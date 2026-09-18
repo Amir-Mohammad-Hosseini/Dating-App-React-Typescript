@@ -1,6 +1,7 @@
-version: '3.9'
+version: "3.9"
 
 services:
+
   db:
     image: postgres
     environment:
@@ -12,18 +13,20 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./pgdata:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - "5432:5432"
+
   adminer:
     image: adminer
     restart: always
-    ports: 
-      - '8080:8080'
+    ports:
+      - "8080:8080"
+
   server:
     build:
       dockerfile: Dockerfile.dev
-      context: './server'
+      context: "./server"
     volumes:
-      - /app/node_modules 
+      - /app/node_modules
       - ./server:/app
     ports:
       - "3001:3001"
@@ -32,16 +35,7 @@ services:
     env_file:
       - .env
     restart: on-failure
-  client: 
-    build:
-      dockerfile: Dockerfile.dev
-      context: './client'
-    volumes:
-      - /app/node_modules
-      - ./client:/app
-    ports:
-      - '3000:3000'
 
 networks:
   default:
-    name: 'matcha_network'
+    name: "matcha_network"
