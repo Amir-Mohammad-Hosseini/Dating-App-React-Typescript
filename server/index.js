@@ -15,9 +15,6 @@ const http = require('http').Server(app) //required for socket to work
 // middleware
 app.use(cors())
 app.use(express.json())
-app.use(
-  express.static(path.join(__dirname, "../client/build"))
-)
 app.use(session({
   secret: 'secret',
   saveUninitialized: true,
@@ -31,7 +28,7 @@ app.use('/images', express.static('./images')) // to serve static files to path 
 
 const socketIO = require('socket.io')(http, {
   cors: {
-    origin: "http://localhost:3000"
+    origin: "http://localhost:5173"
   }
 });
 
