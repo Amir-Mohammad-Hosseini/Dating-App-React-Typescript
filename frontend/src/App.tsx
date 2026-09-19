@@ -1,8 +1,8 @@
+import {RouterProvider} from "react-router"
+import router from "./routes/router";
 const App = () => {
   return (
-    <div>
-      <button className="btn btn-primary">Dating App</button>
-    </div>
+    <RouterProvider router={router} />
   );
 };
 
