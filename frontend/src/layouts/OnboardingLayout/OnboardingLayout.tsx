@@ -4,30 +4,13 @@ import { GoChevronLeft } from "react-icons/go";
 import Logo from "../../components/Logo/Logo";
 import Button from "../../components/Button/Button";
 import SidePanel from "../../components/OnboardingPage/SidePanel";
+import StepBar from "../../components/OnboardingPage/StepBar";
 
 const TOTAL = 4;
 
-const StepBar = ({ step }: { step: number }) => (
-  <div
-    className="flex flex-1 items-center gap-2"
-    role="progressbar"
-    aria-valuemin={1}
-    aria-valuemax={TOTAL}
-    aria-valuenow={step}
-  >
-    {Array.from({ length: TOTAL }, (_, i) => (
-      <span
-        key={i}
-        className={`h-1 flex-1 rounded-full transition-colors ${
-          i < step ? "bg-TertiaryColor" : "bg-DisabledBtnBg"
-        }`}
-      />
-    ))}
-  </div>
-);
-
 const OnboardingLayout = () => {
   const [step, setStep] = useState(1);
+  const [canContinue, setCanContinue] = useState(true);
 
   const back = () => setStep((s) => Math.max(1, s - 1));
   const next = () => setStep((s) => Math.min(TOTAL, s + 1));
@@ -90,7 +73,7 @@ const OnboardingLayout = () => {
             {/* Step content */}
             <div className="flex-1 px-6 md:px-10 lg:flex lg:flex-col lg:justify-center lg:px-12">
               <div className="mx-auto w-full lg:max-w-100">
-                <Outlet />
+                <Outlet context={{setCanContinue}} />
               </div>
             </div>
 

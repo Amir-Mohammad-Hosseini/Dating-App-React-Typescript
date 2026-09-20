@@ -6,6 +6,7 @@ import Discover from "../pages/Discover/Discover";
 import OnboardingLayout from "../layouts/OnboardingLayout/OnboardingLayout";
 import AboutYou from "../pages/Onboarding/AboutYou";
 import YourStory from "../pages/Onboarding/YourStory";
+import YourLocation from "../pages/Onboarding/YourLocation";
 
 const router = createBrowserRouter([
     {path : "login" , element : <Login />},
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
     {path : "onboarding" , element : <OnboardingLayout /> , children : [
         { index : true , element : <AboutYou />},
         { path : "yourStory" , element : <YourStory />},
+        { path : "yourLocation" , element : <YourLocation />},
     ]},
 ])
 export default router
