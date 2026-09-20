@@ -1,12 +1,13 @@
-const OPTIONS = ["Everyone", "Women", "Men"];
+import type { RadioInputType } from "./types";
 
-const RadioInput = () => {
+
+const RadioInput = ({options , text , className = ""} :RadioInputType) => {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 text-SecondaryColor">Show me</legend>
+      <legend className="mb-2 text-SecondaryColor">{text}</legend>
 
-      <div className="flex flex-wrap gap-2">
-        {OPTIONS.map((option, i) => (
+      <div className={`flex flex-wrap gap-2 ${className}`}>
+        {options.map((option, i) => (
           <label key={option} className="cursor-pointer">
             <input
               type="radio"

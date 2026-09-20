@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { RangeInputType } from "./types";
 
 const RangeInput = ({
@@ -8,14 +9,16 @@ const RangeInput = ({
   extraDescription,
   defaultValue,
 }: RangeInputType) => {
+  const id = useId()
   return (
     <fieldset>
-      <label htmlFor={name} className="flex items-center justify-between text-SecondaryColor mb-2">
+      <label htmlFor={id} className="flex items-center justify-between text-SecondaryColor mb-2">
         {text}
         <p>{extraDescription}</p>
       </label>
       <input
         type="range"
+        id={id}
         name={name}
         min={min}
         max={max}
