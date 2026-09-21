@@ -10,6 +10,7 @@ import YourLocation from "../pages/Onboarding/YourLocation";
 import YourPhotos from "../pages/Onboarding/YourPhotos";
 import YouAreDone from "../pages/Onboarding/YouAreDone";
 import Match from "../pages/Match/Match";
+import Matches from "../pages/Matches/Matches";
 
 const router = createBrowserRouter([
   { path: "login", element: <Login /> },
@@ -28,5 +29,6 @@ const router = createBrowserRouter([
     ],
   },
   { path: "match", element: <Match /> },
+  { path: "matches", element: <Matches /> },
 ]);
 export default router;

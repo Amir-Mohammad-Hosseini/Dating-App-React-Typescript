@@ -1,9 +1,9 @@
 import type LogoType from "./types";
 
-export default function Logo({isShowText} : LogoType) {
+export default function Logo({isShowText , className=""} : LogoType) {
   return (
     <div
-    className="flex items-center">
+    className={`flex items-center ${className}`}>
       <svg
         width={64}
         height={40}

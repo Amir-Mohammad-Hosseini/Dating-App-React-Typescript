@@ -3,9 +3,7 @@ import Logo from "../../components/Logo/Logo";
 import { FaHeart, FaStar } from "react-icons/fa6";
 import { FaTimes } from "react-icons/fa";
 import { IoFilter } from "react-icons/io5";
-import RangeInput from "../../components/Input/RangeInput";
 import RadioInput from "../../components/Input/RadioInput";
-import Button from "../../components/Button/Button";
 import FilterPanel from "../../components/DiscoverPage/FilterPanel";
 
 const OPTIONS = ["Everyone", "Women", "Men"];
