@@ -1,10 +1,7 @@
 import { IoFilter } from "react-icons/io5";
 import { CiLock } from "react-icons/ci";
-import { AiOutlineHome } from "react-icons/ai";
-import { FaHeart, FaRegUser } from "react-icons/fa6";
-import { LuMessageSquare } from "react-icons/lu";
-import { NavLink } from "react-router";
-import Logo from "../../components/Logo/Logo";
+import Navbar from "../../components/Navbar/Navbar";
+
 
 type MatchItem = { name: string; status: "Active now" | "Matched" };
 
@@ -30,13 +27,6 @@ const MATCHES: MatchItem[] = [
   { name: "Ali", status: "Matched" },
 ];
 
-const NAV_ITEMS = [
-  { to: "/discover", label: "Discover", Icon: AiOutlineHome },
-  { to: "/matches", label: "Matches", Icon: FaHeart },
-  { to: "/messages", label: "Messages", Icon: LuMessageSquare },
-  { to: "/profile", label: "Profile", Icon: FaRegUser },
-];
-
 // Avatars alternate between a red and a grey gradient
 const AVATAR_TONES = [
   "bg-linear-to-br from-[#ea4a61] to-[#7d2b3a]",
@@ -51,43 +41,11 @@ const initials = (name: string) =>
     .join("")
     .toUpperCase();
 
-// base/sm: tab in the bottom bar (icon over label)
-// md:      icon-only square in the sidebar
-// lg+:     full-width row with icon + label
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-xs transition hover:text-PrimaryColor md:size-12 md:justify-center md:p-0 lg:h-12 lg:w-full lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-base ${
-    isActive ? "bg-TertiaryColor/20 text-PrimaryColor" : "text-SecondaryColor"
-  }`;
-
 const Matches = () => {
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
-      {/* Navigation: fixed bottom bar on mobile, sticky sidebar from md up */}
-      <nav
-        aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-SecondaryColor/20 bg-SecondaryDarkBgColor px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:sticky md:inset-x-auto md:top-0 md:bottom-auto md:flex md:h-dvh md:w-20 md:shrink-0 md:flex-col md:border-t-0 md:border-r md:px-3 md:py-6 lg:w-60 lg:px-4"
-      >
-        <div className="mb-8 hidden md:block">
-          <div className="flex justify-center lg:hidden">
-            <Logo isShowText={false} />
-          </div>
-          <div className="hidden px-3 lg:block">
-            <Logo isShowText />
-          </div>
-        </div>
 
-        <ul className="flex w-full justify-around md:flex-col md:items-center md:justify-start md:gap-2 lg:items-stretch">
-          {NAV_ITEMS.map(({ to, label, Icon }) => (
-            <li key={to}>
-              <NavLink to={to} className={navLinkClass}>
-                <Icon size={20} aria-hidden="true" />
-                {/* hidden visually at md (icon-only) but still read by screen readers */}
-                <span className="md:sr-only lg:not-sr-only">{label}</span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <Navbar />
 
       <main className="min-w-0 flex-1 px-6 pt-6 pb-28 sm:px-8 md:px-10 md:py-8 lg:px-12">
         <header className="flex items-start justify-between gap-4">
@@ -185,7 +143,7 @@ const Matches = () => {
                     {match.status === "Active now" && (
                       <span
                         aria-hidden="true"
-                        className="absolute right-0 bottom-1 size-4 rounded-full border-[3px] border-PrimaryDarkBgColor bg-emerald-400 lg:bottom-2 lg:right-1 lg:size-6"
+                        className="absolute right-0 bottom-1 size-4 rounded-full border-[3px] border-PrimaryDarkBgColor bg-OnlineBgColor lg:bottom-2 lg:right-1 lg:size-6"
                       />
                     )}
                   </span>

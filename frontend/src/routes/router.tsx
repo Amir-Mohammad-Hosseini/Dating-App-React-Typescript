@@ -11,6 +11,10 @@ import YourPhotos from "../pages/Onboarding/YourPhotos";
 import YouAreDone from "../pages/Onboarding/YouAreDone";
 import Match from "../pages/Match/Match";
 import Matches from "../pages/Matches/Matches";
+import Messages from "../pages/Messages/Messages";
+import MessagesLayout from "../layouts/MessagesLayout/MessagesLayout";
+import EmptyConversation from "../pages/Messages/EmptyConversation";
+import Conversation from "../pages/Messages/Conversation";
 
 const router = createBrowserRouter([
   { path: "login", element: <Login /> },
@@ -30,5 +34,16 @@ const router = createBrowserRouter([
   },
   { path: "match", element: <Match /> },
   { path: "matches", element: <Matches /> },
+  {
+    path: "messages",
+    element: <MessagesLayout />,
+    children: [
+      { index: true, element: <EmptyConversation /> },
+      {
+        path: ":matchId",
+        element: <Conversation />,
+      },
+    ],
+  },
 ]);
 export default router;

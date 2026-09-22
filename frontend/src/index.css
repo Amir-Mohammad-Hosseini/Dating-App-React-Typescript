@@ -30,13 +30,14 @@
   /* COLORS */
   --color-PrimaryDarkBgColor: #25262a;
   --color-SecondaryDarkBgColor: #1d1e21;
-  --color-TertiaryDarkBgColor: #1F2024;
+  --color-TertiaryDarkBgColor: #1f2024;
   --color-PrimaryColor: #dce0e4;
-  --color-SecondaryColor: #8D939A;
+  --color-SecondaryColor: #8d939a;
   --color-TertiaryColor: #f5435a;
   --color-InputBg: #1d1e21;
   --color-DisabledBtnBg: #383940;
   --color-HoverBtnBg: #fc2d48;
+  --color-OnlineBgColor: #46d39a;
 
   /* FONTS */
   --font-ItalicFont: "FrauncesItalic";
