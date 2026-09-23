@@ -7,7 +7,7 @@ const ConversationList = () => {
   const newMatches = conversations.filter((c) => c.isNewMatch);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-x-hidden">
       <div className="flex items-start justify-between gap-4 px-6 pt-6">
         <h1 className="font-ItalicFont text-3xl">Messages</h1>
         <button

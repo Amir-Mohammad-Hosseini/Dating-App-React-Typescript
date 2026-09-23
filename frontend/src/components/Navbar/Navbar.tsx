@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { to: "/discover", label: "Discover", Icon: AiOutlineHome },
   { to: "/matches", label: "Matches", Icon: FaHeart },
   { to: "/messages", label: "Messages", Icon: LuMessageSquare },
-  { to: "/profile", label: "Profile", Icon: FaRegUser },
+  { to: "/myProfile", label: "Profile", Icon: FaRegUser },
 ];
 
 // base/sm: tab in the bottom bar (icon over label)

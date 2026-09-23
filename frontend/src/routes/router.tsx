@@ -15,6 +15,8 @@ import Messages from "../pages/Messages/Messages";
 import MessagesLayout from "../layouts/MessagesLayout/MessagesLayout";
 import EmptyConversation from "../pages/Messages/EmptyConversation";
 import Conversation from "../pages/Messages/Conversation";
+import ProfileView from "../pages/ProfileView/ProfileView";
+import MyProfile from "../pages/MyProfile/MyProfile";
 
 const router = createBrowserRouter([
   { path: "login", element: <Login /> },
@@ -45,5 +47,7 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {path: "users/:userId",element: <ProfileView />},
+  {path: "myProfile",element: <MyProfile />},
 ]);
 export default router;

@@ -1,6 +1,6 @@
 const TOTAL = 4;
 
-const StepBar = ({ step }: { step: number }) => (
+const StepBar = ({ step , className = "" }: { step: number , className ?: string }) => (
   <div
     className="flex flex-1 items-center gap-2"
     role="progressbar"
@@ -12,7 +12,7 @@ const StepBar = ({ step }: { step: number }) => (
       <span
         key={i}
         className={`h-1 flex-1 rounded-full transition-colors ${
-          i < step ? "bg-TertiaryColor" : "bg-DisabledBtnBg"
+          i < step ? `${className || "bg-TertiaryColor"}` : "bg-DisabledBtnBg"
         }`}
       />
     ))}

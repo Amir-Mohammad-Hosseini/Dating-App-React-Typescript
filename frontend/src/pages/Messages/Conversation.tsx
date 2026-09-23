@@ -1,10 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
 import { GoChevronLeft, GoLocation } from "react-icons/go";
-import { IoSend } from "react-icons/io5";
-import { FaPaperclip } from "react-icons/fa6";
+import { IoSend, IoImageOutline, IoEllipsisVertical } from "react-icons/io5";
 import { conversations, type MessageBubble } from "../../data/messages-data";
-import { IoImageOutline } from "react-icons/io5";
+
+// daisyUI's dropdown opens/closes on focus (CSS :focus-within), not clicks —
+// clicking a menu item keeps focus inside it, so the panel stays open.
+// Blurring the active element after an action closes it again.
+const closeMenu = () => (document.activeElement as HTMLElement | null)?.blur();
 
 const Conversation = () => {
   const { matchId } = useParams();
@@ -43,28 +46,92 @@ const Conversation = () => {
     <div className="flex h-full xl:flex-row">
       <div className="flex h-full min-w-0 flex-1 flex-col">
         {/* Header */}
-        <div className="flex shrink-0 items-center gap-3 border-b border-SecondaryColor/20 px-4 py-4 sm:px-6">
-          <Link
-            to="/messages"
-            aria-label="Back to messages"
-            className="grid size-9 shrink-0 place-items-center rounded-full text-SecondaryColor transition hover:text-PrimaryColor lg:hidden"
-          >
-            <GoChevronLeft className="size-5" aria-hidden="true" />
-          </Link>
-
-          <span
-            className={`grid size-11 shrink-0 place-items-center rounded-full font-TitleFont text-lg text-PrimaryColor/90 ${match.avatarTone}`}
-          >
-            {match.name[0]}
-          </span>
-
-          <div className="min-w-0">
-            <p className="font-PrimarySemiBoldFont">{match.name}</p>
-            <p
-              className={`text-sm ${match.online ? "text-OnlineBgColor" : "text-SecondaryColor"}`}
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-SecondaryColor/20 px-4 py-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link
+              to="/messages"
+              aria-label="Back to messages"
+              className="grid size-9 shrink-0 place-items-center rounded-full text-SecondaryColor transition hover:text-PrimaryColor lg:hidden"
             >
-              {match.online ? "Online" : "Offline"}
-            </p>
+              <GoChevronLeft className="size-5" aria-hidden="true" />
+            </Link>
+
+            {/* Avatar + name open the match's full profile */}
+            <Link
+              to={`/users/${match.id}`}
+              className="-mx-2 flex min-w-0 items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-SecondaryDarkBgColor/60"
+            >
+              <span
+                className={`grid size-11 shrink-0 place-items-center rounded-full font-TitleFont text-lg text-PrimaryColor/90 ${match.avatarTone}`}
+              >
+                {match.name[0]}
+              </span>
+
+              <div className="min-w-0">
+                <p className="font-PrimarySemiBoldFont">{match.name}</p>
+                <p
+                  className={`text-sm ${match.online ? "text-OnlineBgColor" : "text-SecondaryColor"}`}
+                >
+                  {match.online ? "Online" : "Offline"}
+                </p>
+              </div>
+            </Link>
+          </div>
+
+          {/* Conversation options */}
+          <div className="dropdown dropdown-end shrink-0">
+            <div
+              tabIndex={0}
+              role="button"
+              aria-label="Conversation options"
+              className="grid size-9 cursor-pointer place-items-center rounded-full text-SecondaryColor transition hover:text-PrimaryColor"
+            >
+              <IoEllipsisVertical className="size-5" aria-hidden="true" />
+            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu z-20 mt-2 w-52 rounded-2xl border border-SecondaryColor/20 bg-SecondaryDarkBgColor p-2 shadow-xl"
+            >
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // TODO: wire up to real clear-chat logic
+                    console.log("clear chat", match.id);
+                    closeMenu();
+                  }}
+                  className="rounded-xl text-PrimaryColor"
+                >
+                  Clear chat
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // TODO: open a confirmation modal before reporting
+                    console.log("report", match.id);
+                    closeMenu();
+                  }}
+                  className="rounded-xl text-TertiaryColor"
+                >
+                  Report {match.name}
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // TODO: open a confirmation modal before blocking
+                    console.log("block", match.id);
+                    closeMenu();
+                  }}
+                  className="rounded-xl text-TertiaryColor"
+                >
+                  Block {match.name}
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -105,7 +172,7 @@ const Conversation = () => {
           <button
             type="button"
             aria-label="Attach a photo"
-            className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/30 hover:border-PrimaryColor text-SecondaryColor transition hover:text-PrimaryColor"
+            className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/30 text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
           >
             <IoImageOutline className="size-4" aria-hidden="true" />
           </button>
@@ -130,13 +197,15 @@ const Conversation = () => {
 
       {/* Profile panel: xl and up only */}
       <aside className="hidden w-80 shrink-0 overflow-y-auto border-l border-SecondaryColor/20 p-6 xl:block">
-        <div
-          className={`aspect-3/4 grid place-items-center rounded-2xl ${match.avatarTone}`}
-        >
-          <span className="font-TitleFont text-8xl text-white/20">
-            {match.name[0]}
-          </span>
-        </div>
+        <Link to={`/users/${match.id}`} className="block">
+          <div
+            className={`aspect-3/4 grid place-items-center rounded-2xl transition hover:opacity-90 ${match.avatarTone}`}
+          >
+            <span className="font-TitleFont text-8xl text-white/20">
+              {match.name[0]}
+            </span>
+          </div>
+        </Link>
 
         <h2 className="mt-4 font-TitleFont text-2xl">
           {match.name} <span className="text-SecondaryColor">{match.age}</span>
@@ -160,6 +229,13 @@ const Conversation = () => {
             </li>
           ))}
         </ul>
+
+        <Link
+          to={`/users/${match.id}`}
+          className="mt-6 block rounded-xl border border-SecondaryColor/30 py-2.5 text-center font-PrimarySemiBoldFont text-PrimaryColor transition hover:border-PrimaryColor"
+        >
+          View full profile
+        </Link>
       </aside>
     </div>
   );
