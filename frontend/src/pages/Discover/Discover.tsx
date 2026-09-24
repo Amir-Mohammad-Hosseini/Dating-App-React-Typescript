@@ -6,6 +6,7 @@ import { IoFilter } from "react-icons/io5";
 import RadioInput from "../../components/Input/RadioInput";
 import FilterPanel from "../../components/DiscoverPage/FilterPanel";
 import Navbar from "../../components/Navbar/Navbar";
+import { IoIosNotifications } from "react-icons/io";
 
 const Discover = () => {
   return (
@@ -15,17 +16,25 @@ const Discover = () => {
       {/* Content column: takes whatever width is left beside the Navbar */}
       <div className="min-w-0 flex-1 overflow-x-hidden">
         <div className="mx-auto max-w-[90%] sm:max-w-[85%]">
-          <div className="flex items-center justify-between py-6">
+          <div className="flex items-center justify-between py-6 md:hidden">
             <Logo isShowText />
-            <button
-              popoverTarget="filter-modal"
-              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor lg:hidden"
-            >
-              <IoFilter className="h-3.5 w-3.5 text-SecondaryColor" />
-            </button>
+            <div className="flex items-center justify-center gap-x-2">
+              <button
+                type="button"
+                className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
+              >
+                <IoIosNotifications className="size-4" aria-hidden="true" />
+              </button>
+              <button
+                popoverTarget="filter-modal"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor lg:hidden"
+              >
+                <IoFilter className="h-3.5 w-3.5 text-SecondaryColor" />
+              </button>
+            </div>
           </div>
 
-          <div className="flex lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start">
+          <div className="flex lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start md:mt-12">
             <h3 className="hidden justify-self-center font-TitleFont text-2xl whitespace-nowrap text-SecondaryColor [writing-mode:vertical-rl] lg:block">
               Find someone worth the notification
             </h3>

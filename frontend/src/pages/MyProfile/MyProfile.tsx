@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
+import { IoMdSettings } from "react-icons/io";
 import Navbar from "../../components/Navbar/Navbar";
 import Input from "../../components/Input/Input";
 import BirthdayInput from "../../components/Input/BirthdayInput";
+import { Link } from "react-router";
 
 const DUMMY_PROFILE_PHOTOS = [
   "https://images.unsplash.com/photo-1480429370139-e0132c086e2a?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -123,7 +125,11 @@ const ToggleSwitch = ({
         disabled ? "pointer-events-none opacity-50" : ""
       }`}
     >
-      <input type="checkbox" defaultChecked={defaultChecked} className="peer sr-only" />
+      <input
+        type="checkbox"
+        defaultChecked={defaultChecked}
+        className="peer sr-only"
+      />
       <span className="bg-SecondaryColor/30 peer-checked:bg-TertiaryColor h-6 w-10 rounded-full transition-colors" />
       <span className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
     </label>
@@ -222,8 +228,8 @@ const MyProfile = () => {
             )}
           </div>
           <p className="text-SecondaryColor text-xs">
-            Drag to reorder. Your first photo is the one people see before
-            they open your profile.
+            Drag to reorder. Your first photo is the one people see before they
+            open your profile.
           </p>
         </section>
 
@@ -331,10 +337,14 @@ const MyProfile = () => {
         <section className="bg-SecondaryDarkBgColor/80 mx-6 mt-6 rounded-2xl p-6">
           <h4 className="mb-3 text-xl font-semibold">Account</h4>
           <div className="flex flex-col">
-            <button className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition">
+            <Link to="/settings" className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5">
+              <IoMdSettings />
+              Settings
+            </Link>
+            <button className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5">
               Change password
             </button>
-            <button className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition">
+            <button className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5">
               Blocked accounts
             </button>
             <button className="text-TertiaryColor py-2 text-left text-sm transition">

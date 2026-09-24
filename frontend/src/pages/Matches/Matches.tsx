@@ -1,7 +1,7 @@
 import { IoFilter } from "react-icons/io5";
 import { CiLock } from "react-icons/ci";
 import Navbar from "../../components/Navbar/Navbar";
-
+import { IoIosNotifications } from "react-icons/io";
 
 type MatchItem = { name: string; status: "Active now" | "Matched" };
 
@@ -44,7 +44,6 @@ const initials = (name: string) =>
 const Matches = () => {
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
-
       <Navbar />
 
       <main className="min-w-0 flex-1 px-6 pt-6 pb-28 sm:px-8 md:px-10 md:py-8 lg:px-12">
@@ -56,14 +55,22 @@ const Matches = () => {
             </p>
           </div>
           {/* TODO: there is no #filter-modal on this page yet */}
-          <button
-            type="button"
-            popoverTarget="filter-modal"
-            aria-label="Filter matches"
-            className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor md:size-12"
-          >
-            <IoFilter className="size-4" aria-hidden="true" />
-          </button>
+          <div className="flex items-center justify-center gap-x-2">
+            <button
+              type="button"
+              className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
+            >
+              <IoIosNotifications className="size-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              popoverTarget="filter-modal"
+              aria-label="Filter matches"
+              className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
+            >
+              <IoFilter className="size-4" aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
         {/* Likes you (locked) */}
