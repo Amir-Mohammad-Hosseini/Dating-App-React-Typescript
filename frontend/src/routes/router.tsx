@@ -11,45 +11,55 @@ import YourPhotos from "../pages/Onboarding/YourPhotos";
 import YouAreDone from "../pages/Onboarding/YouAreDone";
 import Match from "../pages/Match/Match";
 import Matches from "../pages/Matches/Matches";
-import Messages from "../pages/Messages/Messages";
 import MessagesLayout from "../layouts/MessagesLayout/MessagesLayout";
 import EmptyConversation from "../pages/Messages/EmptyConversation";
 import Conversation from "../pages/Messages/Conversation";
 import ProfileView from "../pages/ProfileView/ProfileView";
 import MyProfile from "../pages/MyProfile/MyProfile";
 import Settings from "../pages/Settings/Settings";
+import Notifications from "../pages/Notifications/Notifications";
+import NotFound from "../pages/Errors/NotFound";
+import AppLayout from "../layouts/AppLayout/AppLayout";
 
 const router = createBrowserRouter([
-  { path: "login", element: <Login /> },
-  { path: "signup", element: <Register /> },
-  { path: "welcome", element: <Welcome /> },
-  { path: "discover", element: <Discover /> },
   {
-    path: "onboarding",
-    element: <OnboardingLayout />,
+    path: "/",
+    element: <AppLayout />,
     children: [
-      { index: true, element: <AboutYou /> },
-      { path: "yourStory", element: <YourStory /> },
-      { path: "yourLocation", element: <YourLocation /> },
-      { path: "yourPhotos", element: <YourPhotos /> },
-      { path: "youAreDone", element: <YouAreDone /> },
-    ],
-  },
-  { path: "match", element: <Match /> },
-  { path: "matches", element: <Matches /> },
-  {
-    path: "messages",
-    element: <MessagesLayout />,
-    children: [
-      { index: true, element: <EmptyConversation /> },
+      { path: "login", element: <Login /> },
+      { path: "signup", element: <Register /> },
+      { path: "welcome", element: <Welcome /> },
+      { path: "discover", element: <Discover /> },
       {
-        path: ":matchId",
-        element: <Conversation />,
+        path: "onboarding",
+        element: <OnboardingLayout />,
+        children: [
+          { index: true, element: <AboutYou /> },
+          { path: "yourStory", element: <YourStory /> },
+          { path: "yourLocation", element: <YourLocation /> },
+          { path: "yourPhotos", element: <YourPhotos /> },
+          { path: "youAreDone", element: <YouAreDone /> },
+        ],
       },
+      { path: "match", element: <Match /> },
+      { path: "matches", element: <Matches /> },
+      {
+        path: "messages",
+        element: <MessagesLayout />,
+        children: [
+          { index: true, element: <EmptyConversation /> },
+          {
+            path: ":matchId",
+            element: <Conversation />,
+          },
+        ],
+      },
+      { path: "users/:userId", element: <ProfileView /> },
+      { path: "myProfile", element: <MyProfile /> },
+      { path: "settings", element: <Settings /> },
+      { path: "notifications", element: <Notifications /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
-  {path: "users/:userId",element: <ProfileView />},
-  {path: "myProfile",element: <MyProfile />},
-  {path: "settings",element: <Settings />},
 ]);
 export default router;
