@@ -4,4 +4,6 @@ export default interface ButtonType extends ButtonHTMLAttributes<HTMLButtonEleme
   text: string;
   type?: "button" | "submit" | "reset";
   className ?:string
+  isSubmitting : boolean 
+  submittingText : string
 }

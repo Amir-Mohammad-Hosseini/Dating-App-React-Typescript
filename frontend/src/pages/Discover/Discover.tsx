@@ -7,6 +7,7 @@ import RadioInput from "../../components/Input/RadioInput";
 import FilterPanel from "../../components/DiscoverPage/FilterPanel";
 import Navbar from "../../components/Navbar/Navbar";
 import { IoIosNotifications } from "react-icons/io";
+import { Link } from "react-router";
 
 const Discover = () => {
   return (
@@ -19,12 +20,13 @@ const Discover = () => {
           <div className="flex items-center justify-between py-6 md:hidden">
             <Logo isShowText />
             <div className="flex items-center justify-center gap-x-2">
-              <button
+              <Link
+              to="/notifications"
                 type="button"
                 className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
               >
                 <IoIosNotifications className="size-4" aria-hidden="true" />
-              </button>
+              </Link>
               <button
                 popoverTarget="filter-modal"
                 className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor lg:hidden"

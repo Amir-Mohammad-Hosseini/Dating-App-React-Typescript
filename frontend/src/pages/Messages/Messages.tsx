@@ -3,6 +3,7 @@ import Logo from "../../components/Logo/Logo";
 import Navbar from "../../components/Navbar/Navbar";
 import SearchInput from "../../components/Input/SearchInput";
 import { IoIosNotifications } from "react-icons/io";
+import { Link } from "react-router";
 
 const Messages = () => {
   return (
@@ -13,12 +14,13 @@ const Messages = () => {
         <div className="flex items-center justify-between w-full">
           <Logo isShowText={false} />
           <div className="flex items-center justify-center gap-x-2">
-            <button
+            <Link
+            to="/notifications"
               type="button"
               className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
             >
               <IoIosNotifications className="size-4" aria-hidden="true" />
-            </button>
+            </Link>
             <button
               popoverTarget="filter-modal"
               className="w-10 h-10 rounded-full bg-PrimaryDarkBgColor border border-SecondaryColor flex items-center justify-center cursor-pointer"

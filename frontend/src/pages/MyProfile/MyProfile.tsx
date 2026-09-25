@@ -176,7 +176,7 @@ const MyProfile = () => {
     );
 
   return (
-    <div className="relative md:flex">
+    <div className="relative md:flex md:overflow-x-hidden">
       <Navbar />
 
       <div className="w-full pb-24 md:pb-10">

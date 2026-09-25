@@ -2,7 +2,7 @@ import HeroBanner from "../../components/HeroBanner/HeroBanner"
 import Logo from "../../components/Logo/Logo"
 import type AuthLayoutType from "./types"
 
-const AuthLayout = ({children , bannerText , title , description}: AuthLayoutType) => {
+const AuthLayout = ({children , bannerText , title , description , onSubmit}: AuthLayoutType) => {
   return (
     <div className="flex flex-col min-h-dvh font-PrimaryFont md:flex-row">
       <HeroBanner text={bannerText} />
@@ -14,7 +14,7 @@ const AuthLayout = ({children , bannerText , title , description}: AuthLayoutTyp
             {description}
           </p>
         </div>
-        <form className=" flex flex-col gap-y-2 max-w-96">
+        <form className=" flex flex-col gap-y-2 max-w-96" onSubmit={onSubmit}>
           {children}
         </form>
       </div>

@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { IoFilter } from "react-icons/io5";
 import SearchInput from "../Input/SearchInput";
 import { conversations } from "../../data/messages-data";
@@ -12,12 +12,13 @@ const ConversationList = () => {
       <div className="flex items-start justify-between gap-4 px-6 pt-6">
         <h1 className="font-ItalicFont text-3xl">Messages</h1>
         <div className="flex items-center justify-center gap-x-2">
-        <button
+        <Link
+        to="/notifications"
           type="button"
           className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
         >
           <IoIosNotifications className="size-4" aria-hidden="true" />
-        </button>
+        </Link>
         <button
           type="button"
           popoverTarget="filter-modal"

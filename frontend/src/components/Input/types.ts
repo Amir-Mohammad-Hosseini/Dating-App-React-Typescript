@@ -4,6 +4,7 @@ export default interface InputType {
   type: string;
   isForgotPassword?: boolean;
   placeholder: string;
+  error ?: string
 }
 export interface RangeInputType {
   text: string;

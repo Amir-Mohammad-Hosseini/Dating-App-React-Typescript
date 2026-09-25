@@ -2,6 +2,7 @@ import { IoFilter } from "react-icons/io5";
 import { CiLock } from "react-icons/ci";
 import Navbar from "../../components/Navbar/Navbar";
 import { IoIosNotifications } from "react-icons/io";
+import { Link } from "react-router";
 
 type MatchItem = { name: string; status: "Active now" | "Matched" };
 
@@ -56,12 +57,13 @@ const Matches = () => {
           </div>
           {/* TODO: there is no #filter-modal on this page yet */}
           <div className="flex items-center justify-center gap-x-2">
-            <button
+            <Link
+            to="/notifications"
               type="button"
               className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
             >
               <IoIosNotifications className="size-4" aria-hidden="true" />
-            </button>
+            </Link>
             <button
               type="button"
               popoverTarget="filter-modal"
