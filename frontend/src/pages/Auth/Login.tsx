@@ -18,12 +18,13 @@ const Login = () => {
   } = useForm<LoginFormType>({
     resolver: zodResolver(loginSchema),
   });
+  
+  const { mutate, isPending } = useMutation(loginMutation(navigate));
 
   const onValid = (data: LoginFormType) => {
     mutate(data);
   };
 
-  const { mutate, isPending } = useMutation(loginMutation(navigate));
   return (
     <AuthLayout
       bannerText="Good things rarely start with a swipe left."
@@ -46,7 +47,7 @@ const Login = () => {
         isForgotPassword
         placeholder="••••••••"
       />
-      <Button text="Login" type="submit" isSubmitting={isPending} submittingText="Submitting" />
+      <Button text="Login" type="submit" isSubmitting={isPending} submittingText="Submitting..." />
       <p className="my-2 text-SecondaryColor">
         New here?{" "}
         <span className="text-TertiaryColor font-bold cursor-pointer">

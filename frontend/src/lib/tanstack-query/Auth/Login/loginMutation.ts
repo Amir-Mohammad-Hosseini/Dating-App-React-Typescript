@@ -1,7 +1,8 @@
 import { toast } from "sonner";
 import postLogin from "../../../../services/api/Auth/Login/postLogin";
+import type { NavigateFunction } from "react-router";
 
-const loginMutation = (navigate : any) => {
+const loginMutation = (navigate : NavigateFunction) => {
     return {
     mutationFn: postLogin,
     onSuccess: () => {
