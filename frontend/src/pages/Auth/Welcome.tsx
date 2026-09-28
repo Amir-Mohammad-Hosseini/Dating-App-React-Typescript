@@ -7,6 +7,7 @@ const Welcome = () => {
       bannerText="Find someone worth the wait."
       title="Find someone worth the wait."
       description="Three questions, one photo, and you're in. Matching starts the moment you land."
+      onSubmit={() => {}}
     >
       <Link
         className="btn btn-block py-6 bg-TertiaryColor hover:bg-HoverBtnBg rounded-lg my-2"

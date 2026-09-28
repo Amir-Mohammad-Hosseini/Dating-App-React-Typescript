@@ -7,7 +7,7 @@ import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
 import type { LoginFormType } from "../../lib/zod/Auth/loginSchema";
 import loginSchema from "../../lib/zod/Auth/loginSchema";
 import loginMutation from "../../lib/tanstack-query/Auth/Login/loginMutation";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const Login = () => {
   const navigate = useNavigate()
@@ -50,9 +50,9 @@ const Login = () => {
       <Button text="Login" type="submit" isSubmitting={isPending} submittingText="Submitting..." />
       <p className="my-2 text-SecondaryColor">
         New here?{" "}
-        <span className="text-TertiaryColor font-bold cursor-pointer">
+        <Link className="text-TertiaryColor font-bold cursor-pointer" to="/signup">
           Create an account
-        </span>
+        </Link>
       </p>
     </AuthLayout>
   );

@@ -21,7 +21,7 @@ const Discover = () => {
             <Logo isShowText />
             <div className="flex items-center justify-center gap-x-2">
               <Link
-              to="/notifications"
+                to="/notifications"
                 type="button"
                 className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
               >

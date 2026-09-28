@@ -6,7 +6,7 @@ const signupMutation = (navigate: NavigateFunction) => {
   return {
     mutationFn: postSignup,
     onSuccess: () => {
-      navigate("/onboarding");
+      navigate("/login");
       toast("Signed up successully!");
     },
     onError: (error: any) => {

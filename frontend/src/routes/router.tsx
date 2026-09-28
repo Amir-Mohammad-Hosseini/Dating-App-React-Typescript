@@ -1,14 +1,17 @@
+// routes/router.tsx
 import { createBrowserRouter } from "react-router";
+import RootLayout from "../layouts/RootLayout/RootLayout";
+import { OnboardingRoute, ProtectedRoute, AuthRoute } from "./../guards";
+import Welcome from "../pages/Auth/Welcome";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
-import Welcome from "../pages/Auth/Welcome";
-import Discover from "../pages/Discover/Discover";
 import OnboardingLayout from "../layouts/OnboardingLayout/OnboardingLayout";
 import AboutYou from "../pages/Onboarding/AboutYou";
 import YourStory from "../pages/Onboarding/YourStory";
 import YourLocation from "../pages/Onboarding/YourLocation";
 import YourPhotos from "../pages/Onboarding/YourPhotos";
 import YouAreDone from "../pages/Onboarding/YouAreDone";
+import Discover from "../pages/Discover/Discover";
 import Match from "../pages/Match/Match";
 import Matches from "../pages/Matches/Matches";
 import MessagesLayout from "../layouts/MessagesLayout/MessagesLayout";
@@ -19,47 +22,64 @@ import MyProfile from "../pages/MyProfile/MyProfile";
 import Settings from "../pages/Settings/Settings";
 import Notifications from "../pages/Notifications/Notifications";
 import NotFound from "../pages/Errors/NotFound";
-import AppLayout from "../layouts/AppLayout/AppLayout";
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <AppLayout />,
+    element: <RootLayout />,
     children: [
-      { path: "login", element: <Login /> },
-      { path: "signup", element: <Register /> },
-      { path: "welcome", element: <Welcome /> },
-      { path: "discover", element: <Discover /> },
+      // Just for unlogged users
       {
-        path: "onboarding",
-        element: <OnboardingLayout />,
+        element: <AuthRoute />,
         children: [
-          { index: true, element: <AboutYou /> },
-          { path: "yourStory", element: <YourStory /> },
-          { path: "yourLocation", element: <YourLocation /> },
-          { path: "yourPhotos", element: <YourPhotos /> },
-          { path: "youAreDone", element: <YouAreDone /> },
+          { index: true, element: <Welcome /> },
+          { path: "login", element: <Login /> },
+          { path: "signup", element: <Register /> },
         ],
       },
-      { path: "match", element: <Match /> },
-      { path: "matches", element: <Matches /> },
+
+      // Just for logge in users with uncompleted profile
       {
-        path: "messages",
-        element: <MessagesLayout />,
+        element: <OnboardingRoute />,
         children: [
-          { index: true, element: <EmptyConversation /> },
           {
-            path: ":matchId",
-            element: <Conversation />,
+            path: "onboarding",
+            element: <OnboardingLayout />,
+            children: [
+              { index: true, element: <AboutYou /> },
+              { path: "yourStory", element: <YourStory /> },
+              { path: "yourLocation", element: <YourLocation /> },
+              { path: "yourPhotos", element: <YourPhotos /> },
+              { path: "youAreDone", element: <YouAreDone /> },
+            ],
           },
         ],
       },
-      { path: "users/:userId", element: <ProfileView /> },
-      { path: "myProfile", element: <MyProfile /> },
-      { path: "settings", element: <Settings /> },
-      { path: "notifications", element: <Notifications /> },
+
+      //Just for logged in users with complete profile
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "discover", element: <Discover /> },
+          { path: "match", element: <Match /> },
+          { path: "matches", element: <Matches /> },
+          {
+            path: "messages",
+            element: <MessagesLayout />,
+            children: [
+              { index: true, element: <EmptyConversation /> },
+              { path: ":matchId", element: <Conversation /> },
+            ],
+          },
+          { path: "users/:userId", element: <ProfileView /> },
+          { path: "myProfile", element: <MyProfile /> },
+          { path: "settings", element: <Settings /> },
+          { path: "notifications", element: <Notifications /> },
+        ],
+      },
+
       { path: "*", element: <NotFound /> },
     ],
   },
 ]);
+
 export default router;

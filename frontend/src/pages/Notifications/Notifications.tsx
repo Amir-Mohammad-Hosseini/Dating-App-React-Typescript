@@ -6,7 +6,10 @@ import { FaHeart } from "react-icons/fa6";
 import Navbar from "../../components/Navbar/Navbar";
 import Logo from "../../components/Logo/Logo";
 import { conversations } from "../../data/messages-data";
-import { notifications as INITIAL, type AppNotification } from "./../../data/notifications-data";
+import {
+  notifications as INITIAL,
+  type AppNotification,
+} from "./../../data/notifications-data";
 
 type FilterKey = "all" | "match" | "message" | "likes";
 
@@ -128,10 +131,14 @@ const NotificationRow = ({
         >
           {notification.title}
         </p>
-        <p className="truncate text-sm text-SecondaryColor">{notification.body}</p>
+        <p className="truncate text-sm text-SecondaryColor">
+          {notification.body}
+        </p>
       </div>
 
-      <span className="shrink-0 text-xs text-SecondaryColor">{notification.time}</span>
+      <span className="shrink-0 text-xs text-SecondaryColor">
+        {notification.time}
+      </span>
     </div>
   );
 
@@ -149,7 +156,9 @@ const Notifications = () => {
   const [filter, setFilter] = useState<FilterKey>("all");
 
   const markOneAsRead = (id: string) =>
-    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setItems((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
 
   const markAllAsRead = () =>
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));

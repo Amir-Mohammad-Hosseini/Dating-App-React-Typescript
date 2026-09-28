@@ -1,8 +1,14 @@
-import HeroBanner from "../../components/HeroBanner/HeroBanner"
-import Logo from "../../components/Logo/Logo"
-import type AuthLayoutType from "./types"
+import HeroBanner from "../../components/HeroBanner/HeroBanner";
+import Logo from "../../components/Logo/Logo";
+import type AuthLayoutType from "./types";
 
-const AuthLayout = ({children , bannerText , title , description , onSubmit}: AuthLayoutType) => {
+const AuthLayout = ({
+  children,
+  bannerText,
+  title,
+  description,
+  onSubmit,
+}: AuthLayoutType) => {
   return (
     <div className="flex flex-col min-h-dvh font-PrimaryFont md:flex-row">
       <HeroBanner text={bannerText} />
@@ -10,16 +16,14 @@ const AuthLayout = ({children , bannerText , title , description , onSubmit}: Au
         <Logo isShowText />
         <div className="pb-4 sm:pb-6 max-w-96">
           <h1 className="font-TitleFont text-3xl pt-6 pb-2">{title}</h1>
-          <p className="text-SecondaryColor text-lg">
-            {description}
-          </p>
+          <p className="text-SecondaryColor text-lg">{description}</p>
         </div>
         <form className=" flex flex-col gap-y-2 max-w-96" onSubmit={onSubmit}>
           {children}
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AuthLayout
+export default AuthLayout;

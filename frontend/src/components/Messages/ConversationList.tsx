@@ -12,21 +12,21 @@ const ConversationList = () => {
       <div className="flex items-start justify-between gap-4 px-6 pt-6">
         <h1 className="font-ItalicFont text-3xl">Messages</h1>
         <div className="flex items-center justify-center gap-x-2">
-        <Link
-        to="/notifications"
-          type="button"
-          className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
-        >
-          <IoIosNotifications className="size-4" aria-hidden="true" />
-        </Link>
-        <button
-          type="button"
-          popoverTarget="filter-modal"
-          aria-label="Filter conversations"
-          className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
-        >
-          <IoFilter className="size-4" aria-hidden="true" />
-        </button>
+          <Link
+            to="/notifications"
+            type="button"
+            className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
+          >
+            <IoIosNotifications className="size-4" aria-hidden="true" />
+          </Link>
+          <button
+            type="button"
+            popoverTarget="filter-modal"
+            aria-label="Filter conversations"
+            className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
+          >
+            <IoFilter className="size-4" aria-hidden="true" />
+          </button>
         </div>
       </div>
 
@@ -40,17 +40,24 @@ const ConversationList = () => {
         <ul className="carousel carousel-center mt-3 gap-4 px-6 pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden">
           {newMatches.map((match) => (
             <li key={match.id} className="carousel-item">
-              <NavLink to={`/messages/${match.id}`} className="flex flex-col items-center gap-1.5">
+              <NavLink
+                to={`/messages/${match.id}`}
+                className="flex flex-col items-center gap-1.5"
+              >
                 {({ isActive }) => (
                   <>
                     <span
                       className={`grid size-15 place-items-center rounded-full border-2 font-TitleFont text-2xl text-PrimaryColor/90 transition ${match.avatarTone} ${
-                        isActive ? "border-TertiaryColor" : "border-SecondaryColor/40"
+                        isActive
+                          ? "border-TertiaryColor"
+                          : "border-SecondaryColor/40"
                       }`}
                     >
                       {match.name[0]}
                     </span>
-                    <span className="text-sm text-SecondaryColor">{match.name}</span>
+                    <span className="text-sm text-SecondaryColor">
+                      {match.name}
+                    </span>
                   </>
                 )}
               </NavLink>
@@ -102,7 +109,9 @@ const ConversationList = () => {
               </div>
 
               <div className="flex shrink-0 flex-col items-end gap-1.5">
-                <span className="text-xs text-SecondaryColor">{conv.lastMessageTime}</span>
+                <span className="text-xs text-SecondaryColor">
+                  {conv.lastMessageTime}
+                </span>
                 {conv.unreadCount > 0 && (
                   <span className="grid size-5 place-items-center rounded-full bg-TertiaryColor font-PrimarySemiBoldFont text-xs text-SecondaryDarkBgColor">
                     {conv.unreadCount}
