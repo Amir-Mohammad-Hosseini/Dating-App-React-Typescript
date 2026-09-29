@@ -5,5 +5,5 @@ export default interface AuthLayoutType {
     bannerText : string
     title : string
     description : string
-    onSubmit : SubmitEventHandler<HTMLFormElement>
+    onSubmit ?: SubmitEventHandler<HTMLFormElement>
 }

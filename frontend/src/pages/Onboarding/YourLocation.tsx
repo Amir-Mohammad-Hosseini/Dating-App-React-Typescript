@@ -1,5 +1,3 @@
-import { useEffect, useState, type SubmitEventHandler } from "react";
-import { useOutletContext } from "react-router";
 import { BiTargetLock } from "react-icons/bi";
 import { GoLocation, GoLock, GoSearch } from "react-icons/go";
 import LocationMap from "./../../components/OnboardingPage/LocationMap";
@@ -8,22 +6,15 @@ import {
   searchCity,
   type Location,
 } from "./../../services/api/geocoding";
+import { useState, type SubmitEventHandler } from "react";
 
-type OnboardingContext = { setCanContinue: (value: boolean) => void };
 
 const YourLocation = () => {
-  const { setCanContinue } = useOutletContext<OnboardingContext>();
 
   const [location, setLocation] = useState<Location | null>(null);
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // The layout's Continue button stays disabled until a location is set
-  useEffect(() => {
-    setCanContinue(location !== null);
-    return () => setCanContinue(true);
-  }, [location, setCanContinue]);
 
   const label = location ? `${location.city}, ${location.country}` : null;
 

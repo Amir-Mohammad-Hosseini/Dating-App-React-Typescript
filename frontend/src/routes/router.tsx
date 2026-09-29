@@ -22,10 +22,12 @@ import MyProfile from "../pages/MyProfile/MyProfile";
 import Settings from "../pages/Settings/Settings";
 import Notifications from "../pages/Notifications/Notifications";
 import NotFound from "../pages/Errors/NotFound";
+import ErrorPage from "../pages/Errors/ErrorPage";
 
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
+    errorElement : <ErrorPage />,
     children: [
       // Just for unlogged users
       {

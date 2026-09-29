@@ -1,5 +1,6 @@
 import { GoCheck } from "react-icons/go";
 import Logo from "../../components/Logo/Logo";
+import useAppStore from "../../lib/zustand/store";
 
 const STEPS = [
   { title: "About you", hint: "Gender, who you like, birthday" },
@@ -10,9 +11,14 @@ const STEPS = [
 
 const PREVIEW_INTERESTS = ["Hiking", "Music", "Reading"];
 
-type SidePanelType = { step: number };
 
-const SidePanel = ({ step }: SidePanelType) => {
+const SidePanel = () => {
+  const username = useAppStore((state) => state.user)?.username
+  const firstname = useAppStore((state) => state.user)?.firstname
+  const step = useAppStore((state) => state.step)
+  const onboardingDatas = useAppStore((state) => state.onboardingDatas)
+  console.log(onboardingDatas)
+
   return (
     <aside className="relative isolate hidden flex-col justify-between overflow-hidden border-r border-SecondaryColor/20 bg-SecondaryDarkBgColor p-12 lg:flex lg:w-1/2">
       {/* Decoration: two red glows + a soft grey sphere, all behind the content */}
@@ -89,7 +95,7 @@ const SidePanel = ({ step }: SidePanelType) => {
           </div>
           <div className="min-w-0">
             <p className="font-TitleFont text-xl">
-              Kian <span className="text-SecondaryColor">26</span>
+              {firstname} <span className="text-SecondaryColor">26</span>
             </p>
             <p className="text-sm text-SecondaryColor">
               Your bio will show up here.

@@ -26,6 +26,7 @@ module.exports = function (app, pool, bcrypt) {
           var session = request.session
           session.userid = userInfo.rows[0]['id']
           session.username = userInfo.rows[0]['username']
+          session.firstname = userInfo.rows[0]['firstname']
           session.location = userInfo.rows[0]['ip_location']
           return session
         } else {

@@ -1,29 +1,39 @@
-import { useState } from "react";
 import AboutRadioInput from "../../components/Input/AboutRadioInput";
-import BirthdayInput, {
-} from "../../components/Input/BirthdayInput";
-import type { Birthday } from "../../components/Input/types";
-
-const GENDERS = [
-  { label: "Man", value: "man" },
-  { label: "Woman", value: "woman" },
-  { label: "Other", value: "other" },
-];
-
-const INTERESTED_IN = [
-  { label: "Men", value: "men" },
-  { label: "Women", value: "women" },
-  { label: "Everyone", value: "everyone" },
-];
+import BirthdayInput from "../../components/Input/BirthdayInput";
+import { GENDERS, INTERESTED_IN } from "../../utils/constants/onboarding";
+import { useForm } from "react-hook-form";
+import type { AboutYouFormType } from "../../lib/zod/Onboarding/extendSchemas/aboutYouSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import aboutYouSchema from "../../lib/zod/Onboarding/extendSchemas/aboutYouSchema";
+import Button from "../../components/Button/Button";
+import { useNavigate } from "react-router";
+import useAppStore from "../../lib/zustand/store";
 
 const AboutYou = () => {
-  const [gender, setGender] = useState("man");
-  const [interestedIn, setInterestedIn] = useState("men");
-  const [birthday, setBirthday] = useState<Birthday>({
-    day: "",
-    month: "",
-    year: "",
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<AboutYouFormType>({
+    resolver: zodResolver(aboutYouSchema),
   });
+
+  const navigate = useNavigate();
+  const step = useAppStore((state) => state.step);
+  const setStep = useAppStore((state) => state.setStep);
+  const setField = useAppStore((state) => state.setField);
+
+  const onValid = (aboutYouObj: AboutYouFormType) => {
+    Object.keys(aboutYouObj).forEach((key) => {
+      const typedKey = key as keyof AboutYouFormType;
+
+      setField(typedKey, aboutYouObj[typedKey]);
+    });
+
+    navigate("/onboarding/yourStory");
+    setStep(step + 1);
+  };
 
   return (
     <div>
@@ -34,23 +44,35 @@ const AboutYou = () => {
         </p>
       </div>
 
-      <div className="w-full space-y-6">
+      <form onSubmit={handleSubmit(onValid)} className="w-full space-y-6">
         <AboutRadioInput
           text="I am"
-          name="gender"
           options={GENDERS}
-          value={gender}
-          onChange={setGender}
+          {...register("gender")}
+          error={errors.gender?.message}
         />
         <AboutRadioInput
           text="Interested in"
-          name="interestedIn"
           options={INTERESTED_IN}
-          value={interestedIn}
-          onChange={setInterestedIn}
+          {...register("sexual_pref")}
+          error={errors.sexual_pref?.message}
         />
-        <BirthdayInput value={birthday} onChange={setBirthday} />
-      </div>
+        <BirthdayInput
+          name="age"
+          control={control}
+          error={errors.age?.message}
+        />
+
+        <div className="flex-1">
+          <Button
+            text="Continue"
+            type="submit"
+            className="my-0! rounded-xl font-bold shadow-lg shadow-TertiaryColor/30"
+            submittingText="Submitting..."
+            isSubmitting={false}
+          />
+        </div>
+      </form>
     </div>
   );
 };

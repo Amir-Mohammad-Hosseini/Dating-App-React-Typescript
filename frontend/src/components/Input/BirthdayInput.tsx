@@ -1,39 +1,45 @@
+import { useState } from "react";
+import { Controller } from "react-hook-form";
+import type {
+  Control,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+} from "react-hook-form";
 import { GoLock } from "react-icons/go";
-import type { Birthday, BirthdayInputType } from "./types";
 
-const FIELDS = [
-  { key: "day", label: "Day", placeholder: "DD", maxLength: 2, autoComplete: "bday-day" },
-  { key: "month", label: "Month", placeholder: "MM", maxLength: 2, autoComplete: "bday-month" },
-  { key: "year", label: "Year", placeholder: "YYYY", maxLength: 4, autoComplete: "bday-year" },
-] as const;
-
-// Returns the age in years, or null while the date is incomplete / not a real date
-const getAge = ({ day, month, year }: Birthday): number | null => {
-  if (!day || !month || year.length !== 4) return null;
-
-  const d = Number(day);
-  const m = Number(month);
-  const y = Number(year);
-
-  const birth = new Date(y, m - 1, d);
-  const isRealDate =
-    birth.getFullYear() === y &&
-    birth.getMonth() === m - 1 &&
-    birth.getDate() === d;
-  if (!isRealDate) return null;
+const dateToAge = (dateString: string): number | null => {
+  if (!dateString) return null;
+  const birth = new Date(dateString);
+  if (Number.isNaN(birth.getTime())) return null;
 
   const today = new Date();
-  let age = today.getFullYear() - y;
+  let age = today.getFullYear() - birth.getFullYear();
   const hadBirthdayThisYear =
-    today.getMonth() > m - 1 ||
-    (today.getMonth() === m - 1 && today.getDate() >= d);
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() &&
+      today.getDate() >= birth.getDate());
   if (!hadBirthdayThisYear) age -= 1;
 
   return age >= 0 ? age : null;
 };
 
-const BirthdayInput = ({ value, onChange }: BirthdayInputType) => {
-  const age = getAge(value);
+type BirthdayFieldProps<T extends FieldValues> = {
+  field: ControllerRenderProps<T, Path<T>>;
+  error?: string;
+};
+
+const BirthdayField = <T extends FieldValues>({
+  field,
+  error,
+}: BirthdayFieldProps<T>) => {
+  const [dateValue, setDateValue] = useState("");
+  const age = dateToAge(dateValue);
+
+  const handleChange = (value: string) => {
+    setDateValue(value);
+    field.onChange(dateToAge(value) ?? undefined);
+  };
 
   return (
     <div role="group" aria-labelledby="birthday-label">
@@ -49,34 +55,41 @@ const BirthdayInput = ({ value, onChange }: BirthdayInputType) => {
         )}
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr_1.6fr] gap-2">
-        {FIELDS.map((field) => (
-          <input
-            key={field.key}
-            type="text"
-            inputMode="numeric"
-            aria-label={field.label}
-            autoComplete={field.autoComplete}
-            placeholder={field.placeholder}
-            maxLength={field.maxLength}
-            value={value[field.key]}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                [field.key]: e.target.value.replace(/\D/g, ""),
-              })
-            }
-            className="h-12 w-full rounded-xl border border-SecondaryColor/20 bg-InputBg px-4 font-PrimaryMediumFont text-PrimaryColor outline-none transition placeholder:text-SecondaryColor/60 focus:border-TertiaryColor"
-          />
-        ))}
-      </div>
+      <input
+        type="date"
+        className="input bg-InputBg text-PrimaryColor w-full"
+        value={dateValue}
+        onChange={(e) => handleChange(e.target.value)}
+        onBlur={field.onBlur}
+        ref={field.ref}
+      />
 
-      <p className="mt-3 flex items-center gap-2 text-sm text-SecondaryColor">
+      {error && <p className="text-TertiaryColor mt-1 text-sm">{error}</p>}
+
+      <p className="text-SecondaryColor mt-3 flex items-center gap-2 text-sm">
         <GoLock aria-hidden="true" />
         We show your age, never your birthday.
       </p>
     </div>
   );
 };
+
+type BirthdayInputProps<T extends FieldValues> = {
+  name: Path<T>;
+  control: Control<T>;
+  error?: string;
+};
+
+const BirthdayInput = <T extends FieldValues>({
+  name,
+  control,
+  error,
+}: BirthdayInputProps<T>) => (
+  <Controller
+    name={name}
+    control={control}
+    render={({ field }) => <BirthdayField field={field} error={error} />}
+  />
+);
 
 export default BirthdayInput;

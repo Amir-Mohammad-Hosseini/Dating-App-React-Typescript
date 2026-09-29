@@ -11,6 +11,7 @@ const loginMutation = (navigate: NavigateFunction) => {
       const user: User = {
         id: data.userid,
         username: data.username,
+        firstname: data.firstname,
         hasProfile: data.location !== null,
       };
 

@@ -1,24 +1,35 @@
 import type { StateCreator } from "zustand";
 
-export type OnboardingSlice = {
+export type OnboardingData = {
   gender: string;
   age: number | null;
-  sexualPref: string;
+  sexual_pref: string;
   biography: string;
   tags: string[];
   location: string;
   gps: [number, number] | null;
   mainPhoto: File | null;
   otherPhotos: File[];
+};
 
-  setField: <K extends keyof OnboardingSlice>(key: K, value: OnboardingSlice[K]) => void;
+export type OnboardingSlice = {
+  onboardingDatas: OnboardingData;
+
+  step: number;
+  setStep: (step: number) => void;
+
+  setField: <K extends keyof OnboardingData>(
+    key: K,
+    value: OnboardingData[K],
+  ) => void;
+
   reset: () => void;
 };
 
-const initialState = {
+const initialState: OnboardingData = {
   gender: "",
   age: null,
-  sexualPref: "",
+  sexual_pref: "",
   biography: "",
   tags: [],
   location: "",
@@ -26,10 +37,36 @@ const initialState = {
   mainPhoto: null,
   otherPhotos: [],
 };
-const createOnboardingSlice : StateCreator<OnboardingSlice , [] , [] , OnboardingSlice> = (set) => ({
-    ...initialState,
-    setField : (key , value) => set({ [key] : value}),
-    reset : () => set(initialState)
-})
 
-export default createOnboardingSlice
+const createOnboardingSlice: StateCreator<
+  OnboardingSlice,
+  [],
+  [],
+  OnboardingSlice
+> = (set) => ({
+  onboardingDatas: initialState,
+
+  step: 1,
+
+  setStep: (step) => {
+    set({ step });
+  },
+
+  setField: (key, value) => {
+    set((state) => ({
+      onboardingDatas: {
+        ...state.onboardingDatas,
+        [key]: value,
+      },
+    }));
+  },
+
+  reset: () => {
+    set({
+      onboardingDatas: initialState,
+      step: 1,
+    });
+  },
+});
+
+export default createOnboardingSlice;
