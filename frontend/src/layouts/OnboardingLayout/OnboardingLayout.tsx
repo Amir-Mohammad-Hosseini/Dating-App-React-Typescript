@@ -12,7 +12,6 @@ import TOTAL_ONBOARDING_STEPS from "../../utils/constants/onboarding";
 const ROUTES = [
   "/onboarding",
   "/onboarding/yourStory",
-  "/onboarding/yourStory",
   "/onboarding/yourLocation",
   "/onboarding/yourPhotos",
   "/onboarding/youAreDone",

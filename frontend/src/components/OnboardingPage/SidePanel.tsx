@@ -9,15 +9,12 @@ const STEPS = [
   { title: "Photos", hint: "Up to five" },
 ];
 
-const PREVIEW_INTERESTS = ["Hiking", "Music", "Reading"];
 
 
 const SidePanel = () => {
-  const username = useAppStore((state) => state.user)?.username
   const firstname = useAppStore((state) => state.user)?.firstname
   const step = useAppStore((state) => state.step)
   const onboardingDatas = useAppStore((state) => state.onboardingDatas)
-  console.log(onboardingDatas)
 
   return (
     <aside className="relative isolate hidden flex-col justify-between overflow-hidden border-r border-SecondaryColor/20 bg-SecondaryDarkBgColor p-12 lg:flex lg:w-1/2">
@@ -91,17 +88,17 @@ const SidePanel = () => {
         <p className="mb-3 text-xs text-SecondaryColor">How you’ll appear</p>
         <div className="flex gap-4 rounded-2xl border border-SecondaryColor/20 bg-white/5 p-3 backdrop-blur-sm">
           <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-[radial-gradient(circle_at_20%_90%,rgba(245,67,90,0.6),rgba(45,46,51,1)_60%)] font-TitleFont text-4xl text-white/20">
-            K
+            {firstname?.slice(0,1).toUpperCase()}
           </div>
           <div className="min-w-0">
             <p className="font-TitleFont text-xl">
-              {firstname} <span className="text-SecondaryColor">26</span>
+              {firstname} <span className="text-SecondaryColor">{onboardingDatas.age}</span>
             </p>
             <p className="text-sm text-SecondaryColor">
-              Your bio will show up here.
+              {onboardingDatas.biography || "Your bio will show up here."}
             </p>
             <ul className="mt-2 flex flex-wrap gap-2">
-              {PREVIEW_INTERESTS.map((interest) => (
+              {onboardingDatas.tags.map((interest) => (
                 <li
                   key={interest}
                   className="rounded-full border border-SecondaryColor/30 px-2.5 py-0.5 text-xs text-SecondaryColor"

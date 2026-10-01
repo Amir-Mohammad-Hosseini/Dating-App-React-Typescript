@@ -1,80 +1,72 @@
 import { BiTargetLock } from "react-icons/bi";
 import { GoLocation, GoLock, GoSearch } from "react-icons/go";
 import LocationMap from "./../../components/OnboardingPage/LocationMap";
-import {
-  reverseGeocode,
-  searchCity,
-  type Location,
-} from "./../../services/api/geocoding";
-import { useState, type SubmitEventHandler } from "react";
-
+import Button from "../../components/Button/Button";
+import useAppStore from "../../lib/zustand/store";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import locationMutation from "../../lib/tanstack-query/Onboarding/locationMutation";
+import { useState } from "react";
+import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
+import Spinner from "../../components/Loader/Spinner";
+import { useNavigate } from "react-router";
+import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 
 const YourLocation = () => {
+  const [coordinates, setCoordinates] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
-  const [location, setLocation] = useState<Location | null>(null);
-  const [query, setQuery] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data, isPending: isQueryPending } = useQuery(
+    locationQuery(coordinates),
+  );
 
-  const label = location ? `${location.city}, ${location.country}` : null;
+  const { mutate, isPending, error } = useMutation(
+    locationMutation(setCoordinates),
+  );
 
-  const handleUseCurrentLocation = () => {
-    if (!("geolocation" in navigator)) {
-      setError("This browser can't share your location. Search for your city instead.");
-      return;
+  const step = useAppStore((state) => state.step);
+  const setStep = useAppStore((state) => state.setStep);
+  const setField = useAppStore((state) => state.setField);
+
+  const navigate = useNavigate()
+
+  const handleFindLocation = () => {
+    mutate();
+  };
+
+  const handleClearLocation = () => {
+    setCoordinates(null);
+  };
+
+  const handleGoPrevPage = () => {
+    setStep(step - 1);
+  };
+
+  const handlegoNextPage = () => {
+    if(!coordinates || !data){
+      return
     }
 
-    setError(null);
-    setIsLoading(true);
+    const gpsTuple : [number , number] = [ +coordinates.longitude , +coordinates.latitude] 
+    const location = `${data.city}, ${data.country}`
+    
+    setField("gps" , gpsTuple)
+    setField("location" , location)
+    
+    navigate("/onboarding/youAreDone");
+    setStep(step + 1);
+    
+  }
 
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        try {
-          const found = await reverseGeocode(coords.latitude, coords.longitude);
-          if (found) setLocation(found);
-          else setError("We couldn't work out your city. Search for it instead.");
-        } catch {
-          setError("We couldn't look up your city. Check your connection or search for it.");
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      (geoError) => {
-        setIsLoading(false);
-        setError(
-          geoError.code === geoError.PERMISSION_DENIED
-            ? "Location access is blocked. Allow it in your browser settings, or search for your city."
-            : "We couldn't get your location. Try again or search for your city.",
-        );
-      },
-      { timeout: 10000 },
-    );
-  };
+  if (isQueryPending) {
+    return <LoadingOverlay show />
+  }
 
-  const handleSearch: SubmitEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
-    const trimmed = query.trim();
-    if (!trimmed) return;
+  const location = data?.address;
+  const label = location ? `${location?.city}, ${location?.country}` : null;
 
-    setError(null);
-    setIsLoading(true);
 
-    try {
-      const found = await searchCity(trimmed);
-      if (found) setLocation(found);
-      else setError(`No city found for “${trimmed}”. Check the spelling or try a larger nearby city.`);
-    } catch {
-      setError("Search isn't working right now. Check your connection and try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = () => {
-    setLocation(null);
-    setQuery("");
-    setError(null);
-  };
 
   return (
     <div>
@@ -97,8 +89,8 @@ const YourLocation = () => {
             <p className="text-sm text-SecondaryColor">Approximate location</p>
           </div>
           <button
+            onClick={handleClearLocation}
             type="button"
-            onClick={handleChange}
             className="cursor-pointer font-PrimarySemiBoldFont text-TertiaryColor transition hover:text-HoverBtnBg"
           >
             Change
@@ -107,13 +99,19 @@ const YourLocation = () => {
       ) : (
         <>
           <button
+            onClick={handleFindLocation}
+            disabled={isPending}
             type="button"
-            onClick={handleUseCurrentLocation}
-            disabled={isLoading}
             className="mt-4 flex w-full cursor-pointer items-center justify-center gap-x-2 rounded-xl border border-SecondaryColor/30 bg-SecondaryColor/20 py-4 font-PrimarySemiBoldFont text-PrimaryColor transition hover:border-PrimaryColor/40 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <BiTargetLock aria-hidden="true" />
-            {isLoading ? "Finding you…" : "Use my current location"}
+            {isPending ? (
+              <Spinner />
+            ) : (
+              <>
+                <BiTargetLock aria-hidden="true" />
+                Use my current location
+              </>
+            )}
           </button>
 
           <div className="my-5 flex items-center gap-3 text-sm text-SecondaryColor">
@@ -122,7 +120,7 @@ const YourLocation = () => {
             <span className="h-px flex-1 bg-SecondaryColor/20" />
           </div>
 
-          <form onSubmit={handleSearch} className="flex gap-2">
+          <form className="flex gap-2">
             <div className="relative flex-1">
               <GoSearch
                 aria-hidden="true"
@@ -130,8 +128,6 @@ const YourLocation = () => {
               />
               <input
                 type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search your city"
                 placeholder="Search your city"
                 autoComplete="off"
@@ -141,7 +137,6 @@ const YourLocation = () => {
             </div>
             <button
               type="submit"
-              disabled={!query.trim() || isLoading}
               className="h-12 rounded-xl bg-DisabledBtnBg px-6 font-PrimarySemiBoldFont text-SecondaryColor transition enabled:cursor-pointer enabled:bg-TertiaryColor enabled:text-SecondaryDarkBgColor enabled:hover:bg-HoverBtnBg"
             >
               Set
@@ -160,6 +155,27 @@ const YourLocation = () => {
         <GoLock aria-hidden="true" className="mt-0.5 shrink-0" />
         People see how far away you are, never your exact spot.
       </p>
+
+      <div className="mx-auto flex w-full gap-3 lg:max-w-100">
+        <button
+          type="button"
+          onClick={handleGoPrevPage}
+          className="hidden rounded-xl border border-SecondaryColor/30 px-6 font-bold transition hover:border-PrimaryColor md:block"
+        >
+          Back
+        </button>
+
+        <div className="flex-1">
+          <Button
+          onClick={handlegoNextPage}
+            text="Continue"
+            type="submit"
+            className="my-0! rounded-xl font-bold shadow-lg shadow-TertiaryColor/30"
+            submittingText="Submitting..."
+            isSubmitting={false}
+          />
+        </div>
+      </div>
     </div>
   );
 };
