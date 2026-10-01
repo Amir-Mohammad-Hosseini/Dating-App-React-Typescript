@@ -8,8 +8,6 @@ export type OnboardingData = {
   tags: string[];
   location: string;
   gps: [number, number] | null;
-  mainPhoto: File | null;
-  otherPhotos: File[];
 };
 
 export type OnboardingSlice = {
@@ -34,8 +32,6 @@ const initialState: OnboardingData = {
   tags: [],
   location: "",
   gps: null,
-  mainPhoto: null,
-  otherPhotos: [],
 };
 
 const createOnboardingSlice: StateCreator<

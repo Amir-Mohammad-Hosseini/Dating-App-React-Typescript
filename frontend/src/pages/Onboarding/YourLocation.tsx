@@ -48,13 +48,13 @@ const YourLocation = () => {
       return
     }
 
-    const gpsTuple : [number , number] = [ +coordinates.longitude , +coordinates.latitude] 
+    const gpsTuple : [number , number] = [ +coordinates.longitude.toFixed(5) , +coordinates.latitude.toFixed(5)] 
     const location = `${data.city}, ${data.country}`
     
     setField("gps" , gpsTuple)
     setField("location" , location)
     
-    navigate("/onboarding/youAreDone");
+    navigate("/onboarding/yourPhotos");
     setStep(step + 1);
     
   }

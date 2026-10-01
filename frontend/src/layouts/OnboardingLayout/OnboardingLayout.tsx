@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
-import { Navigate, Outlet, useNavigate } from "react-router";
+import { Outlet } from "react-router";
 import { GoChevronLeft } from "react-icons/go";
 import Logo from "../../components/Logo/Logo";
-import Button from "../../components/Button/Button";
 import SidePanel from "../../components/OnboardingPage/SidePanel";
 import StepBar from "../../components/OnboardingPage/StepBar";
 import useAppStore from "../../lib/zustand/store";
