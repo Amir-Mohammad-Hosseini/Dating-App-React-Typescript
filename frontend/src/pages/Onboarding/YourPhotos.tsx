@@ -2,8 +2,34 @@ import { useState, type ChangeEvent } from "react";
 import { FaPlus } from "react-icons/fa";
 import { FaImage } from "react-icons/fa6";
 import { FaTimes } from "react-icons/fa";
+import Button from "../../components/Button/Button";
+import Spinner from "../../components/Loader/Spinner";
+import useAppStore from "../../lib/zustand/store";
+import { useMutation } from "@tanstack/react-query";
+import {
+  mainPhotoMutation,
+  otherPhotosMutation,
+} from "../../lib/tanstack-query/Onboarding/yourPhotosMutation";
+import { useNavigate } from "react-router";
+
+type Photo = {
+  file: File;
+  url: string;
+} | null;
+
 const YourPhotos = () => {
-  const [photos, setPhotos] = useState(Array(5).fill(null));
+  const [photos, setPhotos] = useState<Photo[]>(Array(5).fill(null));
+
+  const step = useAppStore((state) => state.step);
+  const setStep = useAppStore((state) => state.setStep);
+
+  const navigate = useNavigate()
+
+  const { mutate: mainPhotoMutate, isPending: isMainPhotoPending } =
+    useMutation(mainPhotoMutation());
+  const { mutate: otherPhotosMutate, isPending: isOtherPhotosPending } =
+    useMutation(otherPhotosMutation());
+
   const handleChangeAddPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     console.log(file);
@@ -19,7 +45,10 @@ const YourPhotos = () => {
         return prevPhotos;
       }
       const updatedPhotos = [...prevPhotos];
-      updatedPhotos[firstNullItemIndex] = photoUrl;
+      updatedPhotos[firstNullItemIndex] = {
+        file,
+        url: photoUrl,
+      };
       return updatedPhotos;
     });
   };
@@ -32,6 +61,24 @@ const YourPhotos = () => {
 
       return updatedPhotos;
     });
+  };
+
+  const handleGoPrevPage = () => {
+    setStep(step - 1);
+  };
+
+  const handlegoNextPage = () => {
+    if (photos[0]) {
+      mainPhotoMutate(photos[0].file);
+    }
+
+    const otherFiles = photos
+      .slice(1)
+      .filter((photo) => photo !== null)
+      .map((photo) => photo.file);
+    otherPhotosMutate(otherFiles); 
+
+    navigate("/onboarding/youAreDone")
   };
 
   return (
@@ -67,7 +114,7 @@ const YourPhotos = () => {
                       <FaTimes size={12} />
                     </button>
                     <img
-                      src={photo}
+                      src={photo.url}
                       alt={`Photo ${index + 1}`}
                       className="h-full w-full object-cover"
                     />
@@ -105,6 +152,26 @@ const YourPhotos = () => {
             Your first photo is your main photo. Every photo you add raises your
             fame rating.
           </p>
+        </div>
+      </div>
+      <div className="mx-auto flex w-full gap-3 lg:max-w-100">
+        <button
+          type="button"
+          onClick={handleGoPrevPage}
+          className="hidden rounded-xl border border-SecondaryColor/30 px-6 font-bold transition hover:border-PrimaryColor md:block"
+        >
+          Back
+        </button>
+
+        <div className="flex-1">
+          <Button
+            onClick={handlegoNextPage}
+            text="Continue"
+            type="submit"
+            className="my-0! rounded-xl font-bold shadow-lg shadow-TertiaryColor/30"
+            submittingText={<Spinner />}
+            isSubmitting={isMainPhotoPending || isOtherPhotosPending}
+          />
         </div>
       </div>
     </div>
