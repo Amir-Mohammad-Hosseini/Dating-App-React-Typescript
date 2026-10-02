@@ -1,15 +1,15 @@
 import { BiTargetLock } from "react-icons/bi";
 import { GoLocation, GoLock, GoSearch } from "react-icons/go";
 import LocationMap from "./../../components/OnboardingPage/LocationMap";
-import Button from "../../components/Button/Button";
 import useAppStore from "../../lib/zustand/store";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import locationMutation from "../../lib/tanstack-query/Onboarding/locationMutation";
-import { useState } from "react";
+import { useEffect, useState, type SubmitEventHandler } from "react";
 import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
 import Spinner from "../../components/Loader/Spinner";
-import { useNavigate } from "react-router";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
+import useOnboardingStep from "../../hooks/useOnboardingStep";
+import { useOutletContext } from "react-router";
 
 const YourLocation = () => {
   const [coordinates, setCoordinates] = useState<{
@@ -17,33 +17,33 @@ const YourLocation = () => {
     longitude: number;
   } | null>(null);
 
+  const {goNext} = useOnboardingStep()
+  const {setIsSubmitting} = useOutletContext<{setIsSubmitting : (status : boolean) => void}>()
+
   const { data, isPending: isQueryPending } = useQuery(
     locationQuery(coordinates),
   );
 
-  const { mutate, isPending, error } = useMutation(
+  const { mutate : locationMutate, isPending : isLocationMutatePending, error } = useMutation(
     locationMutation(setCoordinates),
   );
-
-  const step = useAppStore((state) => state.step);
-  const setStep = useAppStore((state) => state.setStep);
   const setField = useAppStore((state) => state.setField);
 
-  const navigate = useNavigate()
+  
+    useEffect(() => {
+      setIsSubmitting(isLocationMutatePending)
+    }, [isLocationMutatePending , setIsSubmitting])
 
   const handleFindLocation = () => {
-    mutate();
+    locationMutate();
   };
 
   const handleClearLocation = () => {
     setCoordinates(null);
   };
 
-  const handleGoPrevPage = () => {
-    setStep(step - 1);
-  };
-
-  const handlegoNextPage = () => {
+  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault()
     if(!coordinates || !data){
       return
     }
@@ -53,9 +53,8 @@ const YourLocation = () => {
     
     setField("gps" , gpsTuple)
     setField("location" , location)
-    
-    navigate("/onboarding/yourPhotos");
-    setStep(step + 1);
+
+    goNext()
     
   }
 
@@ -69,7 +68,7 @@ const YourLocation = () => {
 
 
   return (
-    <div>
+    <form id="onboarding-form" onSubmit={handleSubmit}>
       <div className="my-8">
         <h1 className="mb-1 font-ItalicFont text-3xl">Where are you?</h1>
         <p className="text-lg text-SecondaryColor">
@@ -100,11 +99,11 @@ const YourLocation = () => {
         <>
           <button
             onClick={handleFindLocation}
-            disabled={isPending}
+            disabled={isLocationMutatePending}
             type="button"
             className="mt-4 flex w-full cursor-pointer items-center justify-center gap-x-2 rounded-xl border border-SecondaryColor/30 bg-SecondaryColor/20 py-4 font-PrimarySemiBoldFont text-PrimaryColor transition hover:border-PrimaryColor/40 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isPending ? (
+            {isLocationMutatePending ? (
               <Spinner />
             ) : (
               <>
@@ -120,7 +119,7 @@ const YourLocation = () => {
             <span className="h-px flex-1 bg-SecondaryColor/20" />
           </div>
 
-          <form className="flex gap-2">
+          <div className="flex gap-2">
             <div className="relative flex-1">
               <GoSearch
                 aria-hidden="true"
@@ -136,12 +135,12 @@ const YourLocation = () => {
               />
             </div>
             <button
-              type="submit"
+              type="button"
               className="h-12 rounded-xl bg-DisabledBtnBg px-6 font-PrimarySemiBoldFont text-SecondaryColor transition enabled:cursor-pointer enabled:bg-TertiaryColor enabled:text-SecondaryDarkBgColor enabled:hover:bg-HoverBtnBg"
             >
               Set
             </button>
-          </form>
+          </div>
 
           {error && (
             <p role="alert" className="mt-3 text-sm text-TertiaryColor">
@@ -155,28 +154,7 @@ const YourLocation = () => {
         <GoLock aria-hidden="true" className="mt-0.5 shrink-0" />
         People see how far away you are, never your exact spot.
       </p>
-
-      <div className="mx-auto flex w-full gap-3 lg:max-w-100">
-        <button
-          type="button"
-          onClick={handleGoPrevPage}
-          className="hidden rounded-xl border border-SecondaryColor/30 px-6 font-bold transition hover:border-PrimaryColor md:block"
-        >
-          Back
-        </button>
-
-        <div className="flex-1">
-          <Button
-          onClick={handlegoNextPage}
-            text="Continue"
-            type="submit"
-            className="my-0! rounded-xl font-bold shadow-lg shadow-TertiaryColor/30"
-            submittingText="Submitting..."
-            isSubmitting={false}
-          />
-        </div>
-      </div>
-    </div>
+    </form>
   );
 };
 

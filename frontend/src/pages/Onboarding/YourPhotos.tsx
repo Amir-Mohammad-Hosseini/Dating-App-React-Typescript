@@ -1,16 +1,14 @@
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type SubmitEventHandler } from "react";
 import { FaPlus } from "react-icons/fa";
 import { FaImage } from "react-icons/fa6";
 import { FaTimes } from "react-icons/fa";
-import Button from "../../components/Button/Button";
-import Spinner from "../../components/Loader/Spinner";
-import useAppStore from "../../lib/zustand/store";
 import { useMutation } from "@tanstack/react-query";
 import {
   mainPhotoMutation,
   otherPhotosMutation,
 } from "../../lib/tanstack-query/Onboarding/yourPhotosMutation";
-import { useNavigate } from "react-router";
+import useOnboardingStep from "../../hooks/useOnboardingStep";
+import { useOutletContext } from "react-router";
 
 type Photo = {
   file: File;
@@ -19,20 +17,23 @@ type Photo = {
 
 const YourPhotos = () => {
   const [photos, setPhotos] = useState<Photo[]>(Array(5).fill(null));
-
-  const step = useAppStore((state) => state.step);
-  const setStep = useAppStore((state) => state.setStep);
-
-  const navigate = useNavigate()
+  const { goNext } = useOnboardingStep();
 
   const { mutate: mainPhotoMutate, isPending: isMainPhotoPending } =
     useMutation(mainPhotoMutation());
   const { mutate: otherPhotosMutate, isPending: isOtherPhotosPending } =
     useMutation(otherPhotosMutation());
 
+  const { setIsSubmitting } = useOutletContext<{
+    setIsSubmitting: (status: boolean) => void;
+  }>();
+
+  useEffect(() => {
+    setIsSubmitting(isMainPhotoPending || isOtherPhotosPending);
+  }, [isMainPhotoPending, isOtherPhotosPending, setIsSubmitting]);
+
   const handleChangeAddPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log(file);
 
     if (!file || !file.type.startsWith("image/")) {
       return;
@@ -63,11 +64,8 @@ const YourPhotos = () => {
     });
   };
 
-  const handleGoPrevPage = () => {
-    setStep(step - 1);
-  };
-
-  const handlegoNextPage = () => {
+  const handleSubmitPhotos: SubmitEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault()
     if (photos[0]) {
       mainPhotoMutate(photos[0].file);
     }
@@ -76,9 +74,9 @@ const YourPhotos = () => {
       .slice(1)
       .filter((photo) => photo !== null)
       .map((photo) => photo.file);
-    otherPhotosMutate(otherFiles); 
+    otherPhotosMutate(otherFiles);
 
-    navigate("/onboarding/youAreDone")
+    goNext();
   };
 
   return (
@@ -92,18 +90,18 @@ const YourPhotos = () => {
         </p>
       </div>
       <div>
-        <div className="grid grid-cols-4 grid-rows-2 gap-3 w-full aspect-2/1">
+        <form
+          id="onboarding-form"
+          className="grid grid-cols-4 grid-rows-2 gap-3 w-full aspect-2/1"
+          onSubmit={handleSubmitPhotos}
+        >
           {Array.from({ length: 5 }, (_, index) => {
             const photo = photos[index];
 
             return (
               <div
                 key={index}
-                className={`
-        rounded-xl border border-dashed border-SecondaryColor
-        overflow-hidden
-        ${index === 0 ? "col-span-2 row-span-2" : ""}
-      `}
+                className={`rounded-xl border border-dashed border-SecondaryColor overflow-hidden ${index === 0 ? "col-span-2 row-span-2" : ""}`}
               >
                 {photo ? (
                   <div className="relative w-full h-full">
@@ -145,33 +143,13 @@ const YourPhotos = () => {
               </div>
             );
           })}
-        </div>
+        </form>
         <div className="flex items-start justify-start mt-2 gap-x-1 text-SecondaryColor">
           <FaImage className="mt-1" size={18} />
           <p>
             Your first photo is your main photo. Every photo you add raises your
             fame rating.
           </p>
-        </div>
-      </div>
-      <div className="mx-auto flex w-full gap-3 lg:max-w-100">
-        <button
-          type="button"
-          onClick={handleGoPrevPage}
-          className="hidden rounded-xl border border-SecondaryColor/30 px-6 font-bold transition hover:border-PrimaryColor md:block"
-        >
-          Back
-        </button>
-
-        <div className="flex-1">
-          <Button
-            onClick={handlegoNextPage}
-            text="Continue"
-            type="submit"
-            className="my-0! rounded-xl font-bold shadow-lg shadow-TertiaryColor/30"
-            submittingText={<Spinner />}
-            isSubmitting={isMainPhotoPending || isOtherPhotosPending}
-          />
         </div>
       </div>
     </div>

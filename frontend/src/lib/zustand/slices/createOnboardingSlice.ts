@@ -13,9 +13,6 @@ export type OnboardingData = {
 export type OnboardingSlice = {
   onboardingDatas: OnboardingData;
 
-  step: number;
-  setStep: (step: number) => void;
-
   setField: <K extends keyof OnboardingData>(
     key: K,
     value: OnboardingData[K],
@@ -42,12 +39,6 @@ const createOnboardingSlice: StateCreator<
 > = (set) => ({
   onboardingDatas: initialState,
 
-  step: 1,
-
-  setStep: (step) => {
-    set({ step });
-  },
-
   setField: (key, value) => {
     set((state) => ({
       onboardingDatas: {
@@ -60,7 +51,6 @@ const createOnboardingSlice: StateCreator<
   reset: () => {
     set({
       onboardingDatas: initialState,
-      step: 1,
     });
   },
 });

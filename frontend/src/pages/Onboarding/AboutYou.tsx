@@ -5,9 +5,8 @@ import { useForm } from "react-hook-form";
 import type { AboutYouFormType } from "../../lib/zod/Onboarding/extendSchemas/aboutYouSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import aboutYouSchema from "../../lib/zod/Onboarding/extendSchemas/aboutYouSchema";
-import Button from "../../components/Button/Button";
-import { useNavigate } from "react-router";
 import useAppStore from "../../lib/zustand/store";
+import useOnboardingStep from "../../hooks/useOnboardingStep";
 
 const AboutYou = () => {
   const {
@@ -19,9 +18,7 @@ const AboutYou = () => {
     resolver: zodResolver(aboutYouSchema),
   });
 
-  const navigate = useNavigate();
-  const step = useAppStore((state) => state.step);
-  const setStep = useAppStore((state) => state.setStep);
+  const {goNext} = useOnboardingStep()
   const setField = useAppStore((state) => state.setField);
 
   const onValid = (aboutYouObj: AboutYouFormType) => {
@@ -31,8 +28,7 @@ const AboutYou = () => {
       setField(typedKey, aboutYouObj[typedKey]);
     });
 
-    navigate("/onboarding/yourStory");
-    setStep(step + 1);
+    goNext()
   };
 
   return (
@@ -44,7 +40,7 @@ const AboutYou = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onValid)} className="w-full space-y-6">
+      <form id="onboarding-form" onSubmit={handleSubmit(onValid)} className="w-full space-y-6">
         <AboutRadioInput
           text="I am"
           options={GENDERS}
@@ -62,16 +58,6 @@ const AboutYou = () => {
           control={control}
           error={errors.age?.message}
         />
-
-        <div className="flex-1">
-          <Button
-            text="Continue"
-            type="submit"
-            className="my-0! rounded-xl font-bold shadow-lg shadow-TertiaryColor/30"
-            submittingText="Submitting..."
-            isSubmitting={false}
-          />
-        </div>
       </form>
     </div>
   );

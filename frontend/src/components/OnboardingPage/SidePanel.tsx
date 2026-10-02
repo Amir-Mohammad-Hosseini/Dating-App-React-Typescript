@@ -1,6 +1,7 @@
 import { GoCheck } from "react-icons/go";
 import Logo from "../../components/Logo/Logo";
 import useAppStore from "../../lib/zustand/store";
+import useOnboardingStep from "../../hooks/useOnboardingStep";
 
 const STEPS = [
   { title: "About you", hint: "Gender, who you like, birthday" },
@@ -13,8 +14,8 @@ const STEPS = [
 
 const SidePanel = () => {
   const firstname = useAppStore((state) => state.user)?.firstname
-  const step = useAppStore((state) => state.step)
   const onboardingDatas = useAppStore((state) => state.onboardingDatas)
+  const {step} = useOnboardingStep()
 
   return (
     <aside className="relative isolate hidden flex-col justify-between overflow-hidden border-r border-SecondaryColor/20 bg-SecondaryDarkBgColor p-12 lg:flex lg:w-1/2">

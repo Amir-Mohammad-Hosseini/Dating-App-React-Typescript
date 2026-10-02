@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import signupSchema from "../../lib/zod/Auth/signupSchema";
 import { useMutation } from "@tanstack/react-query";
 import signupMutation from "../../lib/tanstack-query/Auth/Register/signupMutation";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const Register = () => {
   const {
@@ -82,9 +82,9 @@ const Register = () => {
       />
       <p className="my-2 text-SecondaryColor">
         Already on Ember?{" "}
-        <span className="text-TertiaryColor font-bold cursor-pointer">
+        <Link to="/login" className="text-TertiaryColor font-bold cursor-pointer">
           Log in
-        </span>
+        </Link>
       </p>
     </AuthLayout>
   );

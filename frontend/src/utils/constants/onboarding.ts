@@ -1,7 +1,3 @@
-const TOTAL_ONBOARDING_STEPS = 4;
-
-export default TOTAL_ONBOARDING_STEPS;
-
 export const GENDERS = [
   { label: "Man", value: "male" },
   { label: "Woman", value: "female" },

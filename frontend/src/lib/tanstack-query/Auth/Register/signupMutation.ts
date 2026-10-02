@@ -11,7 +11,7 @@ const signupMutation = (navigate: NavigateFunction) => {
     },
     onError: (error: any) => {
       const message =
-        error.response?.data?.message || "An error occurred while logging";
+        error.response?.data?.message || "An error occurred while sign up";
       toast(message);
     },
   };

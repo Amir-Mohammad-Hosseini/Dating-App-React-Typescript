@@ -18,6 +18,7 @@ const useAppStore = create<AppStore>()(
         name: "ember-dating-store",
         partialize: (state) => ({
           user: state.user,
+          onboardingDatas : state.onboardingDatas
         }),
       },
     ),
