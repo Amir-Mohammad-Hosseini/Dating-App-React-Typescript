@@ -2,6 +2,8 @@ import { GoCheck } from "react-icons/go";
 import Logo from "../../components/Logo/Logo";
 import useAppStore from "../../lib/zustand/store";
 import useOnboardingStep from "../../hooks/useOnboardingStep";
+import { useQuery } from "@tanstack/react-query";
+import sidePanelQuery from "../../lib/tanstack-query/Onboarding/sidePanelQuery";
 
 const STEPS = [
   { title: "About you", hint: "Gender, who you like, birthday" },
@@ -10,12 +12,13 @@ const STEPS = [
   { title: "Photos", hint: "Up to five" },
 ];
 
-
-
 const SidePanel = () => {
-  const firstname = useAppStore((state) => state.user)?.firstname
-  const onboardingDatas = useAppStore((state) => state.onboardingDatas)
-  const {step} = useOnboardingStep()
+  const firstname = useAppStore((state) => state.user)?.firstname;
+  const onboardingDatas = useAppStore((state) => state.onboardingDatas);
+  const { step } = useOnboardingStep();
+
+  const {data : savedPhoto} = useQuery(sidePanelQuery())
+
 
   return (
     <aside className="relative isolate hidden flex-col justify-between overflow-hidden border-r border-SecondaryColor/20 bg-SecondaryDarkBgColor p-12 lg:flex lg:w-1/2">
@@ -88,12 +91,16 @@ const SidePanel = () => {
       <div>
         <p className="mb-3 text-xs text-SecondaryColor">How you’ll appear</p>
         <div className="flex gap-4 rounded-2xl border border-SecondaryColor/20 bg-white/5 p-3 backdrop-blur-sm">
-          <div className="grid size-20 shrink-0 place-items-center rounded-xl bg-[radial-gradient(circle_at_20%_90%,rgba(245,67,90,0.6),rgba(45,46,51,1)_60%)] font-TitleFont text-4xl text-white/20">
-            {firstname?.slice(0,1).toUpperCase()}
+          <div className="grid size-20 shrink-0 place-items-center rounded-xl overflow-hidden bg-[radial-gradient(circle_at_20%_90%,rgba(245,67,90,0.6),rgba(45,46,51,1)_60%)] font-TitleFont text-4xl text-white/20">
+          {
+            savedPhoto ? <img src={URL.createObjectURL(savedPhoto)} alt="" /> :
+            firstname?.slice(0, 1).toUpperCase()
+          }
           </div>
           <div className="min-w-0">
             <p className="font-TitleFont text-xl">
-              {firstname} <span className="text-SecondaryColor">{onboardingDatas.age}</span>
+              {firstname}{" "}
+              <span className="text-SecondaryColor">{onboardingDatas.age}</span>
             </p>
             <p className="text-sm text-SecondaryColor">
               {onboardingDatas.biography || "Your bio will show up here."}

@@ -9,6 +9,8 @@ import {
 } from "../../lib/tanstack-query/Onboarding/yourPhotosMutation";
 import useOnboardingStep from "../../hooks/useOnboardingStep";
 import { useOutletContext } from "react-router";
+import { savePhotoIntoIndexedDb } from "../../lib/indexedDB/indexedDB";
+import queryClient from "../../lib/tanstack-query/queryClient";
 
 type Photo = {
   file: File;
@@ -64,7 +66,7 @@ const YourPhotos = () => {
     });
   };
 
-  const handleSubmitPhotos: SubmitEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmitPhotos: SubmitEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()
     if (photos[0]) {
       mainPhotoMutate(photos[0].file);
@@ -75,6 +77,9 @@ const YourPhotos = () => {
       .filter((photo) => photo !== null)
       .map((photo) => photo.file);
     otherPhotosMutate(otherFiles);
+
+      await savePhotoIntoIndexedDb(photos[0]!.file)
+      queryClient.invalidateQueries({queryKey : ["onboarding-photo"]})
 
     goNext();
   };
