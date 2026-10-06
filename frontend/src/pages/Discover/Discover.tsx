@@ -14,6 +14,7 @@ import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import UpNextProfiles from "../../components/DiscoverPage/UpNextProfiles";
 import type { SortedUser } from "../../types/discover";
 import { useState } from "react";
+import DiscoverEmptyState from "../../components/DiscoverPage/DiscoverEmptyState";
 
 const Discover = () => {
   const {
@@ -49,6 +50,8 @@ const Discover = () => {
       (person: SortedUser) => !excludedIds.has(person.id),
     ) ?? [];
 
+  const isProfileDiscoverFinished = currentIndex >= nonRepititivePeople.length;
+
   const handleGoAheadIndex = () => {
     setCurrentIndex((prevIndex) => prevIndex + 1);
   };
@@ -79,20 +82,24 @@ const Discover = () => {
             </div>
           </div>
 
-          <div className="flex lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start md:mt-12">
-            <h3 className="hidden justify-self-center font-TitleFont text-2xl whitespace-nowrap text-SecondaryColor [writing-mode:vertical-rl] lg:block select-none">
-              Find someone worth the notification
-            </h3>
-            <CardStack
-              people={nonRepititivePeople}
-              onChangeCurrentIndex={handleGoAheadIndex}
-            />
+          {isProfileDiscoverFinished ? (
+            <DiscoverEmptyState />
+          ) : (
+            <div className="flex lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start md:mt-12">
+              <h3 className="hidden justify-self-center font-TitleFont text-2xl whitespace-nowrap text-SecondaryColor [writing-mode:vertical-rl] lg:block select-none">
+                Find someone worth the notification
+              </h3>
+              <CardStack
+                people={nonRepititivePeople}
+                onChangeCurrentIndex={handleGoAheadIndex}
+              />
 
-            <UpNextProfiles
-              people={nonRepititivePeople}
-              currentIndex={currentIndex}
-            />
-          </div>
+              <UpNextProfiles
+                people={nonRepititivePeople}
+                currentIndex={currentIndex}
+              />
+            </div>
+          )}
 
           <div className="flex justify-center lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start">
             <div className="hidden w-50 justify-self-start lg:block">

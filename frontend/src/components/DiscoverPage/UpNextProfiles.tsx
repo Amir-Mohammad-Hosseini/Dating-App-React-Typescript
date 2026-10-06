@@ -2,7 +2,6 @@ import type { UpNextProfilesType } from "./types";
 
 const UpNextProfiles = ({ people, currentIndex }: UpNextProfilesType) => {
   const upThreeNextProfiles = people.slice(currentIndex + 1, currentIndex + 4);
-  console.log(upThreeNextProfiles);
   return (
     <div className="hidden justify-self-end lg:block">
       <p className="mb-4 text-right text-SecondaryColor">Up next</p>
