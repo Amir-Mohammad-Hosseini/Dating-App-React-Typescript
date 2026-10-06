@@ -5,7 +5,7 @@ import type SwipeCardType from "./types";
 const THRESHOLD = 120;
 const VELOCITY = 500;
 
-const SwipeCard = ({ text, isTop, index, onSwipe }: SwipeCardType) => {
+const SwipeCard = ({ person, isTop, index, onSwipe }: SwipeCardType) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const likeOpacity = useTransform(x, [20, 120], [0, 1]);
@@ -27,6 +27,9 @@ const SwipeCard = ({ text, isTop, index, onSwipe }: SwipeCardType) => {
       onComplete: () => onSwipe(dir > 0 ? "like" : "nope"),
     });
   };
+
+  const { firstname, age, distance, gender, biography, tags , profile_pic , username } = person;
+
 
   return (
     <motion.div
@@ -51,32 +54,36 @@ const SwipeCard = ({ text, isTop, index, onSwipe }: SwipeCardType) => {
         NOPE
       </motion.span>
 
+      {
+        profile_pic ? <motion.img src={profile_pic} alt={username} className="select-none pointer-events-none" draggable={false} /> : 
       <h1 className="pointer-events-none absolute inset-0 flex items-center justify-center font-TitleFont text-9xl text-SecondaryColor">
-        {text}
+        {firstname.slice(0 , 1).toUpperCase()}
       </h1>
+      }
 
       <div className="absolute inset-x-3 bottom-3 z-20 rounded-2xl bg-PrimaryDarkBgColor p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-end gap-x-2 font-TitleFont">
-            <h3 className="text-3xl font-bold">Mike</h3>
-            <h4 className="text-lg text-SecondaryColor">23</h4>
+            <h3 className="text-3xl font-bold">{firstname}</h3>
+            <h4 className="text-lg text-SecondaryColor">{age}</h4>
           </div>
-          <p className="font-PrimaryFont text-sm text-SecondaryColor">2km away</p>
+          <p className="font-PrimaryFont text-sm text-SecondaryColor">
+            {distance > 1 ? `${distance.toFixed(1)}km away` : "Near you"}
+          </p>
         </div>
         <p className="py-2 font-PrimaryFont text-sm text-SecondaryColor">
-          Backend Engineer
+          I am {gender}
         </p>
-        <p className="text-sm">
-          Building something with too many microservices. Ask me about my cat
-          instead.
-        </p>
+        <p className="text-sm">{biography}</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-2xl border border-SecondaryColor px-4 py-1 text-SecondaryColor">
-            Badge
-          </span>
-          <span className="rounded-2xl border border-SecondaryColor px-4 py-1 text-SecondaryColor">
-            Badge
-          </span>
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-2xl border border-SecondaryColor px-4 py-1 text-SecondaryColor"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
       </div>
     </motion.div>

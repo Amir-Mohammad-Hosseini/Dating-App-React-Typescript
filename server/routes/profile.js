@@ -262,7 +262,7 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
 
     app.post('/api/profile/setprofilepic', upload.single('file'), async (request, response) => {
         const session = request.session
-        const picture = 'http://localhost:3000/images/' + request.file.filename
+        const picture = 'http://localhost:3001/images/' + request.file.filename
         if (session.userid) {
             if (request.file.size > 5242880) {
                 return response.send('The maximum size for uploaded images is 5 megabytes.')
@@ -315,7 +315,7 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
 
     app.post('/api/profile/imageupload', upload.single('file'), async (request, response) => {
         const session = request.session
-        const picture = 'http://localhost:3000/images/' + request.file.filename
+        const picture = 'http://localhost:3001/images/' + request.file.filename
         if (session.userid) {
             if (request.file.size > 5242880) {
                 return response.send('The maximum size for uploaded images is 5 megabytes.')
@@ -385,7 +385,7 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
             var pictureData = await pool.query(sql, [session.userid, picture_id])
 
             var oldImageData = pictureData.rows[0]['picture_data']
-            if (oldImageData !== 'http://localhost:3000/images/default_profilepic.jpeg') {
+            if (oldImageData !== 'http://localhost:3001/images/default_profilepic.jpeg') {
                 const oldImage = path.resolve(__dirname, '../images') + oldImageData.replace('http://localhost:3000/images', '');
 
                 if (fs.existsSync(oldImage)) {

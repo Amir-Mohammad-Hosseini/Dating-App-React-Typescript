@@ -1,10 +1,11 @@
 import { useState } from "react";
 import SwipeCard from "./SwipeCard";
+import type { SortedUser } from "../../types/discover";
+import type { CardStackProps } from "./types";
 
-const CARDS = ["A", "B", "C", "D", "E", "F"];
+const CardStack = ({people} : CardStackProps) => {
+  const [cards, setCards] = useState(people);
 
-const CardStack = () => {
-  const [cards, setCards] = useState(CARDS);
 
   const handleSwipeCard = (status: string) => {
     console.log(status);
@@ -12,13 +13,12 @@ const CardStack = () => {
   };
 
   return (
-    <div className="relative mx-auto w-full max-w-95 aspect-[2/3]">
+    <div className="relative mx-auto w-full max-w-95 aspect-2/3">
       {cards
-        .slice(0, 3)
-        .map((card, index) => (
+        .map((card : SortedUser, index : number) => (
           <SwipeCard
-            key={card}
-            text={card}
+            key={card.id}
+            person={card}
             index={index}
             isTop={index === 0}
             onSwipe={handleSwipeCard}

@@ -8,8 +8,42 @@ import FilterPanel from "../../components/DiscoverPage/FilterPanel";
 import Navbar from "../../components/Navbar/Navbar";
 import { IoIosNotifications } from "react-icons/io";
 import { Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import discoverPeopleQuery from "../../lib/tanstack-query/Discover/discoverPeopleQuery";
+import LoadingOverlay from "../../components/Loader/LoadingOverlay";
+import UpNextProfiles from "../../components/DiscoverPage/UpNextProfiles";
+import type { SortedUser } from "../../types/discover";
 
 const Discover = () => {
+  const {
+    data: discoveredPeople,
+    isPending: isDiscoverPeoplePending,
+    isError: isDiscoverPeopleError,
+  } = useQuery(discoverPeopleQuery());
+  const {
+    data: userLists,
+    isPending: isUserListsPending,
+    isError: isUserListsError,
+  } = useQuery(discoverPeopleQuery());
+
+  const isPending = isDiscoverPeoplePending || isUserListsPending;
+  const isError = isDiscoverPeopleError || isUserListsError;
+
+  if (isPending) {
+    return <LoadingOverlay show />;
+  }
+  if (isError) {
+    throw new Error("An error occurred");
+  }
+
+  const excludedIds = new Set([
+    ...(userLists?.connected ?? []),
+    ...(userLists?.liked ?? []),
+  ]);
+
+  const nonRepititivePeople =
+    discoveredPeople?.filter((person: SortedUser) => !excludedIds.has(person.id)) ??
+    [];
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
       <Navbar />
@@ -37,33 +71,12 @@ const Discover = () => {
           </div>
 
           <div className="flex lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start md:mt-12">
-            <h3 className="hidden justify-self-center font-TitleFont text-2xl whitespace-nowrap text-SecondaryColor [writing-mode:vertical-rl] lg:block">
+            <h3 className="hidden justify-self-center font-TitleFont text-2xl whitespace-nowrap text-SecondaryColor [writing-mode:vertical-rl] lg:block select-none">
               Find someone worth the notification
             </h3>
-            <CardStack />
-            <div className="hidden justify-self-end lg:block">
-              <p className="mb-4 text-right text-SecondaryColor">Up next</p>
-              <ul className="space-y-4">
-                <li className="flex items-center justify-center gap-x-2 text-PrimaryColor">
-                  <p>Kevin</p>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_40%,#69343f_0%,#4a2a34_45%,#25262a_100%)]">
-                    K
-                  </div>
-                </li>
-                <li className="flex items-center justify-center gap-x-2 text-PrimaryColor">
-                  <p>Kevin</p>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_40%,#69343f_0%,#4a2a34_45%,#25262a_100%)]">
-                    K
-                  </div>
-                </li>
-                <li className="flex items-center justify-center gap-x-2 text-PrimaryColor">
-                  <p>Kevin</p>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_40%,#69343f_0%,#4a2a34_45%,#25262a_100%)]">
-                    K
-                  </div>
-                </li>
-              </ul>
-            </div>
+            <CardStack people={nonRepititivePeople} />
+
+            <UpNextProfiles />
           </div>
 
           <div className="flex justify-center lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start">

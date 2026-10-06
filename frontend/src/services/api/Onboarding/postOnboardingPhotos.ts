@@ -4,7 +4,6 @@ const postOnboardingMainPhoto = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
   const response = await customFetch.post("profile/setprofilepic", formData);
-  console.log(response)
   return response;
 };
 
@@ -16,7 +15,6 @@ export const postOnboardingAnotherPhotos = async (files: File[]) => {
       return customFetch.post("profile/imageupload", formData);
     }),
   );
-  console.log(responses)
   return responses;
 };
 
