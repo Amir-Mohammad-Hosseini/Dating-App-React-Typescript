@@ -9,6 +9,8 @@ import useAppStore from "../../lib/zustand/store";
 import useOnboardingStep from "../../hooks/useOnboardingStep";
 
 const AboutYou = () => {
+  const { gender, sexual_pref } = useAppStore((state) => state.onboardingDatas);
+
   const {
     register,
     handleSubmit,
@@ -16,9 +18,13 @@ const AboutYou = () => {
     formState: { errors },
   } = useForm<AboutYouFormType>({
     resolver: zodResolver(aboutYouSchema),
+    defaultValues: {
+      gender,
+      sexual_pref,
+    },
   });
 
-  const {goNext} = useOnboardingStep()
+  const { goNext } = useOnboardingStep();
   const setField = useAppStore((state) => state.setField);
 
   const onValid = (aboutYouObj: AboutYouFormType) => {
@@ -28,7 +34,7 @@ const AboutYou = () => {
       setField(typedKey, aboutYouObj[typedKey]);
     });
 
-    goNext()
+    goNext();
   };
 
   return (
@@ -40,7 +46,11 @@ const AboutYou = () => {
         </p>
       </div>
 
-      <form id="onboarding-form" onSubmit={handleSubmit(onValid)} className="w-full space-y-6">
+      <form
+        id="onboarding-form"
+        onSubmit={handleSubmit(onValid)}
+        className="w-full space-y-6"
+      >
         <AboutRadioInput
           text="I am"
           options={GENDERS}

@@ -21,18 +21,17 @@ const CheckboxInput = forwardRef<HTMLInputElement, CheckboxInputType>(
           <div className="label">{extraDescription}</div>
         </legend>
         <div className={`flex flex-wrap gap-2 ${className}`}>
-          {options.map((option, i) => (
+          {options.map((option) => (
             <label key={option} className="group cursor-pointer">
               <input
                 ref={ref}
                 type="checkbox"
                 value={option.toLowerCase()}
-                defaultChecked={i === 0}
                 className="peer sr-only"
                 {...props}
               />
               <span
-                className="flex items-center gap-2 rounded-full border border-PrimaryColor/30 bg-PrimaryDarkBgColor px-5 py-2 text-PrimaryColor transition
+                className="flex items-center gap-2 capitalize rounded-full border border-PrimaryColor/30 bg-PrimaryDarkBgColor px-5 py-2 text-PrimaryColor transition
     peer-checked:border-TertiaryColor peer-checked:bg-TertiaryColor
     peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-PrimaryColor"
               >

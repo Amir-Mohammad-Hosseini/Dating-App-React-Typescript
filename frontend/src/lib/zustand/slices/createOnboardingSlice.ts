@@ -1,9 +1,10 @@
 import type { StateCreator } from "zustand";
+import type { Gender, SexualPref } from "../../../types/onboarding";
 
 export type OnboardingData = {
-  gender: string;
+  gender: Gender | "";
   age: number | null;
-  sexual_pref: string;
+  sexual_pref: SexualPref | "";
   biography: string;
   tags: string[];
   location: string;

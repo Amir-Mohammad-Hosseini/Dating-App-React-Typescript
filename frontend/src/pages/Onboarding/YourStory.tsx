@@ -12,9 +12,11 @@ import yourStorySchema, {
 import useOnboardingStep from "../../hooks/useOnboardingStep";
 
 const YourStory = () => {
-  const [interests, setInterests] = useState(DEFAULT_INTERESTS);
-
+  const {biography , tags} = useAppStore((state) => state.onboardingDatas);
   const setField = useAppStore((state) => state.setField);
+
+  const [interests, setInterests] = useState(tags.length ? tags : DEFAULT_INTERESTS);
+
   const {goNext} = useOnboardingStep()
 
   const {
@@ -24,8 +26,8 @@ const YourStory = () => {
   } = useForm<YourStoryFormType>({
     resolver: zodResolver(yourStorySchema),
     defaultValues: {
-      biography: "",
-      tags: [],
+      biography,
+      tags,
     },
   });
 

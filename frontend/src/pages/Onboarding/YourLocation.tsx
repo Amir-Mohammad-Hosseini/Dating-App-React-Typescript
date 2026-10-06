@@ -12,27 +12,38 @@ import useOnboardingStep from "../../hooks/useOnboardingStep";
 import { useOutletContext } from "react-router";
 
 const YourLocation = () => {
+  const { gps } = useAppStore((state) => state.onboardingDatas);
   const [coordinates, setCoordinates] = useState<{
     latitude: number;
     longitude: number;
-  } | null>(null);
+  } | null>(() =>
+    gps
+      ? {
+          longitude: gps[0],
+          latitude: gps[1],
+        }
+      : null,
+  );
 
-  const {goNext} = useOnboardingStep()
-  const {setIsSubmitting} = useOutletContext<{setIsSubmitting : (status : boolean) => void}>()
+  const { goNext } = useOnboardingStep();
+  const { setIsSubmitting } = useOutletContext<{
+    setIsSubmitting: (status: boolean) => void;
+  }>();
 
-  const { data, isPending: isQueryPending } = useQuery(
+  const { data, isLoading: isQueryLoading } = useQuery(
     locationQuery(coordinates),
   );
 
-  const { mutate : locationMutate, isPending : isLocationMutatePending, error } = useMutation(
-    locationMutation(setCoordinates),
-  );
+  const {
+    mutate: locationMutate,
+    isPending: isLocationMutatePending,
+    error,
+  } = useMutation(locationMutation(setCoordinates));
   const setField = useAppStore((state) => state.setField);
 
-  
-    useEffect(() => {
-      setIsSubmitting(isLocationMutatePending)
-    }, [isLocationMutatePending , setIsSubmitting])
+  useEffect(() => {
+    setIsSubmitting(isLocationMutatePending);
+  }, [isLocationMutatePending, setIsSubmitting]);
 
   const handleFindLocation = () => {
     locationMutate();
@@ -43,29 +54,29 @@ const YourLocation = () => {
   };
 
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
-    event.preventDefault()
-    if(!coordinates || !data){
-      return
+    event.preventDefault();
+    if (!coordinates || !data) {
+      return;
     }
 
-    const gpsTuple : [number , number] = [ +coordinates.longitude.toFixed(5) , +coordinates.latitude.toFixed(5)] 
-    const location = `${data.city}, ${data.country}`
-    
-    setField("gps" , gpsTuple)
-    setField("location" , location)
+    const gpsTuple: [number, number] = [
+      +coordinates.longitude.toFixed(5),
+      +coordinates.latitude.toFixed(5),
+    ];
+    const location = `${data.city}, ${data.country}`;
 
-    goNext()
-    
-  }
+    setField("gps", gpsTuple);
+    setField("location", location);
 
-  if (isQueryPending) {
-    return <LoadingOverlay show />
+    goNext();
+  };
+
+  if (isQueryLoading) {
+    return <LoadingOverlay show />;
   }
 
   const location = data?.address;
   const label = location ? `${location?.city}, ${location?.country}` : null;
-
-
 
   return (
     <form id="onboarding-form" onSubmit={handleSubmit}>

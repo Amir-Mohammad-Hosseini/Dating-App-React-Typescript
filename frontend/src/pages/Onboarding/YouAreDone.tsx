@@ -5,6 +5,7 @@ import doneMutation from "../../lib/tanstack-query/Onboarding/doneMutation";
 import { useNavigate, useOutletContext } from "react-router";
 import useOnboardingStep from "../../hooks/useOnboardingStep";
 import { useEffect, type SubmitEventHandler } from "react";
+import { deletePhotoFromIndexedDb } from "../../lib/indexedDB/indexedDB";
 const YouAreDone = () => {
   const userFirstname = useAppStore((state) => state.user)?.firstname;
   const onboardingDatas = useAppStore((state) => state.onboardingDatas);
@@ -24,12 +25,14 @@ const YouAreDone = () => {
       setIsSubmitting(isPending)
     }, [isPending , setIsSubmitting])
 
-  const handleSubmitOnboardingDatas : SubmitEventHandler<HTMLFormElement> = (event) => {
+  const handleSubmitOnboardingDatas : SubmitEventHandler<HTMLFormElement> =async (event) => {
     event.preventDefault()
     mutate(onboardingDatas);
     goNext()
     markProfileComplete()
     navigate("/discover")
+
+    await deletePhotoFromIndexedDb()
     reset()
   };
   return (

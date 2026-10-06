@@ -17,6 +17,8 @@ const locationQuery = (
         coordinates.longitude,
       );
     },
+
+    enabled: !!coordinates
   };
 };
 

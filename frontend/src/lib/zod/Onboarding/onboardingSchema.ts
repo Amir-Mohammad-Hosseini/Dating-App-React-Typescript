@@ -1,8 +1,8 @@
 import * as z from "zod";
 
 const onboardingSchema = z.object({
-  gender: z.enum(["male", "female", "other"]),
-  sexual_pref: z.enum(["male", "female", "bisexual"]),
+  gender: z.enum(["male", "female", "other" , ""]),
+  sexual_pref: z.enum(["male", "female", "bisexual", ""]),
   age: z.number().min(18).max(120),
   biography: z.string().max(500),
   tags: z
