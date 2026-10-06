@@ -3,13 +3,14 @@ import SwipeCard from "./SwipeCard";
 import type { SortedUser } from "../../types/discover";
 import type { CardStackProps } from "./types";
 
-const CardStack = ({people} : CardStackProps) => {
+const CardStack = ({people , onChangeCurrentIndex} : CardStackProps) => {
   const [cards, setCards] = useState(people);
 
 
   const handleSwipeCard = (status: string) => {
     console.log(status);
     setCards((prev) => prev.slice(1));
+    onChangeCurrentIndex()
   };
 
   return (

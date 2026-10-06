@@ -9,31 +9,32 @@ import { deletePhotoFromIndexedDb } from "../../lib/indexedDB/indexedDB";
 const YouAreDone = () => {
   const userFirstname = useAppStore((state) => state.user)?.firstname;
   const onboardingDatas = useAppStore((state) => state.onboardingDatas);
-  const markProfileComplete = useAppStore((state) => state.markProfileComplete)
-  const reset = useAppStore((state) => state.reset)
-  const {goNext} = useOnboardingStep()
+  const markProfileComplete = useAppStore((state) => state.markProfileComplete);
+  const reset = useAppStore((state) => state.reset);
+  const { goNext } = useOnboardingStep();
   const navigate = useNavigate();
 
+  const { mutateAsync, isPending } = useMutation(doneMutation(navigate));
 
-  const { mutate, isPending } = useMutation(doneMutation(navigate));
-
-    const { setIsSubmitting } = useOutletContext<{
+  const { setIsSubmitting } = useOutletContext<{
     setIsSubmitting: (status: boolean) => void;
   }>();
 
-      useEffect(() => {
-      setIsSubmitting(isPending)
-    }, [isPending , setIsSubmitting])
+  useEffect(() => {
+    setIsSubmitting(isPending);
+  }, [isPending, setIsSubmitting]);
 
-  const handleSubmitOnboardingDatas : SubmitEventHandler<HTMLFormElement> =async (event) => {
-    event.preventDefault()
-    mutate(onboardingDatas);
-    goNext()
-    markProfileComplete()
-    navigate("/discover")
+  const handleSubmitOnboardingDatas: SubmitEventHandler<
+    HTMLFormElement
+  > = async (event) => {
+    event.preventDefault();
+    await mutateAsync(onboardingDatas);
+    goNext();
+    markProfileComplete();
+    navigate("/discover");
 
-    await deletePhotoFromIndexedDb()
-    reset()
+    await deletePhotoFromIndexedDb();
+    reset();
   };
   return (
     <form id="onboarding-form" onSubmit={handleSubmitOnboardingDatas}>

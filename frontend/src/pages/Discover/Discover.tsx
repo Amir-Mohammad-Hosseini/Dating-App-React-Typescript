@@ -13,6 +13,7 @@ import discoverPeopleQuery from "../../lib/tanstack-query/Discover/discoverPeopl
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import UpNextProfiles from "../../components/DiscoverPage/UpNextProfiles";
 import type { SortedUser } from "../../types/discover";
+import { useState } from "react";
 
 const Discover = () => {
   const {
@@ -25,6 +26,8 @@ const Discover = () => {
     isPending: isUserListsPending,
     isError: isUserListsError,
   } = useQuery(discoverPeopleQuery());
+
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const isPending = isDiscoverPeoplePending || isUserListsPending;
   const isError = isDiscoverPeopleError || isUserListsError;
@@ -42,8 +45,14 @@ const Discover = () => {
   ]);
 
   const nonRepititivePeople =
-    discoveredPeople?.filter((person: SortedUser) => !excludedIds.has(person.id)) ??
-    [];
+    discoveredPeople?.filter(
+      (person: SortedUser) => !excludedIds.has(person.id),
+    ) ?? [];
+
+  const handleGoAheadIndex = () => {
+    setCurrentIndex((prevIndex) => prevIndex + 1);
+  };
+
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
       <Navbar />
@@ -74,9 +83,15 @@ const Discover = () => {
             <h3 className="hidden justify-self-center font-TitleFont text-2xl whitespace-nowrap text-SecondaryColor [writing-mode:vertical-rl] lg:block select-none">
               Find someone worth the notification
             </h3>
-            <CardStack people={nonRepititivePeople} />
+            <CardStack
+              people={nonRepititivePeople}
+              onChangeCurrentIndex={handleGoAheadIndex}
+            />
 
-            <UpNextProfiles />
+            <UpNextProfiles
+              people={nonRepititivePeople}
+              currentIndex={currentIndex}
+            />
           </div>
 
           <div className="flex justify-center lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start">

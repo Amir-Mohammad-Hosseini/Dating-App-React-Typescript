@@ -55,7 +55,7 @@ const SwipeCard = ({ person, isTop, index, onSwipe }: SwipeCardType) => {
       </motion.span>
 
       {
-        profile_pic ? <motion.img src={profile_pic} alt={username} className="select-none pointer-events-none" draggable={false} /> : 
+        profile_pic ? <img src={profile_pic} alt={username} className="select-none pointer-events-none" draggable={false} /> : 
       <h1 className="pointer-events-none absolute inset-0 flex items-center justify-center font-TitleFont text-9xl text-SecondaryColor">
         {firstname.slice(0 , 1).toUpperCase()}
       </h1>

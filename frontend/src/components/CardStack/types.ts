@@ -9,4 +9,5 @@ export default interface SwipeCardType {
 
 export interface CardStackProps {
   people: SortedUser[];
+  onChangeCurrentIndex : () => void
 };

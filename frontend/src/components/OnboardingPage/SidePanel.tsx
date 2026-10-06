@@ -29,7 +29,7 @@ const SidePanel = () => {
   }, [photoUrl]);
 
   return (
-    <aside className="relative isolate hidden flex-col justify-between overflow-hidden border-r border-SecondaryColor/20 bg-SecondaryDarkBgColor p-12 lg:flex lg:w-1/2">
+    <aside className="relative isolate hidden flex-col justify-between overflow-hidden border-r border-SecondaryColor/20 bg-SecondaryDarkBgColor p-10 lg:flex lg:w-1/2">
       {/* Decoration: two red glows + a soft grey sphere, all behind the content */}
       <div className="pointer-events-none absolute -top-24 -left-24 -z-10 size-72 rounded-full bg-TertiaryColor/40 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 left-1/2 -z-10 size-80 rounded-full bg-TertiaryColor/30 blur-3xl" />
@@ -96,7 +96,7 @@ const SidePanel = () => {
       </div>
 
       {/* Live-preview card (static placeholder for now) */}
-      <div>
+      <div className="mt-2">
         <p className="mb-3 text-xs text-SecondaryColor">How you’ll appear</p>
         <div className="flex gap-4 rounded-2xl border border-SecondaryColor/20 bg-white/5 p-3 backdrop-blur-sm">
           <div className="grid size-20 shrink-0 place-items-center rounded-xl overflow-hidden bg-[radial-gradient(circle_at_20%_90%,rgba(245,67,90,0.6),rgba(45,46,51,1)_60%)] font-TitleFont text-4xl text-white/20">
@@ -118,7 +118,7 @@ const SidePanel = () => {
               {onboardingDatas.tags.map((interest) => (
                 <li
                   key={interest}
-                  className="rounded-full border border-SecondaryColor/30 px-2.5 py-0.5 text-xs text-SecondaryColor"
+                  className="rounded-full capitalize border border-SecondaryColor/30 px-2.5 py-0.5 text-xs text-SecondaryColor"
                 >
                   {interest}
                 </li>
