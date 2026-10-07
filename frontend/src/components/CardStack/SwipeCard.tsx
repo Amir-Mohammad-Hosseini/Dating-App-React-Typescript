@@ -1,15 +1,31 @@
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import type { PanInfo } from "motion/react";
 import type SwipeCardType from "./types";
+import { forwardRef, useImperativeHandle } from "react";
 
 const THRESHOLD = 120;
 const VELOCITY = 500;
 
-const SwipeCard = ({ person, isTop, index, onSwipe }: SwipeCardType) => {
+export type SwipeCardHandle = {
+  triggerSwipe: (direction: 1 | -1) => void;
+};
+
+const SwipeCard = forwardRef<SwipeCardHandle , SwipeCardType>(({ person, isTop, index, onSwipe } , ref) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const likeOpacity = useTransform(x, [20, 120], [0, 1]);
   const nopeOpacity = useTransform(x, [-120, -20], [1, 0]);
+
+  const runSwipe = (direction: 1 | -1) => {
+    animate(x, direction * window.innerWidth, {
+      duration: 0.25,
+      onComplete: () => onSwipe(direction > 0 ? "like" : "nope"),
+    });
+  };
+
+  useImperativeHandle(ref , () => ({
+    triggerSwipe : runSwipe
+  }))
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     const passed =
@@ -21,15 +37,19 @@ const SwipeCard = ({ person, isTop, index, onSwipe }: SwipeCardType) => {
       return;
     }
 
-    const dir = info.offset.x > 0 ? 1 : -1;
-    animate(x, dir * window.innerWidth, {
-      duration: 0.25,
-      onComplete: () => onSwipe(dir > 0 ? "like" : "nope"),
-    });
+    runSwipe(info.offset.x > 0 ? 1 : -1);
   };
 
-  const { firstname, age, distance, gender, biography, tags , profile_pic , username } = person;
-
+  const {
+    firstname,
+    age,
+    distance,
+    gender,
+    biography,
+    tags,
+    profile_pic,
+    username,
+  } = person;
 
   return (
     <motion.div
@@ -54,12 +74,18 @@ const SwipeCard = ({ person, isTop, index, onSwipe }: SwipeCardType) => {
         NOPE
       </motion.span>
 
-      {
-        profile_pic ? <img src={profile_pic} alt={username} className="select-none pointer-events-none" draggable={false} /> : 
-      <h1 className="pointer-events-none absolute inset-0 flex items-center justify-center font-TitleFont text-9xl text-SecondaryColor">
-        {firstname.slice(0 , 1).toUpperCase()}
-      </h1>
-      }
+      {profile_pic ? (
+        <img
+          src={profile_pic}
+          alt={username}
+          className="select-none pointer-events-none"
+          draggable={false}
+        />
+      ) : (
+        <h1 className="pointer-events-none absolute inset-0 flex items-center justify-center font-TitleFont text-9xl text-SecondaryColor">
+          {firstname.slice(0, 1).toUpperCase()}
+        </h1>
+      )}
 
       <div className="absolute inset-x-3 bottom-3 z-20 rounded-2xl bg-PrimaryDarkBgColor p-4">
         <div className="flex items-center justify-between">
@@ -88,6 +114,6 @@ const SwipeCard = ({ person, isTop, index, onSwipe }: SwipeCardType) => {
       </div>
     </motion.div>
   );
-};
+})
 
 export default SwipeCard;

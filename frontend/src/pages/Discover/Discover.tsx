@@ -1,4 +1,6 @@
-import CardStack from "../../components/CardStack/CardStack";
+import CardStack, {
+  type CardStackHandle,
+} from "../../components/CardStack/CardStack";
 import Logo from "../../components/Logo/Logo";
 import { FaHeart, FaStar } from "react-icons/fa6";
 import { FaTimes } from "react-icons/fa";
@@ -13,7 +15,7 @@ import discoverPeopleQuery from "../../lib/tanstack-query/Discover/discoverPeopl
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import UpNextProfiles from "../../components/DiscoverPage/UpNextProfiles";
 import type { SortedUser } from "../../types/discover";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import DiscoverEmptyState from "../../components/DiscoverPage/DiscoverEmptyState";
 
 const Discover = () => {
@@ -27,11 +29,33 @@ const Discover = () => {
     isPending: isUserListsPending,
     isError: isUserListsError,
   } = useQuery(discoverPeopleQuery());
-
+  
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-
+  const cardStackRef = useRef<CardStackHandle>(null);
+  
   const isPending = isDiscoverPeoplePending || isUserListsPending;
   const isError = isDiscoverPeopleError || isUserListsError;
+
+
+  const handleSwipeProfile = useCallback((direction: 1 | -1) => {
+    console.log("direction" , direction)
+    cardStackRef.current?.triggerTopSwipe(direction);
+    handleGoAheadIndex();
+  } , [])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowUp" || event.key === "ArrowRight") {
+        handleSwipeProfile(1);
+      } else if (event.key === "ArrowLeft") {
+        handleSwipeProfile(-1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleSwipeProfile]);
 
   if (isPending) {
     return <LoadingOverlay show />;
@@ -55,6 +79,7 @@ const Discover = () => {
   const handleGoAheadIndex = () => {
     setCurrentIndex((prevIndex) => prevIndex + 1);
   };
+
 
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
@@ -90,6 +115,7 @@ const Discover = () => {
                 Find someone worth the notification
               </h3>
               <CardStack
+                ref={cardStackRef}
                 people={nonRepititivePeople}
                 onChangeCurrentIndex={handleGoAheadIndex}
               />
@@ -112,15 +138,24 @@ const Discover = () => {
 
             <div className="justify-self-center">
               <div className="mt-6 flex items-center justify-center gap-x-4">
-                <div className="flex h-13.5 w-13.5 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor text-SecondaryColor transition hover:-translate-y-1 hover:border-PrimaryColor hover:text-PrimaryColor">
+                <button
+                  onClick={() => handleSwipeProfile(-1)}
+                  className="flex h-13.5 w-13.5 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor text-SecondaryColor transition hover:-translate-y-1 hover:border-PrimaryColor hover:text-PrimaryColor"
+                >
                   <FaTimes className="h-5 w-5" />
-                </div>
-                <div className="flex h-17 w-17 cursor-pointer items-center justify-center rounded-full bg-TertiaryColor text-SecondaryDarkBgColor shadow-lg shadow-TertiaryColor/40 transition hover:-translate-y-1 hover:border-PrimaryColor hover:bg-HoverBtnBg">
+                </button>
+                <button
+                  onClick={() => handleSwipeProfile(1)}
+                  className="flex h-17 w-17 cursor-pointer items-center justify-center rounded-full bg-TertiaryColor text-SecondaryDarkBgColor shadow-lg shadow-TertiaryColor/40 transition hover:-translate-y-1 hover:border-PrimaryColor hover:bg-HoverBtnBg"
+                >
                   <FaHeart className="h-6.5 w-6.5" />
-                </div>
-                <div className="flex h-13.5 w-13.5 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor text-SecondaryColor transition hover:-translate-y-1 hover:border-TertiaryColor hover:text-TertiaryColor!">
+                </button>
+                <button
+                  onClick={() => handleSwipeProfile(1)}
+                  className="flex h-13.5 w-13.5 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor text-SecondaryColor transition hover:-translate-y-1 hover:border-TertiaryColor hover:text-TertiaryColor!"
+                >
                   <FaStar className="h-5 w-5" />
-                </div>
+                </button>
               </div>
               <p className="mt-4 mb-10 text-center text-sm text-SecondaryColor">
                 Drag the card, tap a button, or use{" "}
