@@ -19,7 +19,7 @@ const SwipeCard = forwardRef<SwipeCardHandle , SwipeCardType>(({ person, isTop, 
   const runSwipe = (direction: 1 | -1) => {
     animate(x, direction * window.innerWidth, {
       duration: 0.25,
-      onComplete: () => onSwipe(direction > 0 ? "like" : "nope"),
+      onComplete: () => onSwipe(direction > 0 ? "like" : "nope" , person),
     });
   };
 

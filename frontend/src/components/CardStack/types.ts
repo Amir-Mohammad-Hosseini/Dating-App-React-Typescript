@@ -4,7 +4,7 @@ export default interface SwipeCardType {
     person : SortedUser
     isTop : boolean
     index : number
-    onSwipe : (status : string) => void
+    onSwipe : (status : string , person : SortedUser) => void
 }
 
 export interface CardStackProps {

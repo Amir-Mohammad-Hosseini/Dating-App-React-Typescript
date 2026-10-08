@@ -1,4 +1,3 @@
-// routes/router.tsx
 import { createBrowserRouter } from "react-router";
 import RootLayout from "../layouts/RootLayout/RootLayout";
 import { OnboardingRoute, ProtectedRoute, AuthRoute } from "./../guards";
@@ -12,7 +11,6 @@ import YourLocation from "../pages/Onboarding/YourLocation";
 import YourPhotos from "../pages/Onboarding/YourPhotos";
 import YouAreDone from "../pages/Onboarding/YouAreDone";
 import Discover from "../pages/Discover/Discover";
-import Match from "../pages/Match/Match";
 import Matches from "../pages/Matches/Matches";
 import MessagesLayout from "../layouts/MessagesLayout/MessagesLayout";
 import EmptyConversation from "../pages/Messages/EmptyConversation";
@@ -62,7 +60,6 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "discover", element: <Discover /> },
-          { path: "match", element: <Match /> },
           { path: "matches", element: <Matches /> },
           {
             path: "messages",

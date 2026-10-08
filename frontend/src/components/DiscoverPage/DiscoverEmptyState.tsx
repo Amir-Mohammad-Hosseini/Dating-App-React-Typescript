@@ -18,7 +18,6 @@ const DiscoverEmptyState = () => {
       transition={{ type: "spring" }}
       className="relative isolate mx-auto flex h-132 mt-8 w-full max-w-95 flex-col items-center justify-center overflow-hidden rounded-3xl border border-SecondaryColor/20 bg-SecondaryDarkBgColor p-8 text-center"
     >
-      {/* نورهای تزئینی، هماهنگ با SidePanel */}
       <div className="pointer-events-none absolute -top-20 -left-16 -z-10 size-56 rounded-full bg-TertiaryColor/40 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -right-16 -z-10 size-56 rounded-full bg-TertiaryColor/30 blur-3xl" />
 

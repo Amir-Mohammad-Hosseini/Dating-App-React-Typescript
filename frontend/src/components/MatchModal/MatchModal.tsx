@@ -1,6 +1,40 @@
 import { FaHeart, FaTimes } from "react-icons/fa";
+import useAppStore from "../../lib/zustand/store";
+import { useQuery } from "@tanstack/react-query";
+import myProfileQuery from "../../lib/tanstack-query/GetMe/myProfileQuery";
+import LoadingOverlay from "../Loader/LoadingOverlay";
 
-const Match = () => {
+const MatchModal = () => {
+  const match = useAppStore((state) => state.match);
+  const closeMatchModal = useAppStore((state) => state.closeMatchModal);
+  console.log(match);
+
+  const {
+    data: myProfileDatas,
+    isPending,
+    isError,
+    error,
+  } = useQuery(myProfileQuery());
+
+  if (!match) {
+    return null;
+  }
+  if (isPending) {
+    return <LoadingOverlay show />;
+  }
+
+  if (isError) {
+    throw new Error(error?.message || "An error occurred");
+  }
+
+  console.log(myProfileDatas);
+
+  const myProfilePicture = myProfileDatas.profile_pic.picture_data;
+  const myFirstName = myProfileDatas.firstname;
+
+  const otherPersonPicture = match.person.profile_pic;
+  const otherPersonFirstName = match.person.firstname;
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-PrimaryDarkBgColor sm:bg-black/70 sm:backdrop-blur-sm">
       <div className="min-h-dvh sm:grid sm:place-items-center sm:p-8">
@@ -13,6 +47,7 @@ const Match = () => {
         >
           <button
             type="button"
+            onClick={closeMatchModal}
             aria-label="Close"
             className="absolute top-4 right-4 z-20 flex size-10 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor text-SecondaryColor transition hover:-translate-y-0.5 hover:border-PrimaryColor hover:text-PrimaryColor"
           >
@@ -25,12 +60,32 @@ const Match = () => {
 
             <div className="relative z-10 flex items-center lg:py-16">
               <div className="relative flex size-33 items-center justify-center overflow-hidden rounded-full border-4 border-PrimaryColor bg-PrimaryDarkBgColor font-ItalicFont text-6xl font-semibold text-PrimaryColor/90 italic sm:size-35 md:size-38 md:text-7xl xl:size-44">
-                <span className="relative">A</span>
+                {myProfilePicture ? (
+                  <img
+                    className="w-full h-full object-cover object-top"
+                    src={myProfilePicture}
+                    alt={myFirstName}
+                  />
+                ) : (
+                  <span className="relative">
+                    {myFirstName.slice(0, 1).toUpperCase()}
+                  </span>
+                )}
               </div>
 
               <div className="relative -ml-7 flex size-33 items-center justify-center overflow-hidden rounded-full border-4 border-TertiaryColor bg-PrimaryDarkBgColor font-ItalicFont text-6xl font-semibold text-PrimaryColor/90 italic sm:size-35 md:-ml-8 md:size-38 md:text-7xl xl:-ml-10 xl:size-44">
                 <span className="absolute inset-0 bg-TertiaryColor/20" />
-                <span className="relative">K</span>
+                {otherPersonPicture ? (
+                  <img
+                    className="w-full h-full object-cover object-top"
+                    src={otherPersonPicture}
+                    alt={otherPersonFirstName}
+                  />
+                ) : (
+                  <span className="relative">
+                    {otherPersonFirstName.slice(0, 1).toUpperCase()}
+                  </span>
+                )}
               </div>
 
               <div className="absolute top-1/2 left-1/2 z-30 grid size-13 -translate-1/2 place-items-center rounded-full border-4 border-PrimaryDarkBgColor bg-TertiaryColor shadow-[0_0_34px_rgba(245,67,90,0.55)] lg:border-TertiaryDarkBgColor">
@@ -58,6 +113,7 @@ const Match = () => {
                 Send a message
               </button>
               <button
+                onClick={closeMatchModal}
                 type="button"
                 className="h-14 cursor-pointer rounded-InputRadius border border-PrimaryColor/15 font-semibold text-PrimaryColor transition hover:border-PrimaryColor/40 md:flex-1 lg:flex-none"
               >
@@ -75,4 +131,4 @@ const Match = () => {
   );
 };
 
-export default Match;
+export default MatchModal;

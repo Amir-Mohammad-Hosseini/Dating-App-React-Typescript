@@ -111,7 +111,7 @@ const SidePanel = () => {
               {firstname}{" "}
               <span className="text-SecondaryColor">{onboardingDatas.age}</span>
             </p>
-            <p className="text-sm text-SecondaryColor">
+            <p className="text-sm text-SecondaryColor truncate">
               {onboardingDatas.biography || "Your bio will show up here."}
             </p>
             <ul className="mt-2 flex flex-wrap gap-2">
