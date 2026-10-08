@@ -249,10 +249,10 @@ const MyProfile = () => {
           </div>
 
           <div className="mt-4">
-            <BirthdayInput
+            {/* <BirthdayInput
               value={{ day: "06", month: "09", year: "2005" }}
               onChange={() => {}}
-            />
+            /> */}
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">

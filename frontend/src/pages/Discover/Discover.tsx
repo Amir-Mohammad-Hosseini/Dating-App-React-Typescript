@@ -2,10 +2,7 @@ import CardStack, {
   type CardStackHandle,
 } from "../../components/CardStack/CardStack";
 import Logo from "../../components/Logo/Logo";
-import { FaHeart, FaStar } from "react-icons/fa6";
-import { FaTimes } from "react-icons/fa";
 import { IoFilter } from "react-icons/io5";
-import RadioInput from "../../components/Input/RadioInput";
 import FilterPanel from "../../components/DiscoverPage/FilterPanel";
 import Navbar from "../../components/Navbar/Navbar";
 import { IoIosNotifications } from "react-icons/io";
@@ -17,31 +14,41 @@ import UpNextProfiles from "../../components/DiscoverPage/UpNextProfiles";
 import type { SortedUser } from "../../types/discover";
 import { useCallback, useEffect, useRef, useState } from "react";
 import DiscoverEmptyState from "../../components/DiscoverPage/DiscoverEmptyState";
+import SwipeButtons from "../../components/DiscoverPage/SwipeButtons";
+import userListsQuery from "../../lib/tanstack-query/Discover/userListsQuery";
+import DEFAULT_DISCOVER_FILTERS, {
+  DISCOVER_QUICK_FILTERS,
+  type DiscoverFilters,
+} from "../../utils/constants/discover";
+import RadioInput from "../../components/Input/RadioInput";
 
 const Discover = () => {
+  const [filters, setFilters] = useState(DEFAULT_DISCOVER_FILTERS);
+  const [selectedQuickFilter, setSelectedQuickFilter] = useState(
+    DISCOVER_QUICK_FILTERS[0]?.label ?? "",
+  );
   const {
     data: discoveredPeople,
     isPending: isDiscoverPeoplePending,
     isError: isDiscoverPeopleError,
-  } = useQuery(discoverPeopleQuery());
+  } = useQuery(discoverPeopleQuery(filters));
   const {
     data: userLists,
     isPending: isUserListsPending,
     isError: isUserListsError,
-  } = useQuery(discoverPeopleQuery());
-  
+  } = useQuery(userListsQuery());
+
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const cardStackRef = useRef<CardStackHandle>(null);
-  
+
   const isPending = isDiscoverPeoplePending || isUserListsPending;
   const isError = isDiscoverPeopleError || isUserListsError;
 
-
   const handleSwipeProfile = useCallback((direction: 1 | -1) => {
-    console.log("direction" , direction)
+    console.log("direction", direction);
     cardStackRef.current?.triggerTopSwipe(direction);
     handleGoAheadIndex();
-  } , [])
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -56,6 +63,24 @@ const Discover = () => {
 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleSwipeProfile]);
+
+  const handleApplyFilters = (data: DiscoverFilters) => {
+    setFilters(data);
+  };
+
+  const handleChangeQuickFilter = (
+    option: (typeof DISCOVER_QUICK_FILTERS)[number],
+  ) => {
+    setSelectedQuickFilter(option.label);
+
+    setCurrentIndex(0);
+
+    setFilters({ ...DEFAULT_DISCOVER_FILTERS, ...option.value });
+  };
+
+  const handleGoAheadIndex = () => {
+    setCurrentIndex((prevIndex) => prevIndex + 1);
+  };
 
   if (isPending) {
     return <LoadingOverlay show />;
@@ -75,11 +100,6 @@ const Discover = () => {
     ) ?? [];
 
   const isProfileDiscoverFinished = currentIndex >= nonRepititivePeople.length;
-
-  const handleGoAheadIndex = () => {
-    setCurrentIndex((prevIndex) => prevIndex + 1);
-  };
-
 
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
@@ -129,56 +149,28 @@ const Discover = () => {
 
           <div className="flex justify-center lg:grid lg:grid-cols-[1fr_23.75rem_1fr] lg:items-start">
             <div className="hidden w-50 justify-self-start lg:block">
+              {/* I will do it later */}
               <RadioInput
                 text="Quick filters"
-                options={["Nearby", "22–29", "Active today"]}
+                options={DISCOVER_QUICK_FILTERS}
                 className="mt-2 flex-col"
+                selectedValue={selectedQuickFilter}
+                onChange={handleChangeQuickFilter}
               />
             </div>
-
-            <div className="justify-self-center">
-              <div className="mt-6 flex items-center justify-center gap-x-4">
-                <button
-                  onClick={() => handleSwipeProfile(-1)}
-                  className="flex h-13.5 w-13.5 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor text-SecondaryColor transition hover:-translate-y-1 hover:border-PrimaryColor hover:text-PrimaryColor"
-                >
-                  <FaTimes className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => handleSwipeProfile(1)}
-                  className="flex h-17 w-17 cursor-pointer items-center justify-center rounded-full bg-TertiaryColor text-SecondaryDarkBgColor shadow-lg shadow-TertiaryColor/40 transition hover:-translate-y-1 hover:border-PrimaryColor hover:bg-HoverBtnBg"
-                >
-                  <FaHeart className="h-6.5 w-6.5" />
-                </button>
-                <button
-                  onClick={() => handleSwipeProfile(1)}
-                  className="flex h-13.5 w-13.5 cursor-pointer items-center justify-center rounded-full border border-SecondaryColor bg-PrimaryDarkBgColor text-SecondaryColor transition hover:-translate-y-1 hover:border-TertiaryColor hover:text-TertiaryColor!"
-                >
-                  <FaStar className="h-5 w-5" />
-                </button>
-              </div>
-              <p className="mt-4 mb-10 text-center text-sm text-SecondaryColor">
-                Drag the card, tap a button, or use{" "}
-                <span className="badge badge-xs rounded-sm border border-SecondaryColor text-SecondaryColor">
-                  ←
-                </span>{" "}
-                <span className="badge badge-xs rounded-sm border border-SecondaryColor text-SecondaryColor">
-                  →
-                </span>{" "}
-                <span className="badge badge-xs rounded-sm border border-SecondaryColor text-SecondaryColor">
-                  ↑
-                </span>
-              </p>
-            </div>
+            <SwipeButtons onSwipeButton={handleSwipeProfile} />
           </div>
 
           <section className="mt-10 hidden rounded-t-2xl border border-SecondaryColor/30 bg-SecondaryDarkBgColor px-8 py-6 lg:block">
-            <FilterPanel fieldsClassName="lg:grid lg:grid-cols-1 lg:items-end lg:gap-4" />
+            <FilterPanel
+              onApplyFilters={handleApplyFilters}
+              fieldsClassName="lg:grid lg:grid-cols-1 lg:items-end lg:gap-4"
+            />
           </section>
 
           <div className="modal lg:hidden" id="filter-modal" popover="auto">
             <div className="modal-box absolute bottom-0 mx-auto w-dvw space-y-4 rounded-t-2xl bg-PrimaryDarkBgColor">
-              <FilterPanel />
+              <FilterPanel onApplyFilters={handleApplyFilters} />
             </div>
             <div className="modal-backdrop">
               <button popoverTarget="filter-modal" popoverTargetAction="hide">

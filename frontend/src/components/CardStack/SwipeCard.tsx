@@ -100,7 +100,7 @@ const SwipeCard = forwardRef<SwipeCardHandle , SwipeCardType>(({ person, isTop, 
         <p className="py-2 font-PrimaryFont text-sm text-SecondaryColor">
           I am {gender}
         </p>
-        <p className="text-sm">{biography}</p>
+        <p className="text-sm truncate">{biography}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {tags.map((tag) => (
             <span

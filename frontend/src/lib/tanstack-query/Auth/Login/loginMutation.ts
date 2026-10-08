@@ -16,8 +16,10 @@ const loginMutation = (navigate: NavigateFunction) => {
       };
 
       toast("Logged in successfully");
-      navigate(user.hasProfile ? "/discover" : "/onboarding");
       useAppStore.getState().setUser(user);
+      navigate(user.hasProfile ? "/discover" : "/onboarding" , {
+        replace : true
+      });
     },
     onError: (error: Error) => {
       const message = error.message || "An error occurred while logging";

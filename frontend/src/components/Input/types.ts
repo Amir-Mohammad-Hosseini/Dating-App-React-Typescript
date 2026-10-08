@@ -1,4 +1,6 @@
+import type { ComponentPropsWithoutRef } from "react";
 import type { Control, FieldValues, Path } from "react-hook-form";
+import type { DiscoverFilters } from "../../utils/constants/discover";
 
 export default interface InputType {
   text: string;
@@ -8,19 +10,28 @@ export default interface InputType {
   placeholder: string;
   error?: string;
 }
-export interface RangeInputType {
+export interface RangeInputType
+  extends Omit<ComponentPropsWithoutRef<"input">, "type" | "min" | "max"> {
   text: string;
   name: string;
   min: number;
   max: number;
   extraDescription: string;
-  defaultValue?: string;
+}
+ 
+export interface QuickFilterOption<T = unknown> {
+  label: string;
+  value: T;
 }
 
-export interface RadioInputType {
-  options: string[];
+export interface RadioInputType<
+  T extends QuickFilterOption = QuickFilterOption,
+> {
+  options: T[];
   text: string;
   className?: string;
+  selectedValue?: string;
+  onChange?: (option: T) => void;
 }
 
 export interface TextareaInputType {
