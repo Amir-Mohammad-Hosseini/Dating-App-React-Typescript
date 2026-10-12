@@ -10,7 +10,7 @@ Prep: Please make sure you have [Docker](https://www.docker.com/) running on you
 1. git clone https://github.com/pawaters/dating-app
 3. `docker-compose up --build` in the root directory (takes 3 minutes)
 4. To create users, go to /script folder, Run `docker-compose up --build` (takes 3 minutes)
-5. Go to `localhost:3000` in your browser, `localhost:8080` for db admin, All fake users' password is Matcha1!
+5. Go to `localhost:5173` in your browser, `localhost:8080` for db admin, All fake users' password is Matcha1!
 
 I recommend using one of the 500 generated users: 
 - username: Nestor4

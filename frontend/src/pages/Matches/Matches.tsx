@@ -3,46 +3,27 @@ import { CiLock } from "react-icons/ci";
 import Navbar from "../../components/Navbar/Navbar";
 import { IoIosNotifications } from "react-icons/io";
 import { Link } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import matchesQuery from "../../lib/tanstack-query/Matches/matchesQuery";
+import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 
-type MatchItem = { name: string; status: "Active now" | "Matched" };
-
-// Placeholder data until the real matches come from the backend
-const MATCHES: MatchItem[] = [
-  { name: "Sara K.", status: "Active now" },
-  { name: "Milad R.", status: "Active now" },
-  { name: "Nika", status: "Matched" },
-  { name: "Ava", status: "Matched" },
-  { name: "Darius", status: "Matched" },
-  { name: "Leyla", status: "Active now" },
-  { name: "Kian", status: "Active now" },
-  { name: "Parisa", status: "Active now" },
-  { name: "Yuki", status: "Active now" },
-  { name: "Noor", status: "Matched" },
-  { name: "Omid", status: "Matched" },
-  { name: "Elena", status: "Active now" },
-  { name: "Tara", status: "Matched" },
-  { name: "Jonas", status: "Active now" },
-  { name: "Mina", status: "Matched" },
-  { name: "Reza", status: "Matched" },
-  { name: "Sofia", status: "Matched" },
-  { name: "Ali", status: "Matched" },
-];
-
-// Avatars alternate between a red and a grey gradient
-const AVATAR_TONES = [
-  "bg-linear-to-br from-[#ea4a61] to-[#7d2b3a]",
-  "bg-linear-to-br from-[#c9cdd3] to-[#54575d]",
-];
-
-const initials = (name: string) =>
-  name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+type MatchPerson = {
+  age: number;
+  connection_id: number;
+  firstname: string;
+  picture_data: string;
+  user_id: number;
+  username: string;
+};
 
 const Matches = () => {
+  const { data: matchesPeople, isPending } = useQuery(matchesQuery());
+
+  if (isPending) {
+    return <LoadingOverlay show />;
+  }
+
+  console.log(matchesPeople.slice(0 ,1))
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
       <Navbar />
@@ -52,13 +33,13 @@ const Matches = () => {
           <div>
             <h1 className="font-TitleFont text-3xl md:text-4xl">Matches</h1>
             <p className="mt-1 text-sm text-SecondaryColor md:text-base">
-              {MATCHES.length} matches · 3 new since your last visit
+              {matchesPeople.length} matches · 3 new since your last visit
             </p>
           </div>
           {/* TODO: there is no #filter-modal on this page yet */}
           <div className="flex items-center justify-center gap-x-2">
             <Link
-            to="/notifications"
+              to="/notifications"
               type="button"
               className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
             >
@@ -82,12 +63,12 @@ const Matches = () => {
               Likes you
               <span className="text-SecondaryColor"> · 23</span>
             </h2>
-            <button
-              type="button"
+            <Link
+              to="/pro"
               className="cursor-pointer font-PrimarySemiBoldFont text-sm text-TertiaryColor transition hover:text-HoverBtnBg"
             >
               See all
-            </button>
+            </Link>
           </div>
 
           <div className="relative overflow-hidden rounded-2xl border border-SecondaryColor/30">
@@ -114,12 +95,13 @@ const Matches = () => {
               <p className="font-PrimaryMediumFont">
                 23 people already liked you
               </p>
-              <button
+              <Link
+                to="/pro"
                 type="button"
                 className="cursor-pointer rounded-full bg-TertiaryColor px-6 py-2.5 font-PrimarySemiBoldFont text-white transition hover:bg-HoverBtnBg"
               >
                 Upgrade to see who
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -133,38 +115,41 @@ const Matches = () => {
             Your matches
           </h2>
 
-          {/* Columns follow the design: 3 → 4 → 3 (sidebar appears) → 4 → 5 */}
           <ul className="grid grid-cols-3 gap-x-4 gap-y-8 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {MATCHES.map((match, index) => (
-              <li key={match.name} className="flex justify-center">
-                <button
-                  type="button"
+            {matchesPeople.slice(0, 20).map((match: MatchPerson) => (
+              <li key={match.user_id} className="flex justify-center">
+                <Link
+                  to={`/messages/${match.connection_id}`}
                   className="group flex cursor-pointer flex-col items-center gap-2 text-center"
                 >
                   <span className="relative">
-                    <span
-                      className={`grid size-20 place-items-center rounded-full font-TitleFont text-2xl font-semibold text-white ring-2 ring-transparent transition group-hover:ring-TertiaryColor group-focus-visible:ring-TertiaryColor md:size-24 xl:size-30 xl:text-3xl ${
-                        AVATAR_TONES[index % AVATAR_TONES.length]
-                      }`}
-                    >
-                      {initials(match.name)}
+                    <span className="grid size-20 place-items-center rounded-full font-TitleFont text-2xl overflow-hidden font-semibold text-white ring-2 ring-transparent transition group-hover:ring-TertiaryColor group-focus-visible:ring-TertiaryColor md:size-24 xl:size-30 xl:text-3xl">
+                      {match.picture_data ? (
+                        <img
+                          src={match.picture_data}
+                          alt={match.firstname}
+                          className="w-full h-full"
+                        />
+                      ) : (
+                        <span>{match.firstname.slice(0, 1).toUpperCase()}</span>
+                      )}
                     </span>
-                    {match.status === "Active now" && (
+                    {/* {match?.status === "Active now" && (
                       <span
                         aria-hidden="true"
                         className="absolute right-0 bottom-1 size-4 rounded-full border-[3px] border-PrimaryDarkBgColor bg-OnlineBgColor lg:bottom-2 lg:right-1 lg:size-6"
                       />
-                    )}
+                    )} */}
                   </span>
                   <span>
                     <span className="block font-PrimaryMediumFont">
-                      {match.name}
+                      {match.firstname}
                     </span>
-                    <span className="block text-xs text-SecondaryColor">
+                    {/* <span className="block text-xs text-SecondaryColor">
                       {match.status}
-                    </span>
+                    </span> */}
                   </span>
-                </button>
+                </Link>
               </li>
             ))}
           </ul>

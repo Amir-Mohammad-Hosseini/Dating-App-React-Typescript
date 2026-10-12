@@ -286,7 +286,7 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
                 } else {
                     let oldImageData = profilePic.rows[0]['picture_data']
                     // path.resolve gets the absolute path of '../images'
-                    const oldImage = path.resolve(__dirname, '../images') + oldImageData.replace('http://localhost:3000/images', '')
+                    const oldImage = path.resolve(__dirname, '../images') + oldImageData.replace('http://localhost:3001/images', '')
                     // fs.existsSync checks if the image already exists, so if there is already an image with same name
                     // in the images folder
                     // console.log('Set a new profile picture to replace the old one.')
@@ -386,7 +386,7 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
 
             var oldImageData = pictureData.rows[0]['picture_data']
             if (oldImageData !== 'http://localhost:3001/images/default_profilepic.jpeg') {
-                const oldImage = path.resolve(__dirname, '../images') + oldImageData.replace('http://localhost:3000/images', '');
+                const oldImage = path.resolve(__dirname, '../images') + oldImageData.replace('http://localhost:3001/images', '');
 
                 if (fs.existsSync(oldImage)) {
                     fs.unlink(oldImage, (error) => {

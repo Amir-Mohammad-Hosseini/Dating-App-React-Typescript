@@ -21,6 +21,7 @@ import Settings from "../pages/Settings/Settings";
 import Notifications from "../pages/Notifications/Notifications";
 import NotFound from "../pages/Errors/NotFound";
 import ErrorPage from "../pages/Errors/ErrorPage";
+import Pro from "../pages/Pro/Pro";
 
 const router = createBrowserRouter([
   {
@@ -73,6 +74,7 @@ const router = createBrowserRouter([
           { path: "myProfile", element: <MyProfile /> },
           { path: "settings", element: <Settings /> },
           { path: "notifications", element: <Notifications /> },
+          { path: "pro", element: <Pro /> },
         ],
       },
 

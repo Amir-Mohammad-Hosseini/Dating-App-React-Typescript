@@ -48,7 +48,7 @@ module.exports = function (app, pool, bcrypt, transporter, crypto) {
                 to: paramsForMail.email,
                 subject: 'Here is the link to reset your password',
                 html: `<p>Click the link below to reset your password.</p>
-                        <a href="http://localhost:3000/resetpassword/${paramsForMail.username}/${paramsForMail.reset_code}">Link</a>
+                        <a href="http://localhost:3001/resetpassword/${paramsForMail.username}/${paramsForMail.reset_code}">Link</a>
                         <p>- Matcha team</p>`
             }
             await transporter.sendMail(mailOptions, function (error, info) {
