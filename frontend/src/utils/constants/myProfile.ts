@@ -1,3 +1,5 @@
+import type { PhotoItem, PhotoSlot } from "../../pages/MyProfile/MyProfile";
+
 const PRIVACY_ITEMS = [
   {
     key: "showOnDiscover",
@@ -24,5 +26,14 @@ const PRIVACY_ITEMS = [
     defaultChecked: false,
   },
 ] as const;
+
+export const MAX_PHOTOS = 5;
+
+export const createPhotosArray : (photos : PhotoItem[]) => PhotoSlot[] = (photos : PhotoItem[]) => {
+return [
+  ...photos.slice(0 , MAX_PHOTOS),
+  ...Array(Math.max(0 , MAX_PHOTOS - photos.length)).fill(null)
+]
+}
 
 export default PRIVACY_ITEMS

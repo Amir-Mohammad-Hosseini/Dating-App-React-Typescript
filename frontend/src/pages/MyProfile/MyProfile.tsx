@@ -1,9 +1,7 @@
 import { FaTimes } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
-import { IoMdSettings } from "react-icons/io";
 import Navbar from "../../components/Navbar/Navbar";
 import Input from "../../components/Input/Input";
-import { Link } from "react-router";
 import { GENDERS } from "../../utils/constants/onboarding";
 import SelectInput from "../../components/Input/SelectInput";
 import TextareaInput from "../../components/Input/TextareaInput";
@@ -15,6 +13,14 @@ import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
 import InterestChip from "../../components/ProfilePage/InterestChip";
 import AddInterestInput from "../../components/Input/AddInterestInput";
 import { useEffect, useState, type ChangeEvent } from "react";
+import AccountActions from "../../components/ProfilePage/AccountActions";
+import { createPhotosArray, MAX_PHOTOS } from "../../utils/constants/myProfile";
+
+export type PhotoItem =
+  | { kind: "existing"; id: number; url: string }
+  | { kind: "new"; tempId: string; file: File; url: string };
+
+export type PhotoSlot = PhotoItem | null;
 
 const MyProfile = () => {
   const { data: myProfileDatas, isPending: isMyPrifileDatasQueryPending } =
@@ -31,12 +37,27 @@ const MyProfile = () => {
       }),
     );
   const [myInterests, setMyInterests] = useState<string[]>([]);
+  const [myPhotos, setMyPhotos] = useState<PhotoSlot[]>(
+    Array(MAX_PHOTOS).fill(null),
+  );
 
   useEffect(() => {
-    if (myProfileDatas?.tags) {
+    if (myProfileDatas) {
       setMyInterests(myProfileDatas?.tags);
+      const serverPhotos = [
+        myProfileDatas.profile_pic,
+        ...(myProfileDatas.other_pictures ?? []),
+      ]
+        .filter((photo) => photo?.picture_data)
+        .map((photo) => ({
+          kind: "existing" as const,
+          id: photo.picture_id,
+          url: photo.picture_data,
+        }));
+
+      setMyPhotos(createPhotosArray(serverPhotos));
     }
-  }, [myProfileDatas?.tags]);
+  }, [myProfileDatas]);
 
   if (isMyPrifileDatasQueryPending) {
     return <LoadingOverlay show />;
@@ -45,30 +66,43 @@ const MyProfile = () => {
     return <LoadingOverlay show />;
   }
 
-  const {
-    firstname,
-    lastname,
-    gender,
-    biography,
-    profile_pic,
-    other_pictures,
-  } = myProfileDatas;
+  const { firstname, lastname, gender, biography } = myProfileDatas;
 
   const { address } = myLocationDatas;
 
-  const myPhotos = [profile_pic, ...other_pictures];
-
-  const allPhotosArray = Array.from(
-    { length: 6 },
-    (_, index) => myPhotos[index] ?? null,
-  );
-
-  const handleChangeAddPhoto = (event : ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if(!file || !file.type.startsWith("image/")){
-      return
+  const handleChangeAddPhoto = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) {
+      return;
     }
-  }
+    const photoUrl = URL.createObjectURL(file);
+
+    const newPhoto: PhotoItem = {
+      kind: "new",
+      tempId: crypto.randomUUID(),
+      file,
+      url: photoUrl,
+    };
+
+    setMyPhotos((prevPhotos) => {
+      const firstNullItemIndex = prevPhotos.findIndex((item) => !item);
+      if (firstNullItemIndex === -1) {
+        return prevPhotos;
+      }
+      const updatedPhotos = [...prevPhotos];
+      updatedPhotos[firstNullItemIndex] = newPhoto;
+      return updatedPhotos;
+    });
+  };
+
+  const handleDeletePhoto = (photoIndex: number) => {
+    setMyPhotos((prevPhotos) => {
+      const unRemovedPhotos = [...prevPhotos];
+      unRemovedPhotos.splice(photoIndex, 1);
+      unRemovedPhotos.push(null);
+      return unRemovedPhotos;
+    });
+  };
 
   const handleAddInterest = (interest: string) => {
     setMyInterests((prevInterests) => [...prevInterests, interest]);
@@ -79,6 +113,8 @@ const MyProfile = () => {
       [...prevInterests].filter((interest) => interest !== deletedInterest),
     );
   };
+
+  const myPhotosNumber = myPhotos.filter((photo) => photo).length;
 
   return (
     <div className="relative md:flex md:overflow-x-hidden">
@@ -96,23 +132,26 @@ const MyProfile = () => {
         <section className="mx-6 my-10">
           <div className="flex items-center justify-between">
             <h5 className="text-lg font-semibold">Photos</h5>
-            <p className="text-SecondaryColor">{myPhotos.length} of 6 added</p>
+            <p className="text-SecondaryColor">{myPhotosNumber} of 5 added</p>
           </div>
           <div className="my-4 grid w-full grid-cols-3 gap-6">
-            {allPhotosArray.map((photo, index) =>
+            {myPhotos.map((photo, index) =>
               photo ? (
                 <div
-                  key={photo.picture_data}
+                  key={photo.kind === "existing" ? photo.id : photo.tempId}
                   className="relative aspect-square justify-self-center overflow-hidden rounded-2xl"
                 >
-                  <button className="cursor-pointer bg-PrimaryDarkBgColor/70 absolute top-1 right-1 lg:top-2 lg:right-2 flex size-6 lg:size-8 items-center justify-center rounded-full">
+                  <button
+                    onClick={() => handleDeletePhoto(index)}
+                    className="cursor-pointer bg-PrimaryDarkBgColor/70 absolute top-1 right-1 lg:top-2 lg:right-2 flex size-6 lg:size-8 items-center justify-center rounded-full"
+                  >
                     <FaTimes className="size-3 lg:size-4" />
                   </button>
                   <img
                     className="h-full w-full object-cover object-top"
-                    src={photo.picture_data}
+                    src={photo.url}
                   />
-                  {photo.profile_pic === "YES" && (
+                  {(photo.kind === "existing" || index === 0) && (
                     <span className="bg-TertiaryColor text-PrimaryColor absolute bottom-1.5 left-1 rounded-full py-0.5 px-1.5 lg:py-2 lg:px-4 text-xs">
                       Main
                     </span>
@@ -194,11 +233,13 @@ const MyProfile = () => {
         <section className="bg-SecondaryDarkBgColor/80 mx-6 mt-6 rounded-2xl p-6">
           <div className="mb-2 flex items-baseline justify-between">
             <h4 className="text-xl font-semibold">About you</h4>
-            <span className="text-SecondaryColor text-xs">
-              {/* {bio.length}/300 */}
-            </span>
           </div>
-          <TextareaInput text="Bio" name="bio" defaultValue={biography} />
+          <TextareaInput
+            text="Bio"
+            name="bio"
+            defaultValue={biography}
+            extraDescription={`${biography.length}/300`}
+          />
         </section>
 
         {/* Interests */}
@@ -226,30 +267,7 @@ const MyProfile = () => {
         <PrivacyProfileWrapper />
 
         {/* Account */}
-        <section className="bg-SecondaryDarkBgColor/80 mx-6 mt-6 rounded-2xl p-6">
-          <h4 className="mb-3 text-xl font-semibold">Account</h4>
-          <div className="flex flex-col">
-            <Link
-              to="/settings"
-              className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5"
-            >
-              <IoMdSettings />
-              Settings
-            </Link>
-            <button className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5">
-              Change password
-            </button>
-            <button className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5">
-              Blocked accounts
-            </button>
-            <button className="text-TertiaryColor py-2 text-left text-sm transition cursor-pointer">
-              Log out
-            </button>
-            <button className="text-SecondaryColor py-2 text-left text-sm transition hover:text-red-400 cursor-pointer">
-              Delete account
-            </button>
-          </div>
-        </section>
+        <AccountActions />
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import { useOutletContext } from "react-router";
 import { savePhotoIntoIndexedDb } from "../../lib/indexedDB/indexedDB";
 import queryClient from "../../lib/tanstack-query/queryClient";
 
-type Photo = {
+export type Photo = {
   file: File;
   url: string;
 } | null;
