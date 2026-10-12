@@ -1,6 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import type { DiscoverFilters } from "../../utils/constants/discover";
 
 export default interface InputType {
   text: string;
@@ -8,6 +7,7 @@ export default interface InputType {
   type: string;
   isForgotPassword?: boolean;
   placeholder: string;
+  defaultvalue ?:string
   error?: string;
 }
 export interface RangeInputType
@@ -39,6 +39,7 @@ export interface TextareaInputType {
   extraDescription?: string;
   name?: string;
   error?: string;
+  defaultValue : string
 }
 export interface CheckboxInputType {
   text: string;
@@ -63,4 +64,12 @@ export interface BirthdayInputType<T extends FieldValues = FieldValues> {
   name: Path<T>;
   control: Control<T>;
   error?: string;
+}
+
+export interface SelectInputType {
+  
+  text: string;
+  name: string;
+  options: Option[];
+  defaultValue : string
 }

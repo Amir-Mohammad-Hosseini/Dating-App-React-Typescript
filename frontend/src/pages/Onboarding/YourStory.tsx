@@ -58,6 +58,7 @@ const YourStory = () => {
           extraDescription="Optional"
           {...register("biography")}
           error={errors.biography?.message}
+          defaultValue=""
         />
         <CheckboxInput
           text="Interests"

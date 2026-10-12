@@ -1,179 +1,60 @@
-import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
 import Navbar from "../../components/Navbar/Navbar";
 import Input from "../../components/Input/Input";
-import BirthdayInput from "../../components/Input/BirthdayInput";
 import { Link } from "react-router";
-
-const DUMMY_PROFILE_PHOTOS = [
-  "https://images.unsplash.com/photo-1480429370139-e0132c086e2a?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://i.pinimg.com/1200x/97/31/97/973197bf06215263fc7fc59e8bd6e89e.jpg",
-  "https://i.pinimg.com/1200x/bf/4a/fc/bf4afcde4a204a11b6bbff613b6aacb2.jpg",
-  null,
-  null,
-  null,
-];
-
-const GENDER_OPTIONS = ["Woman", "Man", "Non-binary"];
-
-const INTEREST_OPTIONS = [
-  "Hiking",
-  "Coffee",
-  "Photography",
-  "Dogs",
-  "Cooking",
-  "Travel",
-  "Live music",
-  "Yoga",
-];
-
-const PRIVACY_ITEMS = [
-  {
-    key: "showOnDiscover",
-    label: "Show me on Discover",
-    description: "Turn off to pause matching",
-    defaultChecked: true,
-  },
-  {
-    key: "showDistance",
-    label: "Show distance",
-    description: "Instead of exact location",
-    defaultChecked: true,
-  },
-  {
-    key: "showAge",
-    label: "Show age",
-    description: "Visible on your profile card",
-    defaultChecked: true,
-  },
-  {
-    key: "readReceipts",
-    label: "Read receipts",
-    description: "Let matches see when you've read their message",
-    defaultChecked: false,
-  },
-] as const;
-
-// ---- small local helpers (mirror Input/BirthdayInput conventions; split into
-// their own files under components/ the same way BirthdayInput was, if you want) ----
-
-const Select = ({
-  text,
-  name,
-  options,
-}: {
-  text: string;
-  name: string;
-  options: string[];
-}) => (
-  <fieldset className="fieldset text-PrimaryColor">
-    <label className="label" htmlFor={name}>
-      {text}
-    </label>
-    <select id={name} name={name} className="select bg-InputBg w-full">
-      {options.map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
-    </select>
-  </fieldset>
-);
-
-const Textarea = ({
-  value,
-  onChange,
-  maxLength,
-  rows,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  maxLength: number;
-  rows: number;
-}) => (
-  <textarea
-    value={value}
-    maxLength={maxLength}
-    rows={rows}
-    onChange={(e) => onChange(e.target.value)}
-    className="textarea bg-InputBg text-PrimaryColor w-full resize-none"
-  />
-);
-
-const ToggleSwitch = ({
-  label,
-  description,
-  defaultChecked,
-  disabled,
-}: {
-  label: string;
-  description?: string;
-  defaultChecked?: boolean;
-  disabled?: boolean;
-}) => (
-  <div className="flex items-start justify-between gap-4">
-    <div>
-      <p className="text-PrimaryColor text-sm">{label}</p>
-      {description && (
-        <p className="text-SecondaryColor mt-0.5 text-xs">{description}</p>
-      )}
-    </div>
-    <label
-      className={`relative inline-flex shrink-0 cursor-pointer items-center ${
-        disabled ? "pointer-events-none opacity-50" : ""
-      }`}
-    >
-      <input
-        type="checkbox"
-        defaultChecked={defaultChecked}
-        className="peer sr-only"
-      />
-      <span className="bg-SecondaryColor/30 peer-checked:bg-TertiaryColor h-6 w-10 rounded-full transition-colors" />
-      <span className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
-    </label>
-  </div>
-);
-
-const Chip = ({
-  label,
-  selected,
-  onClick,
-}: {
-  label: string;
-  selected: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
-      selected
-        ? "bg-TertiaryColor border-TertiaryColor text-PrimaryColor"
-        : "border-SecondaryColor/30 text-SecondaryColor hover:border-SecondaryColor"
-    }`}
-  >
-    {label}
-  </button>
-);
+import { GENDERS } from "../../utils/constants/onboarding";
+import SelectInput from "../../components/Input/SelectInput";
+import TextareaInput from "../../components/Input/TextareaInput";
+import PrivacyProfileWrapper from "./PrivacyProfileWrapper";
+import { useQuery } from "@tanstack/react-query";
+import myProfileQuery from "../../lib/tanstack-query/GetMe/myProfileQuery";
+import LoadingOverlay from "../../components/Loader/LoadingOverlay";
+import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
+import InterestChip from "../../components/ProfilePage/InterestChip";
 
 const MyProfile = () => {
-  const [bio, setBio] = useState(
-    "Coffee before conversation. Always up for a hike, bad puns welcome, dog tax mandatory.",
-  );
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([
-    "Hiking",
-    "Coffee",
-    "Dogs",
-  ]);
+  const { data: myProfileDatas, isPending: isMyPrifileDatasQueryPending } =
+    useQuery(myProfileQuery());
 
-  const toggleInterest = (interest: string) =>
-    setSelectedInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((i) => i !== interest)
-        : [...prev, interest],
+  const longitude = myProfileDatas?.ip_location?.x;
+  const latitude = myProfileDatas?.ip_location?.y;
+
+  const { data: myLocationDatas, isPending: isMyLocationDatasQueryPending } =
+    useQuery(
+      locationQuery({
+        longitude: longitude ?? 0,
+        latitude: latitude ?? 0,
+      }),
     );
+
+  if (isMyPrifileDatasQueryPending) {
+    return <LoadingOverlay show />;
+  }
+  if (isMyLocationDatasQueryPending) {
+    return <LoadingOverlay show />;
+  }
+
+  console.log(myProfileDatas);
+  const {
+    firstname,
+    lastname,
+    gender,
+    biography,
+    profile_pic,
+    other_pictures,
+    tags,
+  } = myProfileDatas;
+
+  const { address } = myLocationDatas;
+
+  const myPhotos = [profile_pic, ...other_pictures];
+
+  const allPhotosArray = Array.from(
+    { length: 6 },
+    (_, index) => myPhotos[index] ?? null,
+  );
 
   return (
     <div className="relative md:flex md:overflow-x-hidden">
@@ -189,30 +70,27 @@ const MyProfile = () => {
           </div>
         </div>
         <div className="bg-SecondaryColor/40 absolute h-px w-dvw"></div>
-
-        {/* Photos — same as before, just with a key added to fix the map warning */}
         <section className="mx-6 my-10">
           <div className="flex items-center justify-between">
             <h5 className="text-lg font-semibold">Photos</h5>
-            <p className="text-SecondaryColor">4 of 6 added</p>
+            <p className="text-SecondaryColor">{myPhotos.length} of 6 added</p>
           </div>
           <div className="my-4 grid w-full grid-cols-3 gap-6">
-            {DUMMY_PROFILE_PHOTOS.map((photo, index) =>
+            {allPhotosArray.map((photo, index) =>
               photo ? (
                 <div
                   key={photo}
                   className="relative aspect-square justify-self-center overflow-hidden rounded-2xl"
                 >
-                  <button className="bg-PrimaryDarkBgColor/70 absolute top-1 right-1 flex size-6 items-center justify-center rounded-full">
-                    <FaTimes className="size-3" />
+                  <button className="cursor-pointer bg-PrimaryDarkBgColor/70 absolute top-1 right-1 lg:top-2 lg:right-2 flex size-6 lg:size-8 items-center justify-center rounded-full">
+                    <FaTimes className="size-3 lg:size-4" />
                   </button>
                   <img
                     className="h-full w-full object-cover object-top"
-                    src={photo}
-                    alt=""
+                    src={photo.picture_data}
                   />
-                  {index === 0 && (
-                    <span className="bg-TertiaryColor text-PrimaryColor absolute bottom-1.5 left-1 rounded-full px-1 text-xs">
+                  {photo.profile_pic === "YES" && (
+                    <span className="bg-TertiaryColor text-PrimaryColor absolute bottom-1.5 left-1 rounded-full py-0.5 px-1.5 lg:py-2 lg:px-4 text-xs">
                       Main
                     </span>
                   )}
@@ -244,31 +122,36 @@ const MyProfile = () => {
               type="text"
               isForgotPassword={false}
               placeholder=""
+              defaultvalue={firstname}
             />
-            <Select text="Gender" name="gender" options={GENDER_OPTIONS} />
+            <Input
+              text="Last name"
+              name="lastName"
+              type="text"
+              isForgotPassword={false}
+              placeholder=""
+              defaultvalue={lastname}
+            />
           </div>
 
           <div className="mt-4">
-            {/* <BirthdayInput
-              value={{ day: "06", month: "09", year: "2005" }}
-              onChange={() => {}}
-            /> */}
+            {/* <BirthdayInput name="birthday" error="birdhday is invalid"/> */}
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <SelectInput
+              text="Gender"
+              name="gender"
+              options={GENDERS}
+              defaultValue={gender}
+            />
             <Input
               text="Location"
               name="location"
               type="text"
               isForgotPassword={false}
               placeholder="Warsaw, Poland"
-            />
-            <Input
-              text="Work / study"
-              name="work"
-              type="text"
-              isForgotPassword={false}
-              placeholder="Product Designer · MTU"
+              defaultvalue={`${address.city}, ${address.country}`}
             />
           </div>
         </section>
@@ -278,66 +161,36 @@ const MyProfile = () => {
           <div className="mb-2 flex items-baseline justify-between">
             <h4 className="text-xl font-semibold">About you</h4>
             <span className="text-SecondaryColor text-xs">
-              {bio.length}/300
+              {/* {bio.length}/300 */}
             </span>
           </div>
-          <Textarea value={bio} onChange={setBio} maxLength={300} rows={4} />
+          <TextareaInput text="Bio" name="bio" defaultValue={biography} />
         </section>
 
         {/* Interests */}
         <section className="mx-6 mt-6">
           <h4 className="mb-3 text-xl font-semibold">Interests</h4>
           <div className="flex flex-wrap gap-2">
-            {INTEREST_OPTIONS.map((interest) => (
-              <Chip
+            {tags.map((interest : any) => (
+              <InterestChip
                 key={interest}
                 label={interest}
-                selected={selectedInterests.includes(interest)}
-                onClick={() => toggleInterest(interest)}
               />
             ))}
           </div>
         </section>
 
         {/* Privacy */}
-        <section className="bg-SecondaryDarkBgColor/80 mx-6 mt-6 rounded-2xl p-6">
-          <h4 className="text-xl font-semibold">Privacy</h4>
-          <p className="text-SecondaryColor mb-4 text-sm">
-            Control what other people can see.
-          </p>
-
-          <div className="flex flex-col gap-4">
-            {PRIVACY_ITEMS.map((item) => (
-              <ToggleSwitch
-                key={item.key}
-                label={item.label}
-                description={item.description}
-                defaultChecked={item.defaultChecked}
-              />
-            ))}
-
-            <div className="border-SecondaryColor/20 flex items-start justify-between gap-4 border-t pt-4">
-              <div>
-                <p className="flex items-center gap-1.5 text-sm">
-                  Incognito mode
-                  <span className="bg-TertiaryColor/15 text-TertiaryColor rounded px-1.5 py-0.5 text-[10px] font-semibold">
-                    PRO
-                  </span>
-                </p>
-                <p className="text-SecondaryColor mt-0.5 text-xs">
-                  Only appear to people you like first
-                </p>
-              </div>
-              <ToggleSwitch label="" disabled />
-            </div>
-          </div>
-        </section>
+        <PrivacyProfileWrapper />
 
         {/* Account */}
         <section className="bg-SecondaryDarkBgColor/80 mx-6 mt-6 rounded-2xl p-6">
           <h4 className="mb-3 text-xl font-semibold">Account</h4>
           <div className="flex flex-col">
-            <Link to="/settings" className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5">
+            <Link
+              to="/settings"
+              className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5"
+            >
               <IoMdSettings />
               Settings
             </Link>
@@ -347,10 +200,10 @@ const MyProfile = () => {
             <button className="hover:text-PrimaryColor text-SecondaryColor py-2 text-left text-sm transition flex items-center justify-start gap-x-1.5">
               Blocked accounts
             </button>
-            <button className="text-TertiaryColor py-2 text-left text-sm transition">
+            <button className="text-TertiaryColor py-2 text-left text-sm transition cursor-pointer">
               Log out
             </button>
-            <button className="text-SecondaryColor py-2 text-left text-sm transition hover:text-red-400">
+            <button className="text-SecondaryColor py-2 text-left text-sm transition hover:text-red-400 cursor-pointer">
               Delete account
             </button>
           </div>

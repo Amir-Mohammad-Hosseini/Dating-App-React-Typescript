@@ -7,6 +7,7 @@ const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputType>(
     extraDescription = "",
     name = "",
     error = "",
+    defaultValue = "",
     ...props
   }: TextareaInputType , ref) => {
     return (
@@ -18,6 +19,7 @@ const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputType>(
         <textarea
         ref={ref}
           className="textarea w-full rounded-xl resize-none min-h-28 bg-SecondaryDarkBgColor"
+          defaultValue={defaultValue}
           maxLength={300}
           placeholder="Something honest, maybe a little funny."
           name={name}

@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import type InputType from "./types";
 const Input = forwardRef<HTMLInputElement, InputType>(
   (
-    { text, name, type, isForgotPassword, placeholder, error = "" , ...props }: InputType,
+    { text, name, type, isForgotPassword, placeholder, error = "" , defaultvalue = "" , ...props }: InputType,
     ref,
   ) => {
     return (
@@ -23,6 +23,7 @@ const Input = forwardRef<HTMLInputElement, InputType>(
           name={name}
           className="input bg-InputBg w-full"
           placeholder={placeholder}
+          defaultValue={defaultvalue}
           {...props}
         />
         {error && <p className="text-sm text-TertiaryColor">{error}</p>}
