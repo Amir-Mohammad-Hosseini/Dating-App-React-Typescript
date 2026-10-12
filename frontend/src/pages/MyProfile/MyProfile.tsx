@@ -13,6 +13,8 @@ import myProfileQuery from "../../lib/tanstack-query/GetMe/myProfileQuery";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
 import InterestChip from "../../components/ProfilePage/InterestChip";
+import AddInterestInput from "../../components/Input/AddInterestInput";
+import { useEffect, useState, type ChangeEvent } from "react";
 
 const MyProfile = () => {
   const { data: myProfileDatas, isPending: isMyPrifileDatasQueryPending } =
@@ -28,6 +30,13 @@ const MyProfile = () => {
         latitude: latitude ?? 0,
       }),
     );
+  const [myInterests, setMyInterests] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (myProfileDatas?.tags) {
+      setMyInterests(myProfileDatas?.tags);
+    }
+  }, [myProfileDatas?.tags]);
 
   if (isMyPrifileDatasQueryPending) {
     return <LoadingOverlay show />;
@@ -36,7 +45,6 @@ const MyProfile = () => {
     return <LoadingOverlay show />;
   }
 
-  console.log(myProfileDatas);
   const {
     firstname,
     lastname,
@@ -44,7 +52,6 @@ const MyProfile = () => {
     biography,
     profile_pic,
     other_pictures,
-    tags,
   } = myProfileDatas;
 
   const { address } = myLocationDatas;
@@ -56,10 +63,26 @@ const MyProfile = () => {
     (_, index) => myPhotos[index] ?? null,
   );
 
+  const handleChangeAddPhoto = (event : ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if(!file || !file.type.startsWith("image/")){
+      return
+    }
+  }
+
+  const handleAddInterest = (interest: string) => {
+    setMyInterests((prevInterests) => [...prevInterests, interest]);
+  };
+
+  const handleDeleteInterest = (deletedInterest: string) => {
+    setMyInterests((prevInterests) =>
+      [...prevInterests].filter((interest) => interest !== deletedInterest),
+    );
+  };
+
   return (
     <div className="relative md:flex md:overflow-x-hidden">
       <Navbar />
-
       <div className="w-full pb-24 md:pb-10">
         <div className="m-6 h-12">
           <div className="flex items-center justify-between">
@@ -79,7 +102,7 @@ const MyProfile = () => {
             {allPhotosArray.map((photo, index) =>
               photo ? (
                 <div
-                  key={photo}
+                  key={photo.picture_data}
                   className="relative aspect-square justify-self-center overflow-hidden rounded-2xl"
                 >
                   <button className="cursor-pointer bg-PrimaryDarkBgColor/70 absolute top-1 right-1 lg:top-2 lg:right-2 flex size-6 lg:size-8 items-center justify-center rounded-full">
@@ -96,12 +119,23 @@ const MyProfile = () => {
                   )}
                 </div>
               ) : (
-                <div
-                  key={`empty-${index}`}
-                  className="border-SecondaryColor hover:border-PrimaryColor aspect-square w-full justify-self-center rounded-2xl border border-dashed transition flex items-center justify-center"
+                <label
+                  key={index}
+                  htmlFor={`photo-${index + 1}`}
+                  className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-y-1.5 text-SecondaryColor hover:text-PrimaryColor border-SecondaryColor hover:border-PrimaryColor aspect-square justify-self-center rounded-2xl border border-dashed transition"
                 >
-                  <FaPlus className="text-SecondaryColor size-5" />
-                </div>
+                  <FaPlus size={20} />
+
+                  {index === 0 && <p>Add main photo</p>}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id={`photo-${index + 1}`}
+                    onChange={handleChangeAddPhoto}
+                    className="sr-only"
+                  />
+                </label>
               ),
             )}
           </div>
@@ -170,13 +204,21 @@ const MyProfile = () => {
         {/* Interests */}
         <section className="mx-6 mt-6">
           <h4 className="mb-3 text-xl font-semibold">Interests</h4>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((interest : any) => (
-              <InterestChip
-                key={interest}
-                label={interest}
-              />
-            ))}
+          <div className="grid grid-cols-2 items-start">
+            {myInterests.length ? (
+              <div className="flex flex-wrap gap-2">
+                {myInterests.map((interest: any) => (
+                  <InterestChip
+                    key={interest}
+                    label={interest}
+                    onDeleteInterest={handleDeleteInterest}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-SecondaryColor">There is no interest</p>
+            )}
+            <AddInterestInput onAddInterest={handleAddInterest} />
           </div>
         </section>
 
