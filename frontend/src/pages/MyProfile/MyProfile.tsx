@@ -31,7 +31,7 @@ import {
 } from "../../lib/tanstack-query/MyProfile/myProfileMutation";
 import queryClient from "../../lib/tanstack-query/queryClient";
 import { toast } from "sonner";
-import createFormDataFromPhotos from "../../utils/myProfileutils";
+import createFormDataFromPhotos from "./../../utils/myProfileUtils"
 
 export type PhotoItem =
   | { kind: "existing"; id: number; url: string }

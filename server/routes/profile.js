@@ -261,7 +261,7 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
     })
  
     // -----------------------------------------------------------------
-    // NEW: replace the user's whole picture set in ONE request.
+    // Replace the user's whole picture set in ONE request.
     //
     // Request: PUT /api/profile/pictures   (multipart/form-data)
     //   layout : JSON string, the final ordered list of pictures.
@@ -550,10 +550,19 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
         }
     })
  
-    app.post('/api/profile/changepassword', async (request, response) => {
+    // =================================================================
+    // SETTINGS: change password, blocked accounts, log out, delete account
+    // =================================================================
+
+    // CHANGED: login check + input check added (before, a missing session
+    // crashed the request and left it hanging).
+    app.post('/api/profile/changepassword', requireLogin, async (request, response) => {
         const session = request.session
         const { oldPassword, newPassword, confirmPassword } = request.body
  
+        if (typeof oldPassword !== 'string' || typeof newPassword !== 'string' || typeof confirmPassword !== 'string') {
+            return response.status(400).send("Please fill in all the fields.")
+        }
         // We use return response.send because we want the headers to be set max once per scenario,
         // so if we fail the initial change (because of a lacking password, etc.), we can try again.
         if (newPassword !== confirmPassword) {
@@ -563,24 +572,74 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
             return response.send("Please enter a password with a length between 8 and 30 characters, at least one lowercase alphabetical character (a to z), at least one uppercase alphabetical character (A-Z), at least one numeric character (0-9), and at least one special character (!.@#$%^&*)")
         }
  
-        var sql = `SELECT * FROM users WHERE id = $1`;
-        const retrievedPassword = await pool.query(sql, [session.userid])
+        try {
+            var sql = `SELECT password FROM users WHERE id = $1`;
+            const retrievedPassword = await pool.query(sql, [session.userid])
  
-        if (!(await bcrypt.compare(oldPassword, retrievedPassword.rows[0]['password']))) {
-            return response.send("The current password you entered was not correct!")
-        } else {
-            const hash = await bcrypt.hash(newPassword, 10);
-            try {
-                sql = "UPDATE users SET password = $1 WHERE id = $2";
-                await pool.query(sql, [hash, session.userid])
-                return response.send(true)
-            } catch (error) {
-                console.error("Something went wrong when trying to change the password:", error)
-                return response.send("Something went wrong when trying to change your password. Please try again!")
+            if (retrievedPassword.rows.length === 0 ||
+                !(await bcrypt.compare(oldPassword, retrievedPassword.rows[0]['password']))) {
+                return response.send("The current password you entered was not correct!")
             }
+            const hash = await bcrypt.hash(newPassword, 10);
+            sql = "UPDATE users SET password = $1 WHERE id = $2";
+            await pool.query(sql, [hash, session.userid])
+            return response.send(true)
+        } catch (error) {
+            console.error("Something went wrong when trying to change the password:", error)
+            return response.send("Something went wrong when trying to change your password. Please try again!")
         }
     })
- 
+
+    // NEW: list of the users I have blocked (with name and picture).
+    app.get('/api/profile/blocked', requireLogin, async (request, response) => {
+        try {
+            const { rows } = await pool.query(
+                `SELECT users.id, users.username, users.firstname, user_pictures.picture_data AS picture
+                FROM blocks
+                INNER JOIN users ON users.id = blocks.target_id
+                LEFT JOIN user_pictures ON user_pictures.user_id = users.id
+                    AND user_pictures.profile_pic = 'YES'
+                WHERE blocks.blocker_id = $1
+                ORDER BY users.username ASC`,
+                [request.session.userid])
+            response.send(rows)
+        } catch (error) {
+            console.error(error)
+            response.status(500).send('Failed to load blocked accounts.')
+        }
+    })
+
+    // NEW: remove a block. (Block deleted the likes and the match, so
+    // unblocking does NOT bring them back.)
+    app.delete('/api/profile/unblock/:id', requireLogin, async (request, response) => {
+        try {
+            await pool.query(
+                `DELETE FROM blocks WHERE blocker_id = $1 AND target_id = $2`,
+                [request.session.userid, request.params.id])
+            response.send(true)
+        } catch (error) {
+            console.error(error)
+            response.status(500).send('Failed to unblock user.')
+        }
+    })
+
+    // NEW: log out. Destroys the session and clears the cookie.
+    // (If you already have a logout endpoint in your login file, you can use
+    // that one instead and delete this.)
+    app.post('/api/profile/logout', requireLogin, (request, response) => {
+        const userId = request.session.userid
+        request.session.destroy((error) => {
+            if (error) {
+                console.error(error)
+                return response.status(500).send('Failed to log out.')
+            }
+            response.clearCookie('connect.sid') // change if your session cookie has another name
+            pool.query(`UPDATE users SET last_connection = NOW()::timestamp WHERE id = $1`, [userId])
+                .catch(console.error)
+            response.send(true)
+        })
+    })
+
     app.get('/api/profile/notifications', async (request, response) => {
         const session = request.session
  
@@ -666,30 +725,69 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
         }
     })
  
-    app.delete('/api/profile/deleteuser', (request, response) => {
-        const session = request.session
- 
-        if (session.userid) {
-            try {
-                var sql = `DELETE FROM users WHERE id = $1`
-                pool.query(sql, [session.userid])
-                var sql = `DELETE FROM likes WHERE target_id = $1`
-                pool.query(sql, [session.userid])
-                var sql = `DELETE FROM blocks WHERE target_id = $1`
-                pool.query(sql, [session.userid])
-                var sql = `DELETE FROM watches WHERE target_id = $1`
-                pool.query(sql, [session.userid])
-                var sql = `DELETE FROM reports WHERE target_id = $1`
-                pool.query(sql, [session.userid])
-                var sql = `DELETE FROM connections WHERE user2_id = $1`
-                pool.query(sql, [session.userid])
-                var sql = `DELETE FROM notifications WHERE sender_id = $1`
-                pool.query(sql, [session.userid])
-                response.send(true)
-            } catch (error) {
-                // console.log(error)
-                response.send("Failed to delete user!")
-            }
+    // CHANGED: the old version only deleted some rows, did not wait for the
+    // queries, left the session alive and left the picture files on disk.
+    // Now: password confirmation + one transaction + files removed after
+    // COMMIT + session destroyed.
+    // Request body: { "password": "..." }
+    app.delete('/api/profile/deleteuser', requireLogin, async (request, response) => {
+        const userId = request.session.userid
+        const password = request.body && request.body.password
+
+        if (typeof password !== 'string' || password.length === 0)
+            return response.status(400).send('Password is required.')
+
+        const client = await pool.connect()
+        let picturesToDelete = []
+        try {
+            const { rows: userRows } = await client.query(
+                `SELECT password FROM users WHERE id = $1`, [userId])
+            if (userRows.length === 0 || !(await bcrypt.compare(password, userRows[0].password)))
+                return response.status(403).send('The password you entered was not correct!')
+
+            await client.query('BEGIN')
+
+            const { rows: pictures } = await client.query(
+                `SELECT picture_data FROM user_pictures WHERE user_id = $1`, [userId])
+            picturesToDelete = pictures.map(p => p.picture_data)
+
+            await client.query(
+                `DELETE FROM chat WHERE connection_id IN
+                (SELECT connection_id FROM connections WHERE user1_id = $1 OR user2_id = $1)`, [userId])
+            await client.query(`DELETE FROM connections WHERE user1_id = $1 OR user2_id = $1`, [userId])
+            await client.query(`DELETE FROM likes WHERE liker_id = $1 OR target_id = $1`, [userId])
+            await client.query(`DELETE FROM blocks WHERE blocker_id = $1 OR target_id = $1`, [userId])
+            await client.query(`DELETE FROM watches WHERE watcher_id = $1 OR target_id = $1`, [userId])
+            await client.query(`DELETE FROM reports WHERE sender_id = $1 OR target_id = $1`, [userId])
+            await client.query(`DELETE FROM notifications WHERE user_id = $1 OR sender_id = $1`, [userId])
+            await client.query(`DELETE FROM password_reset WHERE user_id = $1`, [userId])
+            await client.query(`UPDATE tags SET tagged_users = array_remove(tagged_users, $1)`, [userId])
+            await client.query(`DELETE FROM tags WHERE cardinality(tagged_users) = 0`)
+            await client.query(`DELETE FROM user_pictures WHERE user_id = $1`, [userId])
+            await client.query(`DELETE FROM fame_rates WHERE user_id = $1`, [userId])
+            await client.query(`DELETE FROM user_settings WHERE user_id = $1`, [userId])
+            await client.query(`DELETE FROM users WHERE id = $1`, [userId])
+
+            await client.query('COMMIT')
+        } catch (error) {
+            await client.query('ROLLBACK').catch(() => { })
+            // If a table of yours has a foreign key to users that is not in the
+            // list above, the error shows up here: add that table to the list.
+            console.error(error)
+            return response.status(500).send('Failed to delete account.')
+        } finally {
+            client.release()
         }
+
+        // Delete the picture files only after the COMMIT.
+        for (const url of picturesToDelete) {
+            if (!url || url.endsWith('default_profilepic.jpeg')) continue
+            fs.unlink(path.join(IMAGES_DIR, path.basename(url)), () => { })
+        }
+
+        request.session.destroy(() => {
+            response.clearCookie('connect.sid') // change if your session cookie has another name
+            response.send(true)
+        })
     })
 }
