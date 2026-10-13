@@ -2,11 +2,11 @@ import { FaTimes } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import Navbar from "../../components/Navbar/Navbar";
 import Input from "../../components/Input/Input";
-import { GENDERS } from "../../utils/constants/onboarding";
+import { GENDERS, INTERESTED_IN } from "../../utils/constants/onboarding";
 import SelectInput from "../../components/Input/SelectInput";
 import TextareaInput from "../../components/Input/TextareaInput";
 import PrivacyProfileWrapper from "./PrivacyProfileWrapper";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import myProfileQuery from "../../lib/tanstack-query/GetMe/myProfileQuery";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
@@ -15,6 +15,23 @@ import AddInterestInput from "../../components/Input/AddInterestInput";
 import { useEffect, useState, type ChangeEvent } from "react";
 import AccountActions from "../../components/ProfilePage/AccountActions";
 import { createPhotosArray, MAX_PHOTOS } from "../../utils/constants/myProfile";
+import { useForm } from "react-hook-form";
+import BirthdayInput from "../../components/Input/BirthdayInput";
+import type {
+  MyProfileFormType,
+  myProfileSchemaType,
+} from "../../lib/zod/MyProfile/myProfileSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import myProfileSchema from "../../lib/zod/MyProfile/myProfileSchema";
+import Button from "../../components/Button/Button";
+import Spinner from "../../components/Loader/Spinner";
+import {
+  myProfileFormMutation,
+  myProfilePhotosMutation,
+} from "../../lib/tanstack-query/MyProfile/myProfileMutation";
+import queryClient from "../../lib/tanstack-query/queryClient";
+import { toast } from "sonner";
+import createFormDataFromPhotos from "../../utils/myProfileutils";
 
 export type PhotoItem =
   | { kind: "existing"; id: number; url: string }
@@ -23,7 +40,16 @@ export type PhotoItem =
 export type PhotoSlot = PhotoItem | null;
 
 const MyProfile = () => {
-  const { data: myProfileDatas, isPending: isMyPrifileDatasQueryPending } =
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<myProfileSchemaType>({
+    resolver: zodResolver(myProfileSchema),
+  });
+
+  const { data: myProfileDatas, isPending: isMyProfileDatasQueryPending } =
     useQuery(myProfileQuery());
 
   const longitude = myProfileDatas?.ip_location?.x;
@@ -40,6 +66,15 @@ const MyProfile = () => {
   const [myPhotos, setMyPhotos] = useState<PhotoSlot[]>(
     Array(MAX_PHOTOS).fill(null),
   );
+
+  const {
+    mutateAsync: myProfilePhotosMutate,
+    isPending: isMyProfilePhotosMutatePending,
+  } = useMutation(myProfilePhotosMutation());
+  const {
+    mutateAsync: myProfileFormMutate,
+    isPending: isMyProfileFormMutatePending,
+  } = useMutation(myProfileFormMutation());
 
   useEffect(() => {
     if (myProfileDatas) {
@@ -59,16 +94,59 @@ const MyProfile = () => {
     }
   }, [myProfileDatas]);
 
-  if (isMyPrifileDatasQueryPending) {
-    return <LoadingOverlay show />;
-  }
-  if (isMyLocationDatasQueryPending) {
+  const isMyProfileQueryPending =
+    isMyProfileDatasQueryPending || isMyLocationDatasQueryPending;
+
+  const isMyProfileMutatePending =
+    isMyProfilePhotosMutatePending || isMyProfileFormMutatePending;
+
+  if (isMyProfileQueryPending) {
     return <LoadingOverlay show />;
   }
 
-  const { firstname, lastname, gender, biography } = myProfileDatas;
+  const { firstname, lastname, gender, biography, sexual_pref } =
+    myProfileDatas;
 
   const { address } = myLocationDatas;
+
+  const onValid = async (data: myProfileSchemaType) => {
+    const updatedMyPrfileForm: MyProfileFormType = {
+      ...data,
+      tags: myInterests,
+      username: myProfileDatas.username,
+      email: myProfileDatas.email,
+      gps_lon: myProfileDatas.ip_location.x,
+      gps_lat: myProfileDatas.ip_location.y,
+    };
+
+    const photosFormData = createFormDataFromPhotos(myPhotos);
+
+    try {
+      const [profileFormResult, profilePhotosResult] = await Promise.allSettled(
+        [
+          myProfileFormMutate(updatedMyPrfileForm),
+          myProfilePhotosMutate(photosFormData),
+        ],
+      );
+
+      const isProfileFormResultSuccess =
+        profileFormResult.status === "fulfilled";
+      const isProfilePhotosResultSuccess =
+        profilePhotosResult.status === "fulfilled";
+
+      if (isProfileFormResultSuccess || isProfilePhotosResultSuccess) {
+        await queryClient.invalidateQueries({ queryKey: ["myProfile"] });
+      }
+      if (isProfileFormResultSuccess && isProfilePhotosResultSuccess) {
+        toast.success("Profile updated successfully");
+      } else {
+        toast.error("Some updates failed");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+      console.log(error)
+    }
+  };
 
   const handleChangeAddPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -116,16 +194,22 @@ const MyProfile = () => {
 
   const myPhotosNumber = myPhotos.filter((photo) => photo).length;
 
+  console.log("MY PROFILE DATAS GOT FROM SERVER", myProfileDatas);
+
   return (
     <div className="relative md:flex md:overflow-x-hidden">
       <Navbar />
-      <div className="w-full pb-24 md:pb-10">
+      <form onSubmit={handleSubmit(onValid)} className="w-full pb-24 md:pb-10">
         <div className="m-6 h-12">
           <div className="flex items-center justify-between">
             <h1 className="font-TitleFont text-3xl">Edit profile</h1>
-            <button className="bg-TertiaryColor rounded-full px-4 py-1">
-              Save changes
-            </button>
+            <Button
+              text="Save changes"
+              type="submit"
+              className="bg-TertiaryColor rounded-full px-4 py-1 cursor-pointer shadow-xl w-fit"
+              isSubmitting={isMyProfileMutatePending}
+              submittingText={<Spinner />}
+            />
           </div>
         </div>
         <div className="bg-SecondaryColor/40 absolute h-px w-dvw"></div>
@@ -142,6 +226,7 @@ const MyProfile = () => {
                   className="relative aspect-square justify-self-center overflow-hidden rounded-2xl"
                 >
                   <button
+                    type="button"
                     onClick={() => handleDeletePhoto(index)}
                     className="cursor-pointer bg-PrimaryDarkBgColor/70 absolute top-1 right-1 lg:top-2 lg:right-2 flex size-6 lg:size-8 items-center justify-center rounded-full"
                   >
@@ -151,7 +236,7 @@ const MyProfile = () => {
                     className="h-full w-full object-cover object-top"
                     src={photo.url}
                   />
-                  {(photo.kind === "existing" || index === 0) && (
+                  {index === 0 && (
                     <span className="bg-TertiaryColor text-PrimaryColor absolute bottom-1.5 left-1 rounded-full py-0.5 px-1.5 lg:py-2 lg:px-4 text-xs">
                       Main
                     </span>
@@ -191,40 +276,55 @@ const MyProfile = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               text="First name"
-              name="firstName"
               type="text"
               isForgotPassword={false}
               placeholder=""
               defaultvalue={firstname}
+              {...register("firstname")}
+              error={errors.firstname?.message}
             />
             <Input
               text="Last name"
-              name="lastName"
               type="text"
               isForgotPassword={false}
               placeholder=""
               defaultvalue={lastname}
+              {...register("lastname")}
+              error={errors.lastname?.message}
             />
           </div>
 
           <div className="mt-4">
-            {/* <BirthdayInput name="birthday" error="birdhday is invalid"/> */}
+            <BirthdayInput
+              error={errors.age?.message}
+              name="age"
+              control={control}
+            />
+            <SelectInput
+              text="Gender"
+              options={GENDERS}
+              defaultValue={gender}
+              {...register("gender")}
+              error={errors.gender?.message}
+            />
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectInput
-              text="Gender"
-              name="gender"
-              options={GENDERS}
-              defaultValue={gender}
+              text="Sexual Pref"
+              options={INTERESTED_IN}
+              defaultValue={sexual_pref}
+              {...register("sexual_pref")}
+              error={errors.sexual_pref?.message}
             />
             <Input
               text="Location"
-              name="location"
               type="text"
               isForgotPassword={false}
               placeholder="Warsaw, Poland"
               defaultvalue={`${address.city}, ${address.country}`}
+              {...register("location")}
+              error={errors.location?.message}
             />
           </div>
         </section>
@@ -236,9 +336,10 @@ const MyProfile = () => {
           </div>
           <TextareaInput
             text="Bio"
-            name="bio"
             defaultValue={biography}
-            extraDescription={`${biography.length}/300`}
+            // extraDescription={`${biography.length}/300`}
+            {...register("biography")}
+            error={errors.biography?.message}
           />
         </section>
 
@@ -268,7 +369,7 @@ const MyProfile = () => {
 
         {/* Account */}
         <AccountActions />
-      </div>
+      </form>
     </div>
   );
 };
