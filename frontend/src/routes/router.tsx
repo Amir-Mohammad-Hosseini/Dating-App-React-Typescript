@@ -22,6 +22,7 @@ import Notifications from "../pages/Notifications/Notifications";
 import NotFound from "../pages/Errors/NotFound";
 import ErrorPage from "../pages/Errors/ErrorPage";
 import Pro from "../pages/Pro/Pro";
+import BlockedAccounts from "../pages/MyProfile/BlockedAccounts";
 
 const router = createBrowserRouter([
   {
@@ -73,6 +74,7 @@ const router = createBrowserRouter([
           { path: "users/:userId", element: <ProfileView /> },
           { path: "myProfile", element: <MyProfile /> },
           { path: "settings", element: <Settings /> },
+          { path: "settings/blocked", element: <BlockedAccounts /> },
           { path: "notifications", element: <Notifications /> },
           { path: "pro", element: <Pro /> },
         ],

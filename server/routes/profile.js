@@ -761,6 +761,7 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
             await client.query(`DELETE FROM reports WHERE sender_id = $1 OR target_id = $1`, [userId])
             await client.query(`DELETE FROM notifications WHERE user_id = $1 OR sender_id = $1`, [userId])
             await client.query(`DELETE FROM password_reset WHERE user_id = $1`, [userId])
+            await client.query(`DELETE FROM email_verify WHERE user_id = $1`, [userId])
             await client.query(`UPDATE tags SET tagged_users = array_remove(tagged_users, $1)`, [userId])
             await client.query(`DELETE FROM tags WHERE cardinality(tagged_users) = 0`)
             await client.query(`DELETE FROM user_pictures WHERE user_id = $1`, [userId])
