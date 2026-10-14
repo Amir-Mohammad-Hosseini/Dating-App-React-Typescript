@@ -21,8 +21,8 @@ export const confirmAction = async ({
     showCancelButton: true,
     confirmButtonText,
     cancelButtonText: 'Cancel',
-    confirmButtonColor: '#1e40af', // primary
-    cancelButtonColor: '#dc2626', // error
+    confirmButtonColor: '#1e40af',
+    cancelButtonColor: '#dc2626',
     reverseButtons: true,
     focusCancel: true,
   });
