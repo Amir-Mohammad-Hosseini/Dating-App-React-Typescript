@@ -10,13 +10,18 @@ export interface SettingAccountActionButtonType {
   children: ReactNode;
   Icon: IconType;
   className?: string;
+  onClickAccountAction: () => void;
+  isSubmitting: boolean;
+  submittingContent: ReactNode;
 }
 
 export interface SettingClickableButtonType {
   children: ReactNode;
   text: string;
-  Icon: IconType | null
+  Icon: IconType | null;
   onClick: () => void;
+  isSubmitting ?:boolean
+  submittingContent ?: ReactNode
 }
 
 export interface SettingSwitchButtonTypeType {

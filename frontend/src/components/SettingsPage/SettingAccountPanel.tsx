@@ -7,8 +7,10 @@ import {
   groupClass,
 } from "../../utils/constants/settings";
 import SettingClickableButton from "./SettingClickableButton";
+import useChangePasswordProfile from "../../hooks/AccountActions/useChangePasswordProfile";
 
 const SettingAccountPanel = () => {
+    const  { isChangePasswordMutatePending, handleShowChangePasswordSwal } = useChangePasswordProfile()
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-3.5 rounded-2xl border border-SecondaryColor/10 bg-SecondaryDarkBgColor/60 p-4">
@@ -45,7 +47,7 @@ const SettingAccountPanel = () => {
               </span>
             </span>
           </SettingClickableButton>
-          <SettingClickableButton text="Change password" onClick={() => {}} Icon={LuLock} children={null} />
+          <SettingClickableButton text="Change password" onClick={handleShowChangePasswordSwal} isSubmitting={isChangePasswordMutatePending} Icon={LuLock} children={null} />
         </div>
       </div>
     </div>

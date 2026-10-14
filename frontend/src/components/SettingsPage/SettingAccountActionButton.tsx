@@ -6,18 +6,23 @@ const SettingAccountActionButton = ({
   children,
   Icon,
   className = "",
+  isSubmitting ,
+  submittingContent,
+  onClickAccountAction
 }: SettingAccountActionButtonType) => {
   return (
     <button
       type="button"
-      onClick={() => {
-        /* اینجا به تابع خروج از حساب وصلش کن */
-      }}
+      onClick={onClickAccountAction}
       className={`${rowClass} ${className}`}
+      disabled={isSubmitting}
     >
+      {
+        isSubmitting ? submittingContent : 
       <span className={iconBoxClass}>
         <Icon size={16} />
       </span>
+      }
       {children}
       <LuChevronRight size={16} className="text-SecondaryColor/60" />
     </button>
