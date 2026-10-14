@@ -4,12 +4,20 @@ import { confirmAction } from "../../lib/sweetalert2/confirmAction";
 import { useMutation } from "@tanstack/react-query";
 import logoutMutation from "../../lib/tanstack-query/MyProfile/AccountActions/logoutMutation";
 import TextButton from "../Button/TextButton";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
+import deleteAccountMutation from "../../lib/tanstack-query/MyProfile/AccountActions/deleteAccountMutation";
 
 const AccountActions = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const { mutate: logoutMutate, isPending: isLogoutMutatePending } =
     useMutation(logoutMutation(navigate));
+  const {
+    mutateAsync: deleteAccountMutate,
+    isPending: isDeleteAccountMutatePending,
+  } = useMutation(deleteAccountMutation(navigate));
+
   const handleShowChangePasswordSwal = () => {};
 
   const handleShowLogoutSwal = async () => {
@@ -17,15 +25,35 @@ const AccountActions = () => {
       title: "Log out?",
       text: "You will need to sign in again to access your account.",
       confirmButtonText: "Log Out",
-      icon: "question",
+      icon: "warning",
     });
 
     if (isConfirmed) {
-      logoutMutate()
+      logoutMutate();
     }
   };
 
-  const handleShowDeleteAccountSwal = () => {};
+  const handleShowDeleteAccountSwal = async () => {
+    const isConfirmed = await confirmAction({
+      title: "Delete account?",
+      text: "You will need to create a new account later.",
+      confirmButtonText: "Delete account",
+      confirmButtonColor: "#dc2626",
+      icon: "warning",
+      input: "password",
+      inputPlaceholder: "Your password",
+      preConfirm: async (passwordValue: string) => {
+        if (!passwordValue.trim().length) {
+          return toast.error("Password is invalid");
+        }
+        try {
+          await deleteAccountMutate(passwordValue);
+        } catch (error) {
+          return Swal.showValidationMessage("Wrong password");
+        }
+      },
+    });
+  };
 
   return (
     <section className="bg-SecondaryDarkBgColor/80 mx-6 mt-6 rounded-2xl p-6">
