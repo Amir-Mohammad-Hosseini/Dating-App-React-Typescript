@@ -15,9 +15,6 @@ const deleteAccountMutation = (navigate: NavigateFunction) => {
       });
       queryClient.clear();
     },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
   };
 };
 

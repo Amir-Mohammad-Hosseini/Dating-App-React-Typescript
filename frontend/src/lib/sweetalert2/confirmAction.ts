@@ -1,4 +1,8 @@
-import Swal, { type SweetAlertIcon, type SweetAlertInput, type SweetAlertOptions } from 'sweetalert2';
+import Swal, {
+  type SweetAlertIcon,
+  type SweetAlertInput,
+  type SweetAlertOptions,
+} from "sweetalert2";
 
 type ConfirmActionProps = {
   title?: string;
@@ -8,16 +12,20 @@ type ConfirmActionProps = {
   confirmButtonColor?: string;
   input?: SweetAlertInput;
   inputPlaceholder?: string;
-  preConfirm?: SweetAlertOptions['preConfirm'];
+  html?: string;
+  didOpen?: SweetAlertOptions["didOpen"];
+  preConfirm?: SweetAlertOptions["preConfirm"];
 };
 
 export const confirmAction = async ({
-  title = 'Are you sure?',
-  text = '',
-  confirmButtonText = 'Yes, confirm',
-  icon = 'warning',
-  confirmButtonColor = '#1e40af',
+  title = "Are you sure?",
+  text = "",
+  confirmButtonText = "Yes, confirm",
+  icon = "warning",
+  confirmButtonColor = "#1e40af",
   input,
+  html,
+  didOpen,
   inputPlaceholder,
   preConfirm,
 }: ConfirmActionProps) => {
@@ -26,15 +34,17 @@ export const confirmAction = async ({
     text,
     icon,
     input,
+    html,
+    didOpen,
     inputPlaceholder,
     preConfirm,
     showCancelButton: true,
     confirmButtonText,
-    cancelButtonText: 'Cancel',
+    cancelButtonText: "Cancel",
     confirmButtonColor,
-    cancelButtonColor: '#dc2626',
+    cancelButtonColor: "#dc2626",
     reverseButtons: true,
-    focusCancel: !input,
+  focusCancel: !input && !html,
     showLoaderOnConfirm: !!preConfirm,
     allowOutsideClick: () => !Swal.isLoading(),
   });
