@@ -8,7 +8,7 @@ import { useEffect, useState, type SubmitEventHandler } from "react";
 import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
 import Spinner from "../../components/Loader/Spinner";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
-import useOnboardingStep from "../../hooks/useOnboardingStep";
+import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
 import { useOutletContext } from "react-router";
 
 const YourLocation = () => {

@@ -9,15 +9,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import yourStorySchema, {
   type YourStoryFormType,
 } from "../../lib/zod/Onboarding/extendSchemas/yourStorySchema";
-import useOnboardingStep from "../../hooks/useOnboardingStep";
+import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
 
 const YourStory = () => {
-  const {biography , tags} = useAppStore((state) => state.onboardingDatas);
+  const { biography, tags } = useAppStore((state) => state.onboardingDatas);
   const setField = useAppStore((state) => state.setField);
 
-  const [interests, setInterests] = useState(tags.length ? tags : DEFAULT_INTERESTS);
+  const [interests, setInterests] = useState(
+    tags.length ? tags : DEFAULT_INTERESTS,
+  );
 
-  const {goNext} = useOnboardingStep()
+  const { goNext } = useOnboardingStep();
 
   const {
     register,
@@ -41,7 +43,7 @@ const YourStory = () => {
 
       setField(typedKey, yourStoryObj[typedKey]);
     });
-    goNext()
+    goNext();
   };
 
   return (
@@ -52,7 +54,11 @@ const YourStory = () => {
           A line or two about you, then the things you’re into.
         </p>
       </div>
-      <form id="onboarding-form" className="w-full space-y-4" onSubmit={handleSubmit(onValid)}>
+      <form
+        id="onboarding-form"
+        className="w-full space-y-4"
+        onSubmit={handleSubmit(onValid)}
+      >
         <TextareaInput
           text="Bio"
           extraDescription="Optional"

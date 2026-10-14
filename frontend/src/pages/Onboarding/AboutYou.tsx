@@ -6,7 +6,7 @@ import type { AboutYouFormType } from "../../lib/zod/Onboarding/extendSchemas/ab
 import { zodResolver } from "@hookform/resolvers/zod";
 import aboutYouSchema from "../../lib/zod/Onboarding/extendSchemas/aboutYouSchema";
 import useAppStore from "../../lib/zustand/store";
-import useOnboardingStep from "../../hooks/useOnboardingStep";
+import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
 
 const AboutYou = () => {
   const { gender, sexual_pref } = useAppStore((state) => state.onboardingDatas);

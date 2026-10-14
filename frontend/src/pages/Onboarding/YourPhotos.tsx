@@ -1,4 +1,9 @@
-import { useEffect, useState, type ChangeEvent, type SubmitEventHandler } from "react";
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type SubmitEventHandler,
+} from "react";
 import { FaPlus } from "react-icons/fa";
 import { FaImage } from "react-icons/fa6";
 import { FaTimes } from "react-icons/fa";
@@ -7,7 +12,7 @@ import {
   mainPhotoMutation,
   otherPhotosMutation,
 } from "../../lib/tanstack-query/Onboarding/yourPhotosMutation";
-import useOnboardingStep from "../../hooks/useOnboardingStep";
+import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
 import { useOutletContext } from "react-router";
 import { savePhotoIntoIndexedDb } from "../../lib/indexedDB/indexedDB";
 import queryClient from "../../lib/tanstack-query/queryClient";
@@ -66,8 +71,10 @@ const YourPhotos = () => {
     });
   };
 
-  const handleSubmitPhotos: SubmitEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault()
+  const handleSubmitPhotos: SubmitEventHandler<HTMLFormElement> = async (
+    event,
+  ) => {
+    event.preventDefault();
     if (photos[0]) {
       mainPhotoMutate(photos[0].file);
     }
@@ -78,8 +85,8 @@ const YourPhotos = () => {
       .map((photo) => photo.file);
     otherPhotosMutate(otherFiles);
 
-      await savePhotoIntoIndexedDb(photos[0]!.file)
-      queryClient.invalidateQueries({queryKey : ["onboarding-photo"]})
+    await savePhotoIntoIndexedDb(photos[0]!.file);
+    queryClient.invalidateQueries({ queryKey: ["onboarding-photo"] });
 
     goNext();
   };

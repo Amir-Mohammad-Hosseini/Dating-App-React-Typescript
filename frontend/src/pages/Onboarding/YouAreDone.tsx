@@ -3,7 +3,7 @@ import useAppStore from "../../lib/zustand/store";
 import { useMutation } from "@tanstack/react-query";
 import doneMutation from "../../lib/tanstack-query/Onboarding/doneMutation";
 import { useNavigate, useOutletContext } from "react-router";
-import useOnboardingStep from "../../hooks/useOnboardingStep";
+import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
 import { useEffect, type SubmitEventHandler } from "react";
 import { deletePhotoFromIndexedDb } from "../../lib/indexedDB/indexedDB";
 const YouAreDone = () => {

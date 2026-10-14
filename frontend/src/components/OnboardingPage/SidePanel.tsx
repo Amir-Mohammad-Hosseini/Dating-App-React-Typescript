@@ -1,7 +1,7 @@
 import { GoCheck } from "react-icons/go";
 import Logo from "../../components/Logo/Logo";
 import useAppStore from "../../lib/zustand/store";
-import useOnboardingStep from "../../hooks/useOnboardingStep";
+import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
 import { useQuery } from "@tanstack/react-query";
 import sidePanelQuery from "../../lib/tanstack-query/Onboarding/sidePanelQuery";
 import { useEffect } from "react";
@@ -101,7 +101,11 @@ const SidePanel = () => {
         <div className="flex gap-4 rounded-2xl border border-SecondaryColor/20 bg-white/5 p-3 backdrop-blur-sm">
           <div className="grid size-20 shrink-0 place-items-center rounded-xl overflow-hidden bg-[radial-gradient(circle_at_20%_90%,rgba(245,67,90,0.6),rgba(45,46,51,1)_60%)] font-TitleFont text-4xl text-white/20">
             {photoUrl ? (
-              <img src={photoUrl} alt="" className="w-full h-full object-cover object-top" />
+              <img
+                src={photoUrl}
+                alt=""
+                className="w-full h-full object-cover object-top"
+              />
             ) : (
               firstname?.slice(0, 1).toUpperCase()
             )}

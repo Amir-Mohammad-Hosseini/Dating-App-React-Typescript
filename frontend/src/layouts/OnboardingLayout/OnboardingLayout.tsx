@@ -5,7 +5,7 @@ import SidePanel from "../../components/OnboardingPage/SidePanel";
 import StepBar from "../../components/OnboardingPage/StepBar";
 import useAppStore from "../../lib/zustand/store";
 import { confirmAction } from "../../lib/sweetalert2/confirmAction";
-import useOnboardingStep from "../../hooks/useOnboardingStep";
+import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
 import Button from "../../components/Button/Button";
 import { useState } from "react";
 import Spinner from "../../components/Loader/Spinner";
@@ -27,7 +27,7 @@ const OnboardingLayout = () => {
 
     if (isConfirmed) {
       logoutUser();
-      reset()
+      reset();
     }
   };
 
@@ -90,7 +90,7 @@ const OnboardingLayout = () => {
             {/* Step content */}
             <div className="flex-1 px-6 md:px-10 lg:flex lg:flex-col lg:justify-center lg:px-12">
               <div className="mx-auto w-full lg:max-w-100">
-                <Outlet context={{setIsSubmitting}} />
+                <Outlet context={{ setIsSubmitting }} />
               </div>
             </div>
 
