@@ -6,15 +6,8 @@ import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import matchesQuery from "../../lib/tanstack-query/Matches/matchesQuery";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
-
-type MatchPerson = {
-  age: number;
-  connection_id: number;
-  firstname: string;
-  picture_data: string;
-  user_id: number;
-  username: string;
-};
+import MatchPerosn from "../../components/MatchesPage/MatchPerosn";
+import type MatchPersonType from "../../components/MatchesPage/types";
 
 const Matches = () => {
   const { data: matchesPeople, isPending } = useQuery(matchesQuery());
@@ -23,7 +16,7 @@ const Matches = () => {
     return <LoadingOverlay show />;
   }
 
-  console.log(matchesPeople.slice(0 ,1))
+  console.log(matchesPeople);
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
       <Navbar />
@@ -116,41 +109,8 @@ const Matches = () => {
           </h2>
 
           <ul className="grid grid-cols-3 gap-x-4 gap-y-8 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {matchesPeople.slice(0, 20).map((match: MatchPerson) => (
-              <li key={match.user_id} className="flex justify-center">
-                <Link
-                  to={`/messages/${match.connection_id}`}
-                  className="group flex cursor-pointer flex-col items-center gap-2 text-center"
-                >
-                  <span className="relative">
-                    <span className="grid size-20 place-items-center rounded-full font-TitleFont text-2xl overflow-hidden font-semibold text-white ring-2 ring-transparent transition group-hover:ring-TertiaryColor group-focus-visible:ring-TertiaryColor md:size-24 xl:size-30 xl:text-3xl">
-                      {match.picture_data ? (
-                        <img
-                          src={match.picture_data}
-                          alt={match.firstname}
-                          className="w-full h-full"
-                        />
-                      ) : (
-                        <span>{match.firstname.slice(0, 1).toUpperCase()}</span>
-                      )}
-                    </span>
-                    {/* {match?.status === "Active now" && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute right-0 bottom-1 size-4 rounded-full border-[3px] border-PrimaryDarkBgColor bg-OnlineBgColor lg:bottom-2 lg:right-1 lg:size-6"
-                      />
-                    )} */}
-                  </span>
-                  <span>
-                    <span className="block font-PrimaryMediumFont">
-                      {match.firstname}
-                    </span>
-                    {/* <span className="block text-xs text-SecondaryColor">
-                      {match.status}
-                    </span> */}
-                  </span>
-                </Link>
-              </li>
+            {matchesPeople.map((match: MatchPersonType) => (
+              <MatchPerosn key={match.user_id} {...match} />
             ))}
           </ul>
         </section>

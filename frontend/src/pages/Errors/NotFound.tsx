@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { HiOutlineHome } from "react-icons/hi";
 
-const NotFound = () => {
+const NotFound = ({message = ""} : {message?:string}) => {
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-PrimaryDarkBgColor px-6 text-center">
       <span className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-TertiaryColor/35 blur-3xl" />
@@ -16,12 +16,12 @@ const NotFound = () => {
       </h1>
 
       <p className="relative mt-3 max-w-[32ch] text-base text-SecondaryColor">
-        The page you're looking for doesn't exist or may have moved.
+        {message || "The page you're looking for doesn't exist or may have moved."}
       </p>
 
       <Link
         to="/"
-        className="relative mt-8 flex h-14 items-center justify-center gap-2 rounded-[14px] bg-TertiaryColor px-8 font-semibold text-white shadow-[0_10px_26px_rgba(245,67,90,0.32)]"
+        className="relative mt-8 flex h-14 items-center justify-center gap-2 rounded-InputRadius bg-TertiaryColor px-8 font-semibold text-white shadow-[0_10px_26px_rgba(245,67,90,0.32)]"
       >
         <HiOutlineHome className="size-5" />
         Back to home
