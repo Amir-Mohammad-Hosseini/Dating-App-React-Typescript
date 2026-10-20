@@ -7,3 +7,7 @@ export default interface NotificationItemType {
   text: string;
   user_id: number | string;
 }
+
+export interface NotificationsPageHeaderType {
+  isExistNotif : boolean
+}
