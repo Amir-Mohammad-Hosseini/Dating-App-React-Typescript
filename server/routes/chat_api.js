@@ -1,7 +1,7 @@
 module.exports = (app, pool) => {
   app.get("/api/chat/chat_connections", async (request, response) => {
     const session = request.session;
-    if (!session.userid) return response.send(false);
+    if (!session.userid) return response.status(401).send(false);
 
     try {
       const sql = `SELECT c.connection_id,
@@ -19,27 +19,39 @@ module.exports = (app, pool) => {
       response.send(rows);
     } catch (error) {
       console.error(error);
-      response.send(false);
+      response.status(500).send(false);
     }
   });
 
   app.post("/api/chat/room_messages", async (request, response) => {
     const session = request.session;
-    const connection_id = request.body.room;
+    if (!session.userid) return response.status(401).send(false);
+
+    const connection_id = Number(request.body.room);
+    if (!Number.isInteger(connection_id))
+      return response.status(400).send(false);
+
     try {
-      if (session.userid) {
-        var sql = `SELECT message AS text, sender_id, username AS name, connection_id AS room, chat_id AS key
-                            FROM chat
-				            INNER JOIN users ON users.id = chat.sender_id
-				            WHERE connection_id = $1
-                            ORDER BY time_stamp ASC`;
-        var { rows } = await pool.query(sql, [connection_id]);
-        response.send(rows);
-      } else {
-        response.send(false);
-      }
+      const member = await pool.query(
+        `SELECT 1 FROM connections
+         WHERE connection_id = $1 AND (user1_id = $2 OR user2_id = $2)`,
+        [connection_id, session.userid],
+      );
+      if (member.rows.length === 0) return response.status(403).send(false);
+
+      const { rows } = await pool.query(
+        `SELECT message AS text, sender_id, username AS name,
+                connection_id AS room, chat_id AS key, time_stamp
+         FROM chat
+         INNER JOIN users ON users.id = chat.sender_id
+         WHERE connection_id = $1
+         ORDER BY time_stamp ASC`,
+        [connection_id],
+      );
+      response.send(rows);
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      response.status(500).send(false);
     }
   });
 };

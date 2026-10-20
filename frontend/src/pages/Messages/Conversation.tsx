@@ -169,13 +169,16 @@ const Conversation = () => {
           onSubmit={handleSend}
           className="flex shrink-0 items-center gap-2 border-t border-SecondaryColor/20 px-4 py-3 sm:px-6"
         >
-          <button
-            type="button"
-            aria-label="Attach a photo"
-            className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/30 text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
-          >
+          <label htmlFor="image-file" className="border border-SecondaryColor/30 rounded-full size-10 cursor-pointer flex items-center justify-center text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor">
+            <input
+              id="image-file"
+              type="file"
+              accept="image/*"
+              aria-label="Attach a photo"
+              className="sr-only"
+            />
             <IoImageOutline className="size-4" aria-hidden="true" />
-          </button>
+          </label>
           <input
             type="text"
             value={draft}

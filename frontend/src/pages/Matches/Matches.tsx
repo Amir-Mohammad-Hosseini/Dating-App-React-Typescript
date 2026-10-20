@@ -1,13 +1,12 @@
-import { IoFilter } from "react-icons/io5";
 import { CiLock } from "react-icons/ci";
 import Navbar from "../../components/Navbar/Navbar";
-import { IoIosNotifications } from "react-icons/io";
 import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import matchesQuery from "../../lib/tanstack-query/Matches/matchesQuery";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import MatchPerosn from "../../components/MatchesPage/MatchPerosn";
 import type MatchPersonType from "../../components/MatchesPage/types";
+import NotificationLogo from "../../components/NotificationLogo/NotificationLogo";
 
 const Matches = () => {
   const { data: matchesPeople, isPending } = useQuery(matchesQuery());
@@ -16,7 +15,6 @@ const Matches = () => {
     return <LoadingOverlay show />;
   }
 
-  console.log(matchesPeople);
   return (
     <div className="min-h-dvh bg-PrimaryDarkBgColor md:flex">
       <Navbar />
@@ -31,21 +29,7 @@ const Matches = () => {
           </div>
           {/* TODO: there is no #filter-modal on this page yet */}
           <div className="flex items-center justify-center gap-x-2">
-            <Link
-              to="/notifications"
-              type="button"
-              className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
-            >
-              <IoIosNotifications className="size-4" aria-hidden="true" />
-            </Link>
-            <button
-              type="button"
-              popoverTarget="filter-modal"
-              aria-label="Filter matches"
-              className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-SecondaryColor/40 bg-PrimaryDarkBgColor text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
-            >
-              <IoFilter className="size-4" aria-hidden="true" />
-            </button>
+            <NotificationLogo />
           </div>
         </header>
 
