@@ -640,88 +640,85 @@ module.exports = (app, pool, upload, fs, path, bcrypt) => {
         })
     })
 
-    app.get('/api/profile/notifications', async (request, response) => {
-        const session = request.session
- 
-        if (session.userid) {
-            try {
-                var sql = `SELECT notification_id AS id, notifications.user_id AS user_id, sender_id,
+    // =================================================================
+    // NOTIFICATIONS
+    // CHANGED: every route now requires login, waits for its query and
+    // answers with a proper error. The list uses LEFT JOIN, so
+    // notifications from users without a profile picture are not hidden
+    // anymore (their "picture" is just null).
+    // =================================================================
+    app.get('/api/profile/notifications', requireLogin, async (request, response) => {
+        try {
+            const sql = `SELECT notification_id AS id, notifications.user_id AS user_id, sender_id,
 							notification_text AS text, redirect_path, read, picture_data AS picture
 							FROM notifications
-							INNER JOIN user_pictures ON notifications.sender_id = user_pictures.user_id AND user_pictures.profile_pic = $1
+							LEFT JOIN user_pictures ON notifications.sender_id = user_pictures.user_id AND user_pictures.profile_pic = $1
 							WHERE notifications.user_id = $2
 							ORDER BY notification_id DESC`
-                const notificationsData = await pool.query(sql, ['YES', session.userid])
-                response.send(notificationsData.rows)
-            } catch (error) {
-                response.send(false)
-            }
-        } else {
-            response.send(false)
+            const { rows } = await pool.query(sql, ['YES', request.session.userid])
+            response.send(rows)
+        } catch (error) {
+            console.error(error)
+            response.status(500).send('Failed to load notifications.')
         }
     })
- 
-    app.delete('/api/profile/notifications', (request, response) => {
-        const session = request.session
- 
-        if (session.userid) {
-            try {
-                var sql = `DELETE FROM notifications WHERE user_id = $1`
-                pool.query(sql, [session.userid])
-                response.send(true)
-            } catch (error) {
-                console.error('Something went wrong when trying to clear notifications: ', error)
-                response.send("Something went wrong when trying to clear notifications.")
-            }
+
+    // Clear ALL my notifications.
+    app.delete('/api/profile/notifications', requireLogin, async (request, response) => {
+        try {
+            await pool.query(`DELETE FROM notifications WHERE user_id = $1`, [request.session.userid])
+            response.send(true)
+        } catch (error) {
+            console.error('Something went wrong when trying to clear notifications: ', error)
+            response.status(500).send('Failed to clear notifications.')
         }
     })
- 
-    app.patch('/api/profile/readnotification/:id', (request, response) => {
-        const session = request.session
- 
-        if (session.userid) {
-            try {
-                const notification_id = request.params.id
-                var sql = `UPDATE notifications SET read = $1
-                            WHERE user_id = $2
-                            AND notification_id = $3`
-                pool.query(sql, ['YES', session.userid, notification_id])
-                response.send(true)
-            } catch (error) {
-                console.error(error)
-                response.send("Something went wrong when trying mark the notification as 'read'")
-            }
+
+    // Mark ONE notification as read.
+    app.patch('/api/profile/readnotification/:id', requireLogin, async (request, response) => {
+        const notification_id = Number(request.params.id)
+        if (!Number.isInteger(notification_id))
+            return response.status(400).send('Invalid notification.')
+
+        try {
+            await pool.query(
+                `UPDATE notifications SET read = $1
+                WHERE user_id = $2 AND notification_id = $3`,
+                ['YES', request.session.userid, notification_id])
+            response.send(true)
+        } catch (error) {
+            console.error(error)
+            response.status(500).send('Failed to mark the notification as read.')
         }
     })
- 
-    app.patch('/api/profile/readnotifications', (request, response) => {
-        const session = request.session
- 
-        if (session.userid) {
-            try {
-                var sql = `UPDATE notifications SET read = $1
-                            WHERE user_id = $2`
-                pool.query(sql, ['YES', session.userid])
-                response.send(true)
-            } catch (error) {
-                console.error(error)
-                response.send("Something went wrong when trying mark all notifications as 'read'")
-            }
+
+    // Mark ALL my notifications as read.
+    app.patch('/api/profile/readnotifications', requireLogin, async (request, response) => {
+        try {
+            await pool.query(
+                `UPDATE notifications SET read = $1 WHERE user_id = $2`,
+                ['YES', request.session.userid])
+            response.send(true)
+        } catch (error) {
+            console.error(error)
+            response.status(500).send('Failed to mark all notifications as read.')
         }
     })
- 
-    app.delete('/api/profile/notification/:id', (request, response) => {
-        const session = request.session
- 
-        if (session.userid) {
-            try {
-                const notification_id = request.params.id
-                var sql = `DELETE FROM notifications WHERE user_id = $1 AND notification_id = $2`
-                pool.query(sql, [session.userid, notification_id])
-                response.send(true)
-            } catch (error) {
-                response.send("Failed to delete notification")
-            }
+
+    // Delete ONE notification.
+    app.delete('/api/profile/notification/:id', requireLogin, async (request, response) => {
+        const notification_id = Number(request.params.id)
+        if (!Number.isInteger(notification_id))
+            return response.status(400).send('Invalid notification.')
+
+        try {
+            await pool.query(
+                `DELETE FROM notifications WHERE user_id = $1 AND notification_id = $2`,
+                [request.session.userid, notification_id])
+            response.send(true)
+        } catch (error) {
+            console.error(error)
+            response.status(500).send('Failed to delete the notification.')
         }
     })
  
