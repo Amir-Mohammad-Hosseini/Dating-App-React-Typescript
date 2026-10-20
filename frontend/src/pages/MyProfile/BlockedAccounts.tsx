@@ -9,11 +9,9 @@ const BlockedAccounts = () => {
   const { data: blockedAccounts, isPending: isBlockedAccountsQueryPending } =
     useQuery(blockedAccountsQuery());
 
-
   if (isBlockedAccountsQueryPending) {
     return <LoadingOverlay show />;
   }
-
 
   console.log(blockedAccounts);
   return (
@@ -41,14 +39,9 @@ const BlockedAccounts = () => {
         {blockedAccounts.length ? (
           // Do this part later
           <ul className="divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/10 bg-PrimaryDarkBgColor/30">
-            {
-              blockedAccounts.map((blockedAccount: any) => (
-                <BlockedAccountItem
-                  key={blockedAccount.id}
-                  {...blockedAccount}
-                />
-              ))
-            }
+            {blockedAccounts.map((blockedAccount: any) => (
+              <BlockedAccountItem key={blockedAccount.id} {...blockedAccount} />
+            ))}
           </ul>
         ) : (
           <div className="rounded-2xl border mt-8 border-white/10 bg-PrimaryDarkBgColor/30 flex items-center justify-center h-30">

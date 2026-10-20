@@ -1,3 +1,7 @@
+export interface ProfileViewTopbarType {
+  id : number | string
+}
+
 interface ProfileViewPhotoType {
   picture_data: string;
   picture_id: number;

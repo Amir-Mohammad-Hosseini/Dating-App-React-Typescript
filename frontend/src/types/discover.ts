@@ -6,7 +6,7 @@ export type SortedUser = {
   age: number;
   biography: string;
   fame_rating: number;
-  distance: number;
+  distance: number | null;
   profile_pic: string | null;
   tags: string[];
   sexual_pref : "male" | "female" | "bisexual";

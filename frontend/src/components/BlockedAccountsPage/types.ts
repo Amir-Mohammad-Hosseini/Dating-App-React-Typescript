@@ -1,6 +1,6 @@
 export default interface BlockedAccountItemType {
-    accountId  : number |  string
-    profilePic ?: string
+    id  : number |  string
+    picture ?: string
     firstname : string
     lastname : string
     username : string 
