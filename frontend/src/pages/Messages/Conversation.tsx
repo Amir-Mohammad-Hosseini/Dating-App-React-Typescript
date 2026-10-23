@@ -30,17 +30,26 @@ const Conversation = () => {
 
   const { handleShowBlockSwal } = useBlockProfile();
 
-  // Socket: join / پیام زنده / leave  (فقط به matchId وابسته است)
   useEffect(() => {
     if (!matchId) return;
+
+    const markRead = () => {
+      if(document.visibilityState !== "visible")
+        return
+      socket.emit("mark_read" , {
+        room : matchId
+      })
+    }
 
     const joinRoom = () => {
       socket.emit("join_room", {
         room: matchId,
       });
+      markRead()
     };
     const onReceive = () => {
       queryClient.invalidateQueries({ queryKey: ["historyMessages", matchId] });
+      markRead()
     };
     const onConnect = () => {
       joinRoom();
@@ -62,7 +71,6 @@ const Conversation = () => {
     };
   }, [matchId]);
 
-  // اسکرول به آخرین پیام (جدا از socket، تا با هر پیام leave/join نشود)
   useEffect(() => {
     lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [historyMessages?.length]);
@@ -78,11 +86,10 @@ const Conversation = () => {
         room: matchId,
         text,
       },
-      // response همان چیزی است که سرور به reply(...) داده: { ok, error? }
       (response: { ok: boolean; error?: string }) => {
         if (!response.ok) {
           toast.error("Message was not sent. Try again.");
-          setDraft(text); // متن برگردد تا دوباره تایپ نشود
+          setDraft(text);
         }
       },
     );
@@ -119,7 +126,6 @@ const Conversation = () => {
               <GoChevronLeft className="size-5" aria-hidden="true" />
             </Link>
 
-            {/* Avatar + name open the match's full profile */}
             <Link
               to={`/users/${matchedUser.user_id}`}
               className="-mx-2 flex min-w-0 items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-SecondaryDarkBgColor/60"

@@ -1,16 +1,17 @@
 import { NavLink } from "react-router";
 import type ConversationItemType from "./types";
+import { formatMessageTime } from "../../utils/conversation";
 
 const ConversationItem = ({
   connection_id,
   firstname,
   picture_data,
+  unread_count,
+  last_message,
+  last_message_time
 }: ConversationItemType) => {
   const online = true;
-  const isTyping = true;
-  const unreadCount = 5;
-  const lastMessage = 5;
-  const lastMessageTime = 5;
+  const isTyping = false;
 
   return (
     <li key={connection_id}>
@@ -48,21 +49,21 @@ const ConversationItem = ({
               className={`truncate text-sm ${
                 isTyping
                   ? "italic text-TertiaryColor"
-                  : unreadCount > 0
+                  : unread_count > 0
                     ? "text-PrimaryColor"
                     : "text-SecondaryColor"
               }`}
             >
-              {isTyping ? "Typing…" : lastMessage}
+              {isTyping ? "Typing…" : last_message}
             </p>
           </div>
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <span className="text-xs text-SecondaryColor">{lastMessageTime}</span>
-          {unreadCount > 0 && (
+          <span className="text-xs text-SecondaryColor">{formatMessageTime(last_message_time)}</span>
+          {unread_count > 0 && (
             <span className="grid size-5 place-items-center rounded-full bg-TertiaryColor font-PrimarySemiBoldFont text-xs text-SecondaryDarkBgColor">
-              {unreadCount}
+              {unread_count}
             </span>
           )}
         </div>

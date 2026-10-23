@@ -5,9 +5,24 @@ import LoadingOverlay from "../Loader/LoadingOverlay";
 import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
 import ConversationItem from "./ConversationItem";
 import type ConversationItemType from "./types";
+import { useEffect } from "react";
+import socket from "../../lib/socket/socket";
+import queryClient from "../../lib/tanstack-query/queryClient";
 
 const ConversationList = () => {
   const {data : conversationsList , isPending : isConversationsListQueryPending} = useQuery(conversationsListQuery())
+
+  useEffect(() => {
+    const onConversationUpdate = () => {
+      queryClient.invalidateQueries({queryKey : ["conversations"]})
+    }
+
+    socket.on("conversation_updated" , onConversationUpdate)
+    
+    return () => {
+      socket.off("conversation_updated" , onConversationUpdate)
+    }
+  } , [])
 
   if(isConversationsListQueryPending){
     return <LoadingOverlay show />
