@@ -1,42 +1,109 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type SubmitEventHandler } from "react";
 import { Link, useParams } from "react-router";
-import { GoChevronLeft } from "react-icons/go";
+import { GoChevronLeft, GoCommentDiscussion } from "react-icons/go";
 import { IoSend, IoImageOutline, IoEllipsisVertical } from "react-icons/io5";
-
-const closeMenu = () => (document.activeElement as HTMLElement | null)?.blur();
+import socket from "../../lib/socket/socket";
+import { useQuery } from "@tanstack/react-query";
+import roomHistoryMessagesQuery from "../../lib/tanstack-query/Message/roomHistoryMessagesQuery";
+import queryClient from "../../lib/tanstack-query/queryClient";
+import { toast } from "sonner";
+import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
+import type ConversationItemType from "../../components/Messages/types";
+import useBlockProfile from "../../hooks/BlockProfile/useBlockProfile";
+import LoadingOverlay from "../../components/Loader/LoadingOverlay";
+import HistoryMessage from "../../components/MessagesPage/HistoryMessage";
+import type HistoryMessageType from "../../components/MessagesPage/types";
+import closeMenu from "../../utils/conversation";
 
 const Conversation = () => {
   const { matchId } = useParams();
-  // const match = conversations.find((c) => c.id === matchId);
-
-  // Seeded from mock data; only lives in this component's state for now
-  // const [messages, setMessages] = useState<MessageBubble[]>(
-  //   match?.messages ?? [],
-  // );
   const [draft, setDraft] = useState("");
 
-  // if (!match) {
-  //   return (
-  //     <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-  //       <p className="font-ItalicFont text-2xl">Conversation not found</p>
-  //       <Link to="/messages" className="text-TertiaryColor">
-  //         Back to messages
-  //       </Link>
-  //     </div>
-  //   );
-  // }
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const { data: historyMessages, isPending: isHistoryMessagesQueryPending } =
+    useQuery(roomHistoryMessagesQuery(matchId));
+  const {
+    data: conversationsList,
+    isPending: isConversationsListQueryPending,
+  } = useQuery(conversationsListQuery());
+
+  const { handleShowBlockSwal } = useBlockProfile();
+
+  // Socket: join / پیام زنده / leave  (فقط به matchId وابسته است)
+  useEffect(() => {
+    if (!matchId) return;
+
+    const joinRoom = () => {
+      socket.emit("join_room", {
+        room: matchId,
+      });
+    };
+    const onReceive = () => {
+      queryClient.invalidateQueries({ queryKey: ["historyMessages", matchId] });
+    };
+    const onConnect = () => {
+      joinRoom();
+      queryClient.invalidateQueries({ queryKey: ["historyMessages", matchId] });
+    };
+
+    if (socket.connected) {
+      joinRoom();
+    }
+    socket.on("receive_message", onReceive);
+    socket.on("connect", onConnect);
+
+    return () => {
+      socket.emit("leave_room", {
+        room: matchId,
+      });
+      socket.off("receive_message", onReceive);
+      socket.off("connect", onConnect);
+    };
+  }, [matchId]);
+
+  // اسکرول به آخرین پیام (جدا از socket، تا با هر پیام leave/join نشود)
+  useEffect(() => {
+    lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [historyMessages?.length]);
+
+  const handleSendMessage: SubmitEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
     const text = draft.trim();
     if (!text) return;
 
-    // setMessages((prev) => [
-    //   ...prev,
-    //   { id: crypto.randomUUID(), from: "me", text, time: "now" },
-    // ]);
-    // setDraft("");
+    socket.emit(
+      "send_message",
+      {
+        room: matchId,
+        text,
+      },
+      // response همان چیزی است که سرور به reply(...) داده: { ok, error? }
+      (response: { ok: boolean; error?: string }) => {
+        if (!response.ok) {
+          toast.error("Message was not sent. Try again.");
+          setDraft(text); // متن برگردد تا دوباره تایپ نشود
+        }
+      },
+    );
+    setDraft("");
   };
+
+  const handleBlockProfile = (profileId: number | string) => {
+    handleShowBlockSwal(profileId);
+    closeMenu();
+  };
+
+  const isQueryPending =
+    isHistoryMessagesQueryPending || isConversationsListQueryPending;
+  if (isQueryPending) {
+    return <LoadingOverlay show />;
+  }
+
+  const matchedUser: ConversationItemType = conversationsList.find(
+    (conversation: ConversationItemType) =>
+      conversation.connection_id === Number(matchId),
+  );
 
   return (
     <div className="flex h-full">
@@ -54,20 +121,27 @@ const Conversation = () => {
 
             {/* Avatar + name open the match's full profile */}
             <Link
-              // to={`/users/${match.id}`}
-              to="/"
+              to={`/users/${matchedUser.user_id}`}
               className="-mx-2 flex min-w-0 items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-SecondaryDarkBgColor/60"
             >
-              <span
-                // className={`grid size-11 shrink-0 place-items-center rounded-full font-TitleFont text-lg text-PrimaryColor/90 ${match.avatarTone}`}
-              >
-                {/* {match.name[0]} */}
-              </span>
+              {matchedUser.picture_data ? (
+                <img
+                  src={matchedUser.picture_data}
+                  alt={matchedUser.firstname}
+                  className="size-11 rounded-full"
+                />
+              ) : (
+                <span className="grid size-11 shrink-0 place-items-center rounded-full font-TitleFont text-lg text-PrimaryColor/90 bg-TertiaryColor">
+                  {matchedUser.firstname[0]}
+                </span>
+              )}
 
               <div className="min-w-0">
-                {/* <p className="font-PrimarySemiBoldFont">{match.name}</p> */}
+                <p className="font-PrimarySemiBoldFont">
+                  {matchedUser.firstname}
+                </p>
                 <p
-                  // className={`text-sm ${match.online ? "text-OnlineBgColor" : "text-SecondaryColor"}`}
+                // className={`text-sm ${match.online ? "text-OnlineBgColor" : "text-SecondaryColor"}`}
                 >
                   {/* {match.online ? "Online" : "Offline"} */}
                 </p>
@@ -94,7 +168,6 @@ const Conversation = () => {
                   type="button"
                   onClick={() => {
                     // TODO: wire up to real clear-chat logic
-                    // console.log("clear chat", match.id);
                     closeMenu();
                   }}
                   className="rounded-xl text-PrimaryColor"
@@ -103,29 +176,25 @@ const Conversation = () => {
                 </button>
               </li>
               <li>
-                <button
+                {/* <button
                   type="button"
                   onClick={() => {
                     // TODO: open a confirmation modal before reporting
-                    // console.log("report", match.id);
+                    console.log("report", matchedUser.user_id);
                     closeMenu();
                   }}
                   className="rounded-xl text-TertiaryColor"
                 >
-                  {/* Report {match.name} */}
-                </button>
+                  Report {matchedUser.firstname}
+                </button> */}
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => {
-                    // TODO: open a confirmation modal before blocking
-                    // console.log("block", match.id);
-                    closeMenu();
-                  }}
+                  onClick={() => handleBlockProfile(matchedUser.user_id)}
                   className="rounded-xl text-TertiaryColor"
                 >
-                  {/* Block {match.name} */}
+                  Block {matchedUser.firstname}
                 </button>
               </li>
             </ul>
@@ -133,40 +202,36 @@ const Conversation = () => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-6">
-          {/* {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.from === "me" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2.5 sm:max-w-sm ${
-                  message.from === "me"
-                    ? "rounded-br-sm bg-TertiaryColor text-white"
-                    : "rounded-bl-sm bg-InputBg text-PrimaryColor"
-                }`}
-              >
-                <p>{message.text}</p>
-                <p
-                  className={`mt-1 text-right text-[11px] ${
-                    message.from === "me"
-                      ? "text-white/70"
-                      : "text-SecondaryColor"
-                  }`}
-                >
-                  {message.time}
-                </p>
-              </div>
+        {historyMessages.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+            <span className="grid size-16 place-items-center rounded-2xl bg-SecondaryDarkBgColor text-PrimaryColor">
+              <GoCommentDiscussion className="size-7" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="font-ItalicFont text-2xl">No messages yet</p>
+              <p className="mt-1 text-SecondaryColor">
+                Say hello to {matchedUser.firstname} and start the conversation.
+              </p>
             </div>
-          ))} */}
-        </div>
+          </div>
+        ) : (
+          <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-6">
+            {historyMessages.map(({ key, ...message }: HistoryMessageType) => (
+              <HistoryMessage key={key} {...message} />
+            ))}
+            <div ref={lastMessageRef} />
+          </div>
+        )}
 
         {/* Composer */}
         <form
-          onSubmit={handleSend}
+          onSubmit={handleSendMessage}
           className="flex shrink-0 items-center gap-2 border-t border-SecondaryColor/20 px-4 py-3 sm:px-6"
         >
-          <label htmlFor="image-file" className="border border-SecondaryColor/30 rounded-full size-10 cursor-pointer flex items-center justify-center text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor">
+          <label
+            htmlFor="image-file"
+            className="border border-SecondaryColor/30 rounded-full size-10 cursor-pointer flex items-center justify-center text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
+          >
             <input
               id="image-file"
               type="file"

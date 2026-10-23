@@ -3,6 +3,7 @@ import postLogoutAccount from "../../../../services/api/MyProfile/AccountActions
 import type { NavigateFunction } from "react-router";
 import queryClient from "../../queryClient";
 import useAppStore from "../../../zustand/store";
+import socket from "../../../socket/socket";
 
 const logoutMutation = (navigate: NavigateFunction) => {
   return {
@@ -17,6 +18,7 @@ const logoutMutation = (navigate: NavigateFunction) => {
         replace: true,
       });
       queryClient.clear();
+      socket.disconnect().connect();
     },
     onError: (error: Error) => {
       toast.error(error.message);

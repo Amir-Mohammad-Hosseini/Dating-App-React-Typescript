@@ -19,44 +19,107 @@ module.exports = (pool, socketIO) => {
         }
     }
 
+    const getMembership = async (connectionId, userId) => {
+        const { rows } = await pool.query(
+            `SELECT user1_id, user2_id FROM connections
+             WHERE connection_id = $1 AND (user1_id = $2 OR user2_id = $2)`,
+            [connectionId, userId]
+        )
+        return rows[0] || null
+    }
+
     let users = []
 
     socketIO.on('connection', (socket) => {
-        socket.on('join_room', (data) => {
-            socket.join(`room-${data.room}`)
+        const sessionUserId = Number(socket.request.session?.userid) || null
+
+        if (sessionUserId) {
+            socket.join(`notification-${sessionUserId}`)
+        }
+
+        socket.on('join_room', async (data) => {
+            try {
+                const room = Number(data?.room)
+                if (!sessionUserId || !Number.isInteger(room)) return
+                const membership = await getMembership(room, sessionUserId)
+                if (membership) socket.join(`room-${room}`)
+            } catch (error) {
+                console.error('join_room error:', error)
+            }
         })
 
         socket.on('join_notification', (data) => {
-            socket.join(`notification-${data.id}`)
+            if (sessionUserId && Number(data?.id) === sessionUserId) {
+                socket.join(`notification-${sessionUserId}`)
+            }
         })
 
         socket.on('leave_room', (data) => {
-            socket.leave(`room-${data.room}`)
+            socket.leave(`room-${data?.room}`)
         })
 
-        socket.on('send_message', async (data) => { // When sending a message... || data is coming through from ChatFooter.js
-            const sendToDatabase = async (data) => {
-                var variables = [data.room, data.sender_id, data.text]
+        socket.on('send_message', async (data, ack) => {
+            const reply = typeof ack === 'function' ? ack : () => { }
+            try {
+                if (!sessionUserId) return reply({ ok: false, error: 'unauthorized' })
 
-                var sql = `INSERT INTO chat (connection_id, sender_id, message)
-							VALUES ($1, $2, $3)`
-                pool.query(sql, variables)
-                var notification = `You received a new message from ${data.name}`
-                var sql = `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
-							VALUES ($1, $2, $3, $4)
-                            RETURNING notification_id`
-                const { rows } = await pool.query(sql, [data.receiver_id, notification,
-                `/chat/${data.room}`, data.sender_id])
+                const room = Number(data?.room)
+                const text = typeof data?.text === 'string' ? data.text.trim() : ''
+                if (!Number.isInteger(room) || !text || text.length > 1000) {
+                    return reply({ ok: false, error: 'invalid' })
+                }
 
-                sendNotification(rows[0]['notification_id'], notification, data.sender_id,
-                    data.receiver_id, `/chat/${data.room}`)
-            }
-            var sql = `SELECT * FROM connections WHERE connection_id = $1`
-            const connections = await pool.query(sql, [data.room])
+                const connection = await getMembership(room, sessionUserId)
+                if (!connection) return reply({ ok: false, error: 'forbidden' })
 
-            if (connections.rows.length > 0) {
-                socketIO.in(`room-${data.room}`).emit('receive_message', data)
-                sendToDatabase(data) // and save message to database.
+                const receiverId =
+                    Number(connection.user1_id) === sessionUserId
+                        ? connection.user2_id
+                        : connection.user1_id
+
+                const inserted = await pool.query(
+                    `INSERT INTO chat (connection_id, sender_id, message)
+                     VALUES ($1, $2, $3)
+                     RETURNING chat_id, time_stamp`,
+                    [room, sessionUserId, text]
+                )
+
+                const senderRes = await pool.query(
+                    `SELECT username FROM users WHERE id = $1`,
+                    [sessionUserId]
+                )
+                const senderName = senderRes.rows[0]?.username
+
+                const message = {
+                    key: inserted.rows[0].chat_id,
+                    text,
+                    sender_id: sessionUserId,
+                    name: senderName,
+                    room,
+                    time_stamp: inserted.rows[0].time_stamp,
+                }
+
+                socketIO.in(`room-${room}`).emit('receive_message', message)
+                reply({ ok: true })
+
+                const notification = `You received a new message from ${senderName}`
+                const redirect = `/messages/${room}`
+                const notifRes = await pool.query(
+                    `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
+                     VALUES ($1, $2, $3, $4)
+                     RETURNING notification_id`,
+                    [receiverId, notification, redirect, sessionUserId]
+                )
+                sendNotification(
+                    notifRes.rows[0]['notification_id'],
+                    notification,
+                    sessionUserId,
+                    receiverId,
+                    redirect
+                )
+            } catch (error) {
+                console.error('send_message error:', error)
+                reply({ ok: false, error: 'server' })
             }
         })
 
@@ -92,9 +155,5 @@ module.exports = (pool, socketIO) => {
             users = users.filter(user => user.socketID !== data.socketID)
             socketIO.emit('newUserResponse', users)
         })
-    })
-
-    socketIO.on("connect_error", (error) => {
-        console.log(`connect_error: ${error.message}`)
     })
 }

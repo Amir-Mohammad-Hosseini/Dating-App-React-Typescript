@@ -27,23 +27,28 @@ app.use(
   }),
 );
 app.use(express.json());
-app.use(
-  session({
-    secret: "secret",
-    saveUninitialized: true,
-    resave: true,
-    cookie: {
-      sameSite: "strict",
-    },
-  }),
-);
+
+const sessionMiddleware = session({
+  secret: "secret",
+  saveUninitialized: true,
+  resave: true,
+  cookie: {
+    sameSite: "strict",
+  },
+});
+app.use(sessionMiddleware);
 
 app.use("/images", express.static("./images")); // to serve static files to path /images, from images folder
 
 const socketIO = require("socket.io")(http, {
   cors: {
     origin: "http://localhost:5173",
+    credentials: true,
   },
+});
+
+socketIO.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next);
 });
 
 // POSTGRES SETUP
@@ -101,6 +106,6 @@ require("./routes/chat.js")(pool, socketIO);
 
 const PORT = config.PORT || 3001;
 
-http.listen(config.PORT, () => {
-  console.log(` Server running on port ${config.PORT}`);
+http.listen(PORT, () => {
+  console.log(` Server running on port ${PORT}`);
 });

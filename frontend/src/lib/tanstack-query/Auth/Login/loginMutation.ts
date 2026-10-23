@@ -3,6 +3,7 @@ import postLogin from "../../../../services/api/Auth/Login/postLogin";
 import type { NavigateFunction } from "react-router";
 import useAppStore from "../../../zustand/store";
 import type { User } from "../../../../types/user";
+import socket from "../../../socket/socket";
 
 const loginMutation = (navigate: NavigateFunction) => {
   return {
@@ -20,6 +21,8 @@ const loginMutation = (navigate: NavigateFunction) => {
       navigate(user.hasProfile ? "/discover" : "/onboarding" , {
         replace : true
       });
+
+      socket.disconnect().connect()
     },
     onError: (error: Error) => {
       const message = error.message || "An error occurred while logging";

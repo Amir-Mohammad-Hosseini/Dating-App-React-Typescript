@@ -2,32 +2,16 @@ import { GoChevronLeft } from "react-icons/go";
 import { MdOutlineBlock } from "react-icons/md";
 import { useNavigate } from "react-router";
 import type { ProfileViewTopbarType } from "./types";
-import { confirmAction } from "../../lib/sweetalert2/confirmAction";
-import { useMutation } from "@tanstack/react-query";
-import blockProfileMutation from "../../lib/tanstack-query/BlockProfile/blockProfileMutation";
 import Spinner from "../Loader/Spinner";
+import useBlockProfile from "../../hooks/BlockProfile/useBlockProfile";
 
 const ProfileViewTopbar = ({ id }: ProfileViewTopbarType) => {
   const navigate = useNavigate();
-  const { mutate: blockProfileMutate, isPending: isBlockProfileMutatePending } =
-    useMutation(blockProfileMutation(navigate));
+  const { handleShowBlockSwal, isBlockProfileMutatePending } =
+    useBlockProfile();
 
   const handleGoToPrevPage = () => {
     navigate(-1);
-  };
-
-  const handleShowBlockSwal = async () => {
-    const isBlockConfirm = await confirmAction({
-      title: "Are you sure?",
-      text: "Do you want to block this user?",
-      confirmButtonText: "Yes, confirm",
-      icon: "warning",
-      confirmButtonColor: "#1e40af",
-    });
-
-    if (isBlockConfirm) {
-      blockProfileMutate(id);
-    }
   };
 
   return (
@@ -44,7 +28,7 @@ const ProfileViewTopbar = ({ id }: ProfileViewTopbarType) => {
       </span>
       <button
         disabled={isBlockProfileMutatePending}
-        onClick={handleShowBlockSwal}
+        onClick={() => handleShowBlockSwal(id)}
         aria-label="More options"
         className="flex size-10 items-center justify-center rounded-full border border-SecondaryColor/30 bg-PrimaryDarkBgColor/55 text-PrimaryColor backdrop-blur-md md:border-SecondaryColor/20 md:bg-SecondaryDarkBgColor md:backdrop-blur-none cursor-pointer"
       >
