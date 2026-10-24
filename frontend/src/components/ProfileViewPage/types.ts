@@ -20,6 +20,7 @@ export interface ProfileViewInfoType {
   age: number;
   isActive: boolean;
   distanceKm: number | null;
+  connectionId : number | string | null
 };
 
 export interface ProfileViewAboutType {

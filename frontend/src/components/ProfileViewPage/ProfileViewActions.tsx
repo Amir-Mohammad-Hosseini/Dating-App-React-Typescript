@@ -108,7 +108,7 @@ const ProfileViewActions = ({ profileDatas }: any) => {
           }}
           className="text-PrimaryColor py-2 w-40 border border-TertiaryColor rounded-lg hover:bg-TertiaryColor transition"
         >
-          I'm interested
+          I'm not interested
         </button>
         <button
           style={{
@@ -119,7 +119,7 @@ const ProfileViewActions = ({ profileDatas }: any) => {
           }}
           className="text-PrimaryColor py-2 w-40 border border-TertiaryColor rounded-lg hover:bg-TertiaryColor transition"
         >
-          I'm not interested
+          I'm interested
         </button>
       </div>
     </div>

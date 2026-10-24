@@ -13,6 +13,8 @@ import { isRecentlyActive } from "../../utils/constants/profileView";
 import ProfileViewActions from "../../components/ProfileViewPage/ProfileViewActions";
 import MatchModal from "../../components/MatchModal/MatchModal";
 import ProfileViewTopbar from "../../components/ProfileViewPage/ProfileViewTopbar";
+import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
+import type ConversationItemType from "../../components/Messages/types";
 
 const ProfileView = () => {
   const { userId: userIdParam } = useParams();
@@ -28,11 +30,19 @@ const ProfileView = () => {
     enabled: isValidUserId,
   });
 
+  const {
+    data: conversationsList,
+    isPending: isConversationsListQueryPending,
+  } = useQuery(conversationsListQuery());
+
+  const isPending =
+    isProfileViewQueryPending || isConversationsListQueryPending;
+
   if (!isValidUserId) {
     return <NotFound message="Profile not found" />;
   }
 
-  if (isProfileViewQueryPending) {
+  if (isPending) {
     return <LoadingOverlay show />;
   }
 
@@ -65,6 +75,9 @@ const ProfileView = () => {
       ? Number(distance)
       : null;
 
+  const matchedUserDatas = conversationsList.find(
+    (conversation: ConversationItemType) => conversation.user_id === id,
+  );
   return (
     <>
       <div className="min-h-dvh w-full bg-PrimaryDarkBgColor sm:mx-auto sm:max-w-140 md:mx-0 md:max-w-none md:px-8 md:pb-10 lg:px-12 xl:px-16">
@@ -87,6 +100,7 @@ const ProfileView = () => {
               age={age}
               isActive={isRecentlyActive(last_connection)}
               distanceKm={distanceKm}
+              connectionId={matchedUserDatas?.connection_id || null}
             />
             <ProfileViewAbout about={biography} />
             <ProfileViewInterests interests={tags} />

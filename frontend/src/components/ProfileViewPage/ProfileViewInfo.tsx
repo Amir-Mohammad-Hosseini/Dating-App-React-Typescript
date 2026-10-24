@@ -1,5 +1,7 @@
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import type { ProfileViewInfoType } from "./types";
+import { Link } from "react-router";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 
 const chipClass =
   "inline-flex items-center gap-1.5 rounded-full border border-SecondaryColor/20 bg-SecondaryDarkBgColor px-3 py-1.5 text-sm text-SecondaryColor";
@@ -10,6 +12,7 @@ const ProfileViewInfo = ({
   age,
   isActive,
   distanceKm,
+  connectionId,
 }: ProfileViewInfoType) => {
   return (
     <div>
@@ -20,6 +23,18 @@ const ProfileViewInfo = ({
         <span className="font-TitleFont text-2xl text-SecondaryColor md:text-3xl">
           {age}
         </span>
+        {connectionId && (
+          <Link
+            to={`/messages/${connectionId}`}
+            className="inline-flex h-11 cursor-pointer ml-auto items-center justify-center gap-2 rounded-full bg-TertiaryColor px-6 font-PrimarySemiBoldFont text-white transition hover:bg-HoverBtnBg"
+          >
+            <IoChatbubbleEllipsesOutline
+              className="size-5"
+              aria-hidden="true"
+            />
+            Message
+          </Link>
+        )}
       </div>
       <p className="mt-1.5 text-SecondaryColor">@{username}</p>
 
