@@ -81,4 +81,27 @@ module.exports = (app, pool, socketIO) => {
       response.status(500).send(false);
     }
   });
+
+  app.get("/api/chat/presence/:userId", async (request, response) => {
+    if (!request.session.userid) return response.status(401).send(false);
+
+    const userId = Number(request.params.userId);
+    if (!Number.isInteger(userId)) return response.status(400).send(false);
+
+    try {
+      const { rows } = await pool.query(
+        `SELECT last_connection FROM users WHERE id = $1`,
+        [userId],
+      );
+      if (rows.length === 0) return response.status(404).send(false);
+
+      response.send({
+        is_online: isUserOnline(userId),
+        last_connection: rows[0].last_connection,
+      });
+    } catch (error) {
+      console.error(error);
+      response.status(500).send(false);
+    }
+  });
 };

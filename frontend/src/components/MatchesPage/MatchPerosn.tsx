@@ -1,7 +1,14 @@
 import { Link } from "react-router";
 import type MatchPersonType from "./types";
+import usePresenceProfile from "../../hooks/Conversations/usePresenceProfile";
+import LoadingOverlay from "../Loader/LoadingOverlay";
 
 const MatchPerosn = ({ firstname, picture_data, user_id }: MatchPersonType) => {
+  const { presenceProfile, isPresenceProfileQueryPending } =
+    usePresenceProfile(user_id);
+  if (isPresenceProfileQueryPending) {
+    return <LoadingOverlay show />;
+  }
   return (
     <li key={user_id} className="flex justify-center">
       <Link
@@ -20,18 +27,15 @@ const MatchPerosn = ({ firstname, picture_data, user_id }: MatchPersonType) => {
               <span>{firstname.slice(0, 1).toUpperCase()}</span>
             )}
           </span>
-          {/* {match?.status === "Active now" && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute right-0 bottom-1 size-4 rounded-full border-[3px] border-PrimaryDarkBgColor bg-OnlineBgColor lg:bottom-2 lg:right-1 lg:size-6"
-                      />
-                    )} */}
+          {presenceProfile.is_online && (
+            <span
+              aria-hidden="true"
+              className="absolute right-0 bottom-1 size-4 rounded-full border-[3px] border-PrimaryDarkBgColor bg-OnlineBgColor lg:bottom-2 lg:right-1 lg:size-6"
+            />
+          )}
         </span>
         <span>
           <span className="block font-PrimaryMediumFont">{firstname}</span>
-          {/* <span className="block text-xs text-SecondaryColor">
-                      {status}
-                    </span> */}
         </span>
       </Link>
     </li>

@@ -10,7 +10,7 @@ const ProfileViewInfo = ({
   firstname,
   username,
   age,
-  isActive,
+  isOnline,
   distanceKm,
   connectionId,
 }: ProfileViewInfoType) => {
@@ -48,7 +48,7 @@ const ProfileViewInfo = ({
           </span>
         )}
 
-        {isActive ? (
+        {isOnline ? (
           <span className={chipClass}>
             <span className="size-2 rounded-full bg-emerald-400" />
             Active today

@@ -27,7 +27,6 @@ const Matches = () => {
               {matchesPeople.length} matches · 3 new since your last visit
             </p>
           </div>
-          {/* TODO: there is no #filter-modal on this page yet */}
           <div className="flex items-center justify-center gap-x-2">
             <NotificationLogo />
           </div>

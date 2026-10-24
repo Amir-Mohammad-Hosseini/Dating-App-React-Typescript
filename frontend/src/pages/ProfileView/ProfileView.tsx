@@ -9,12 +9,12 @@ import ProfileViewFameRating from "../../components/ProfileViewPage/ProfileViewF
 import ProfileViewPhotos from "../../components/ProfileViewPage/ProfileViewPhotos";
 import ProfileViewInfo from "../../components/ProfileViewPage/ProfileViewInfo";
 import NotFound from "../Errors/NotFound";
-import { isRecentlyActive } from "../../utils/constants/profileView";
 import ProfileViewActions from "../../components/ProfileViewPage/ProfileViewActions";
 import MatchModal from "../../components/MatchModal/MatchModal";
 import ProfileViewTopbar from "../../components/ProfileViewPage/ProfileViewTopbar";
 import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
 import type ConversationItemType from "../../components/Messages/types";
+import usePresenceProfile from "../../hooks/Conversations/usePresenceProfile";
 
 const ProfileView = () => {
   const { userId: userIdParam } = useParams();
@@ -35,8 +35,10 @@ const ProfileView = () => {
     isPending: isConversationsListQueryPending,
   } = useQuery(conversationsListQuery());
 
+  const {presenceProfile , isPresenceProfileQueryPending} = usePresenceProfile(userId)
+
   const isPending =
-    isProfileViewQueryPending || isConversationsListQueryPending;
+    isProfileViewQueryPending || isConversationsListQueryPending || isPresenceProfileQueryPending
 
   if (!isValidUserId) {
     return <NotFound message="Profile not found" />;
@@ -64,7 +66,6 @@ const ProfileView = () => {
     gender,
     sexual_pref,
     fame_rating,
-    last_connection,
     distance,
   } = profileViewDatas;
 
@@ -78,6 +79,9 @@ const ProfileView = () => {
   const matchedUserDatas = conversationsList.find(
     (conversation: ConversationItemType) => conversation.user_id === id,
   );
+
+  console.log(presenceProfile)
+
   return (
     <>
       <div className="min-h-dvh w-full bg-PrimaryDarkBgColor sm:mx-auto sm:max-w-140 md:mx-0 md:max-w-none md:px-8 md:pb-10 lg:px-12 xl:px-16">
@@ -98,7 +102,7 @@ const ProfileView = () => {
               firstname={firstname}
               username={username}
               age={age}
-              isActive={isRecentlyActive(last_connection)}
+              isOnline={presenceProfile.is_online}
               distanceKm={distanceKm}
               connectionId={matchedUserDatas?.connection_id || null}
             />

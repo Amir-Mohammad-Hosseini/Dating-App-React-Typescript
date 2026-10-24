@@ -18,7 +18,7 @@ export interface ProfileViewInfoType {
   firstname: string;
   username: string;
   age: number;
-  isActive: boolean;
+  isOnline: boolean;
   distanceKm: number | null;
   connectionId : number | string | null
 };
