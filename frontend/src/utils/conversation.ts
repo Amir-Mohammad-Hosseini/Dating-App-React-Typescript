@@ -38,4 +38,22 @@ export const formatMessageTime = (time: string | null) => {
   });
 };
 
+export const formatLastSeen = (iso: string | null) => {
+  if (!iso) return "Offline";
+
+  const label = formatMessageTime(iso);
+
+  if(!label){
+    return label
+  }
+
+  if (label === "Yesterday") {
+    return "Last seen yesterday";
+  }
+  if (/^\d{2}:\d{2}$/.test(label)) {
+    return `Last seen today at ${label}`;
+  }
+  return `Last seen ${label}`;
+};
+
 export default closeMenu;

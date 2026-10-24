@@ -6,9 +6,9 @@ import createOnboardingSlice, {
 } from "./slices/createOnboardingSlice";
 import createMatchModal, { type MatchModalSlice } from "./slices/createMatchModal";
 
-type AppStore = UserSlice & OnboardingSlice & MatchModalSlice
+type AppStoreType = UserSlice & OnboardingSlice & MatchModalSlice
 
-const useAppStore = create<AppStore>()(
+const useAppStore = create<AppStoreType>()(
   devtools(
     persist(
       (...args) => ({

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router";
 import type ConversationItemType from "./types";
 import { formatMessageTime } from "../../utils/conversation";
+import useTypingStore from "../../lib/zustand/typingStore/useTypingStore";
 
 const ConversationItem = ({
   connection_id,
@@ -8,10 +9,12 @@ const ConversationItem = ({
   picture_data,
   unread_count,
   last_message,
-  last_message_time
+  last_message_time,
+  is_online,
 }: ConversationItemType) => {
-  const online = true;
-  const isTyping = false;
+  const isTyping = Boolean(
+    useTypingStore((state) => state.typingRooms[+connection_id]),
+  );
 
   return (
     <li key={connection_id}>
@@ -36,7 +39,7 @@ const ConversationItem = ({
                 {firstname[0]}
               </span>
             )}
-            {online && (
+            {is_online && (
               <span
                 aria-hidden="true"
                 className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-SecondaryDarkBgColor bg-OnlineBgColor"
@@ -54,13 +57,17 @@ const ConversationItem = ({
                     : "text-SecondaryColor"
               }`}
             >
-              {isTyping ? "Typing…" : last_message}
+              {isTyping ? "Typing…" : (last_message ?? "No messages yet")}
             </p>
           </div>
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <span className="text-xs text-SecondaryColor">{formatMessageTime(last_message_time)}</span>
+          {last_message_time && (
+            <span className="text-xs text-SecondaryColor">
+              {formatMessageTime(last_message_time)}
+            </span>
+          )}
           {unread_count > 0 && (
             <span className="grid size-5 place-items-center rounded-full bg-TertiaryColor font-PrimarySemiBoldFont text-xs text-SecondaryDarkBgColor">
               {unread_count}

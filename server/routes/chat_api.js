@@ -1,4 +1,7 @@
-module.exports = (app, pool) => {
+module.exports = (app, pool, socketIO) => {
+  const isUserOnline = (userId) =>
+    (socketIO.sockets.adapter.rooms.get(`user-${userId}`)?.size ?? 0) > 0;
+
   app.get("/api/chat/chat_connections", async (request, response) => {
     const session = request.session;
     if (!session.userid) return response.status(401).send(false);
@@ -6,6 +9,7 @@ module.exports = (app, pool) => {
     try {
       const sql = `SELECT c.connection_id,
                         u.id AS user_id, u.username, u.firstname,
+                        u.last_connection,
                         us.age, up.picture_data,
                         lm.message AS last_message,
                         lm.time_stamp AS last_message_time,
@@ -36,7 +40,10 @@ module.exports = (app, pool) => {
                     WHERE c.user1_id = $1 OR c.user2_id = $1
                     ORDER BY lm.time_stamp DESC NULLS LAST, c.connection_id DESC`;
       const { rows } = await pool.query(sql, [session.userid]);
-      response.send(rows);
+
+      response.send(
+        rows.map((row) => ({ ...row, is_online: isUserOnline(row.user_id) })),
+      );
     } catch (error) {
       console.error(error);
       response.status(500).send(false);

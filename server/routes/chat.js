@@ -19,7 +19,6 @@ module.exports = (pool, socketIO) => {
         }
     }
 
-    // آیا این کاربر عضو این connection (چت) هست؟ اگر بله، ردیف connection را برمی‌گرداند
     const getMembership = async (connectionId, userId) => {
         const { rows } = await pool.query(
             `SELECT user1_id, user2_id FROM connections
@@ -29,29 +28,62 @@ module.exports = (pool, socketIO) => {
         return rows[0] || null
     }
 
-    // به همه‌ی socketهای یک کاربر (همه‌ی تب‌هایش) خبر می‌دهد: لیست چت‌هایت قدیمی شد
     const notifyConversationUpdated = (userId, room) => {
         socketIO.to(`user-${userId}`).emit('conversation_updated', { room })
+    }
+
+    // ─── Presence (Online / Offline) ──────────────────────────────
+
+    const userSocketCount = (userId) =>
+        socketIO.sockets.adapter.rooms.get(`user-${userId}`)?.size ?? 0
+
+    const isUserOnline = (userId) => userSocketCount(userId) > 0
+
+    const getMatchIds = async (userId) => {
+        const { rows } = await pool.query(
+            `SELECT CASE WHEN user1_id = $1 THEN user2_id ELSE user1_id END AS other_id
+             FROM connections
+             WHERE user1_id = $1 OR user2_id = $1`,
+            [userId]
+        )
+        return rows.map((row) => row.other_id)
+    }
+
+    const broadcastPresence = async (userId, online) => {
+        try {
+            const matchIds = await getMatchIds(userId)
+            if (matchIds.length === 0) return
+
+            socketIO
+                .to(matchIds.map((id) => `user-${id}`))
+                .emit('presence_changed', {
+                    userId,
+                    online,
+                    lastSeen: online ? null : new Date(),
+                })
+        } catch (error) {
+            console.error('broadcastPresence error:', error)
+        }
     }
 
     let users = []
 
     socketIO.on('connection', (socket) => {
-        // userid از session (کوکی) می‌آید، نه از کلاینت
         const sessionUserId = Number(socket.request.session?.userid) || null
 
         if (sessionUserId) {
-            // room اعلان‌ها
             socket.join(`notification-${sessionUserId}`)
-            // room شخصی کاربر؛ برای آپدیت لیست چت‌ها (بعداً برای online هم به کارمان می‌آید)
             socket.join(`user-${sessionUserId}`)
+
+            if (userSocketCount(sessionUserId) === 1) {
+                broadcastPresence(sessionUserId, true)
+            }
         }
 
         socket.on('join_room', async (data) => {
             try {
                 const room = Number(data?.room)
                 if (!sessionUserId || !Number.isInteger(room)) return
-                // فقط اعضای همین چت اجازه‌ی ورود به room را دارند
                 const membership = await getMembership(room, sessionUserId)
                 if (membership) socket.join(`room-${room}`)
             } catch (error) {
@@ -60,7 +92,6 @@ module.exports = (pool, socketIO) => {
         })
 
         socket.on('join_notification', (data) => {
-            // فقط room اعلان‌های خودِ کاربر
             if (sessionUserId && Number(data?.id) === sessionUserId) {
                 socket.join(`notification-${sessionUserId}`)
             }
@@ -70,7 +101,6 @@ module.exports = (pool, socketIO) => {
             socket.leave(`room-${data?.room}`)
         })
 
-        // پیام‌های نخوانده‌ی طرف مقابل در این چت را «خوانده» می‌کند
         socket.on('mark_read', async (data) => {
             try {
                 const room = Number(data?.room)
@@ -79,14 +109,12 @@ module.exports = (pool, socketIO) => {
                 const membership = await getMembership(room, sessionUserId)
                 if (!membership) return
 
-                // sender_id <> من: فقط پیام‌های طرف مقابل
                 const result = await pool.query(
                     `UPDATE chat SET is_read = TRUE
                      WHERE connection_id = $1 AND sender_id <> $2 AND is_read = FALSE`,
                     [room, sessionUserId]
                 )
 
-                // فقط اگر واقعاً چیزی عوض شد
                 if (result.rowCount > 0) {
                     notifyConversationUpdated(sessionUserId, room)
                 }
@@ -95,7 +123,28 @@ module.exports = (pool, socketIO) => {
             }
         })
 
-        // data = { room, text }   |   ack = تابعی که کلاینت می‌دهد
+        socket.on('typing', async (data) => {
+            try {
+                const room = Number(data?.room)
+                if (!sessionUserId || !Number.isInteger(room)) return
+
+                const connection = await getMembership(room, sessionUserId)
+                if (!connection) return
+
+                const receiverId =
+                    Number(connection.user1_id) === sessionUserId
+                        ? connection.user2_id
+                        : connection.user1_id
+
+                socketIO.to(`user-${receiverId}`).emit('user_typing', {
+                    room,
+                    isTyping: Boolean(data?.isTyping),
+                })
+            } catch (error) {
+                console.error('typing error:', error)
+            }
+        })
+
         socket.on('send_message', async (data, ack) => {
             const reply = typeof ack === 'function' ? ack : () => { }
             try {
@@ -115,7 +164,6 @@ module.exports = (pool, socketIO) => {
                         ? connection.user2_id
                         : connection.user1_id
 
-                // ذخیره در دیتابیس (is_read به صورت پیش‌فرض FALSE است)
                 const inserted = await pool.query(
                     `INSERT INTO chat (connection_id, sender_id, message)
                      VALUES ($1, $2, $3)
@@ -129,7 +177,6 @@ module.exports = (pool, socketIO) => {
                 )
                 const senderName = senderRes.rows[0]?.username
 
-                // همان شکلی که API room_messages برمی‌گرداند
                 const message = {
                     key: inserted.rows[0].chat_id,
                     text,
@@ -139,16 +186,18 @@ module.exports = (pool, socketIO) => {
                     time_stamp: inserted.rows[0].time_stamp,
                 }
 
-                // برای همه‌ی اعضای room (فرستنده و گیرنده)
                 socketIO.in(`room-${room}`).emit('receive_message', message)
 
-                // به هر دو نفر: لیست چت‌هایتان (آخرین پیام / نخوانده) عوض شد
+                socketIO.to(`user-${receiverId}`).emit('user_typing', {
+                    room,
+                    isTyping: false,
+                })
+
                 notifyConversationUpdated(sessionUserId, room)
                 notifyConversationUpdated(receiverId, room)
 
                 reply({ ok: true })
 
-                // اعلان برای گیرنده
                 const notification = `You received a new message from ${senderName}`
                 const redirect = `/messages/${room}`
                 const notifRes = await pool.query(
@@ -190,6 +239,24 @@ module.exports = (pool, socketIO) => {
             users = users.filter(user => user.socketID !== socket.id)
             socketIO.emit('newUserResponse', users)
             socket.disconnect()
+        })
+
+        socket.on('disconnect', () => {
+            if (!sessionUserId) return
+
+            setTimeout(async () => {
+                try {
+                    if (isUserOnline(sessionUserId)) return
+
+                    await pool.query(
+                        `UPDATE users SET last_connection = NOW()::timestamp WHERE id = $1`,
+                        [sessionUserId]
+                    )
+                    broadcastPresence(sessionUserId, false)
+                } catch (error) {
+                    console.error('offline handler error:', error)
+                }
+            }, 3000)
         })
 
         socket.on('logOut', (data) => {
