@@ -43,6 +43,44 @@ module.exports = (pool, socketIO) => {
     socketIO.to(`user-${userId}`).emit("conversation_updated", { room });
   };
 
+  const notifyNewMessage = async (room, senderId, senderName, receiverId) => {
+    try {
+      const socketsInRoom = await socketIO.in(`room-${room}`).fetchSockets();
+      const receiverIsInChat = socketsInRoom.some(
+        (s) => Number(s.data.userId) === Number(receiverId),
+      );
+      if (receiverIsInChat) return;
+
+      const redirect = `/messages/${room}`;
+
+      const existing = await pool.query(
+        `SELECT 1 FROM notifications
+         WHERE user_id = $1 AND sender_id = $2
+           AND redirect_path = $3 AND read = 'NO'
+         LIMIT 1`,
+        [receiverId, senderId, redirect],
+      );
+      if (existing.rows.length > 0) return;
+
+      const notification = `You received a new message from ${senderName}`;
+      const { rows } = await pool.query(
+        `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
+         VALUES ($1, $2, $3, $4)
+         RETURNING notification_id`,
+        [receiverId, notification, redirect, senderId],
+      );
+      sendNotification(
+        rows[0]["notification_id"],
+        notification,
+        senderId,
+        receiverId,
+        redirect,
+      );
+    } catch (error) {
+      console.error("notifyNewMessage error:", error);
+    }
+  };
+
   // ─── Presence (Online / Offline) ──────────────────────────────
 
   const userSocketCount = (userId) =>
@@ -79,6 +117,8 @@ module.exports = (pool, socketIO) => {
 
   socketIO.on("connection", (socket) => {
     const sessionUserId = Number(socket.request.session?.userid) || null;
+
+    socket.data.userId = sessionUserId;
 
     if (sessionUserId) {
       socket.join(`notification-${sessionUserId}`);
@@ -124,8 +164,17 @@ module.exports = (pool, socketIO) => {
           [room, sessionUserId],
         );
 
+        const notifResult = await pool.query(
+          `UPDATE notifications SET read = 'YES'
+           WHERE user_id = $1 AND redirect_path = $2 AND read = 'NO'`,
+          [sessionUserId, `/messages/${room}`],
+        );
+
         if (result.rowCount > 0) {
           notifyConversationUpdated(sessionUserId, room);
+        }
+        if (notifResult.rowCount > 0) {
+          socketIO.to(`user-${sessionUserId}`).emit("notifications_changed");
         }
       } catch (error) {
         console.error("mark_read error:", error);
@@ -219,21 +268,7 @@ module.exports = (pool, socketIO) => {
 
         reply({ ok: true });
 
-        const notification = `You received a new message from ${senderName}`;
-        const redirect = `/messages/${room}`;
-        const notifRes = await pool.query(
-          `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
-                     VALUES ($1, $2, $3, $4)
-                     RETURNING notification_id`,
-          [receiverId, notification, redirect, sessionUserId],
-        );
-        sendNotification(
-          notifRes.rows[0]["notification_id"],
-          notification,
-          sessionUserId,
-          receiverId,
-          redirect,
-        );
+        notifyNewMessage(room, sessionUserId, senderName, receiverId);
       } catch (error) {
         console.error("send_message error:", error);
         reply({ ok: false, error: "server" });

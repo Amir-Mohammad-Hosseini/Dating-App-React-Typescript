@@ -3,7 +3,6 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 
-
 const CHAT_IMAGES_DIR = path.join("images", "chat");
 fs.mkdirSync(CHAT_IMAGES_DIR, { recursive: true });
 
@@ -82,6 +81,11 @@ module.exports = (app, pool, socketIO) => {
                         SELECT message, time_stamp, sender_id
                         FROM chat
                         WHERE chat.connection_id = c.connection_id
+                          AND chat.time_stamp > COALESCE(
+                                (SELECT cc.cleared_at FROM chat_clears cc
+                                 WHERE cc.connection_id = c.connection_id
+                                   AND cc.user_id = $1),
+                                '-infinity'::timestamp)
                         ORDER BY time_stamp DESC
                         LIMIT 1
                     ) lm ON TRUE
@@ -128,10 +132,53 @@ module.exports = (app, pool, socketIO) => {
          FROM chat
          INNER JOIN users ON users.id = chat.sender_id
          WHERE connection_id = $1
+           AND time_stamp > COALESCE(
+                 (SELECT cleared_at FROM chat_clears
+                  WHERE connection_id = $1 AND user_id = $2),
+                 '-infinity'::timestamp)
          ORDER BY time_stamp ASC`,
-        [connection_id],
+        [connection_id, session.userid],
       );
       response.send(rows);
+    } catch (error) {
+      console.error(error);
+      response.status(500).send(false);
+    }
+  });
+
+  app.post("/api/chat/clear_chat", requireLogin, async (request, response) => {
+    const userId = Number(request.session.userid);
+
+    const connection_id = Number(request.body.room);
+    if (!Number.isInteger(connection_id))
+      return response.status(400).send(false);
+
+    try {
+      const member = await pool.query(
+        `SELECT 1 FROM connections
+         WHERE connection_id = $1 AND (user1_id = $2 OR user2_id = $2)`,
+        [connection_id, userId],
+      );
+      if (member.rows.length === 0) return response.status(403).send(false);
+
+      await pool.query(
+        `INSERT INTO chat_clears (connection_id, user_id, cleared_at)
+         VALUES ($1, $2, NOW())
+         ON CONFLICT (connection_id, user_id) DO UPDATE SET cleared_at = NOW()`,
+        [connection_id, userId],
+      );
+
+      await pool.query(
+        `UPDATE chat SET is_read = TRUE
+         WHERE connection_id = $1 AND sender_id <> $2 AND is_read = FALSE`,
+        [connection_id, userId],
+      );
+
+      socketIO
+        .to(`user-${userId}`)
+        .emit("conversation_updated", { room: connection_id });
+
+      response.send(true);
     } catch (error) {
       console.error(error);
       response.status(500).send(false);

@@ -457,6 +457,8 @@ module.exports = (app, pool, transporter, socketIO) => {
       ]);
  
       if (rows.length !== 0) {
+                socketIO.to(`user-${unliked_person_id}`).emit("conversation_updated", {});
+        socketIO.to(`user-${session.userid}`).emit("conversation_updated", {});
         var notification = `The user ${session.username} has unliked you. You can no longer chat with each other.`;
         sql = `INSERT INTO notifications (user_id, notification_text, sender_id)
               VALUES ($1, $2, $3)
@@ -532,6 +534,8 @@ module.exports = (app, pool, transporter, socketIO) => {
 					  WHERE (user1_id = $1 AND user2_id = $2)
             OR (user1_id = $2 AND user2_id = $1)`;
       await pool.query(sql, [session.userid, blocked_person_id]);
+      socketIO.to(`user-${blocked_person_id}`).emit("conversation_updated", {});
+      socketIO.to(`user-${session.userid}`).emit("conversation_updated", {});
  
       sql = `SELECT * FROM connections WHERE user1_id = $1 OR user2_id = $1`;
       const connections = await pool.query(sql, [blocked_person_id]);

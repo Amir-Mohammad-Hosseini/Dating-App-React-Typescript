@@ -5,9 +5,9 @@ import {
   type ChangeEvent,
   type SubmitEventHandler,
 } from "react";
-import { Link, useParams } from "react-router";
-import { GoChevronLeft, GoCommentDiscussion } from "react-icons/go";
-import { IoSend, IoImageOutline, IoEllipsisVertical } from "react-icons/io5";
+import { useParams } from "react-router";
+import { GoCommentDiscussion } from "react-icons/go";
+import { IoSend, IoImageOutline } from "react-icons/io5";
 import socket from "../../lib/socket/socket";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import roomHistoryMessagesQuery from "../../lib/tanstack-query/Message/roomHistoryMessagesQuery";
@@ -15,15 +15,15 @@ import queryClient from "../../lib/tanstack-query/queryClient";
 import { toast } from "sonner";
 import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
 import type ConversationItemType from "../../components/Messages/types";
-import useBlockProfile from "../../hooks/BlockProfile/useBlockProfile";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import HistoryMessage from "../../components/MessagesPage/HistoryMessage";
 import type HistoryMessageType from "../../components/MessagesPage/types";
-import closeMenu from "../../utils/conversation";
 import uploadChatImageMutation from "../../lib/tanstack-query/Message/uploadChatImageMutation";
 import ALLOWED_IMAGE_TYPES, {
   MAX_IMAGE_SIZE,
 } from "../../utils/constants/conversation";
+import ConversationOtherProfile from "../../components/ConversationPage/ConversationOtherProfile";
+import ConversationOptions from "../../components/ConversationPage/ConversationOptions";
 
 const Conversation = () => {
   const { matchId } = useParams();
@@ -40,8 +40,6 @@ const Conversation = () => {
 
   const { mutate: uploadImageMutate, isPending: isUploadImageMutationPending } =
     useMutation(uploadChatImageMutation());
-
-  const { handleShowBlockSwal } = useBlockProfile();
 
   useEffect(() => {
     if (!matchId) return;
@@ -146,11 +144,6 @@ const Conversation = () => {
     lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleBlockProfile = (profileId: number | string) => {
-    handleShowBlockSwal(profileId);
-    closeMenu();
-  };
-
   const isQueryPending =
     isHistoryMessagesQueryPending || isConversationsListQueryPending;
   if (isQueryPending) {
@@ -162,100 +155,23 @@ const Conversation = () => {
       conversation.connection_id === Number(matchId),
   );
 
-
   return (
     <div className="flex h-full">
       <div className="flex h-full min-w-0 flex-1 flex-col">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-SecondaryColor/20 px-4 py-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <Link
-              to="/messages"
-              aria-label="Back to messages"
-              className="grid size-9 shrink-0 place-items-center rounded-full text-SecondaryColor transition hover:text-PrimaryColor lg:hidden"
-            >
-              <GoChevronLeft className="size-5" aria-hidden="true" />
-            </Link>
+          <ConversationOtherProfile
+            userId={matchedUser.user_id}
+            profilePic={matchedUser.picture_data}
+            firstname={matchedUser.firstname}
+            isOnline={matchedUser.is_online}
+          />
 
-            <Link
-              to={`/users/${matchedUser.user_id}`}
-              className="-mx-2 flex min-w-0 items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-SecondaryDarkBgColor/60"
-            >
-              {matchedUser.picture_data ? (
-                <img
-                  src={matchedUser.picture_data}
-                  alt={matchedUser.firstname}
-                  className="size-11 rounded-full"
-                />
-              ) : (
-                <span className="grid size-11 shrink-0 place-items-center rounded-full font-TitleFont text-lg text-PrimaryColor/90 bg-TertiaryColor">
-                  {matchedUser.firstname[0]}
-                </span>
-              )}
-
-              <div className="min-w-0">
-                <p className="font-PrimarySemiBoldFont">
-                  {matchedUser.firstname}
-                </p>
-                <p
-                className={`text-sm ${matchedUser.is_online ? "text-OnlineBgColor" : "text-SecondaryColor"}`}
-                >
-                  {matchedUser.is_online ? "Online" : "Offline"}
-                </p>
-              </div>
-            </Link>
-          </div>
-
-          {/* Conversation options */}
-          <div className="dropdown dropdown-end shrink-0">
-            <div
-              tabIndex={0}
-              role="button"
-              aria-label="Conversation options"
-              className="grid size-9 cursor-pointer place-items-center rounded-full text-SecondaryColor transition hover:text-PrimaryColor"
-            >
-              <IoEllipsisVertical className="size-5" aria-hidden="true" />
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu z-20 mt-2 w-52 rounded-2xl border border-SecondaryColor/20 bg-SecondaryDarkBgColor p-2 shadow-xl"
-            >
-              <li>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // TODO: wire up to real clear-chat logic
-                    closeMenu();
-                  }}
-                  className="rounded-xl text-PrimaryColor"
-                >
-                  Clear chat
-                </button>
-              </li>
-              <li>
-                {/* <button
-                  type="button"
-                  onClick={() => {
-                    // TODO: open a confirmation modal before reporting
-                    console.log("report", matchedUser.user_id);
-                    closeMenu();
-                  }}
-                  className="rounded-xl text-TertiaryColor"
-                >
-                  Report {matchedUser.firstname}
-                </button> */}
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => handleBlockProfile(matchedUser.user_id)}
-                  className="rounded-xl text-TertiaryColor"
-                >
-                  Block {matchedUser.firstname}
-                </button>
-              </li>
-            </ul>
-          </div>
+          <ConversationOptions
+            userId={matchedUser.user_id}
+            matchId={matchId}
+            firstname={matchedUser.firstname}
+          />
         </div>
 
         {/* Messages */}
