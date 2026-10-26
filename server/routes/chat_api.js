@@ -1,6 +1,59 @@
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
+
+
+const CHAT_IMAGES_DIR = path.join("images", "chat");
+fs.mkdirSync(CHAT_IMAGES_DIR, { recursive: true });
+
+const ALLOWED_IMAGE_TYPES = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+};
+
+const chatImageUpload = multer({
+  storage: multer.diskStorage({
+    destination: (request, file, callback) => callback(null, CHAT_IMAGES_DIR),
+    filename: (request, file, callback) => {
+      const random = crypto.randomBytes(16).toString("hex");
+      callback(
+        null,
+        `${request.session.userid}-${Date.now()}-${random}${ALLOWED_IMAGE_TYPES[file.mimetype]}`,
+      );
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (request, file, callback) =>
+    callback(
+      null,
+      Object.prototype.hasOwnProperty.call(ALLOWED_IMAGE_TYPES, file.mimetype),
+    ),
+});
+
+const handleChatImageUpload = (request, response, next) => {
+  chatImageUpload.single("image")(request, response, (error) => {
+    if (error instanceof multer.MulterError) {
+      return response.status(413).send({ error: error.code });
+    }
+    if (error) {
+      console.error(error);
+      return response.status(500).send(false);
+    }
+    next();
+  });
+};
+
 module.exports = (app, pool, socketIO) => {
   const isUserOnline = (userId) =>
     (socketIO.sockets.adapter.rooms.get(`user-${userId}`)?.size ?? 0) > 0;
+
+  const requireLogin = (request, response, next) => {
+    if (!request.session.userid) return response.status(401).send(false);
+    next();
+  };
 
   app.get("/api/chat/chat_connections", async (request, response) => {
     const session = request.session;
@@ -11,7 +64,11 @@ module.exports = (app, pool, socketIO) => {
                         u.id AS user_id, u.username, u.firstname,
                         u.last_connection,
                         us.age, up.picture_data,
-                        lm.message AS last_message,
+                        CASE
+                            WHEN lm.time_stamp IS NULL THEN NULL
+                            WHEN lm.message IS NULL OR lm.message = '' THEN 'Photo'
+                            ELSE lm.message
+                        END AS last_message,
                         lm.time_stamp AS last_message_time,
                         lm.sender_id AS last_message_sender_id,
                         uc.unread_count
@@ -21,7 +78,6 @@ module.exports = (app, pool, socketIO) => {
                     LEFT JOIN user_settings us ON us.user_id = u.id
                     LEFT JOIN user_pictures up
                         ON up.user_id = u.id AND up.profile_pic = 'YES'
-                    -- آخرین پیام این چت
                     LEFT JOIN LATERAL (
                         SELECT message, time_stamp, sender_id
                         FROM chat
@@ -29,7 +85,6 @@ module.exports = (app, pool, socketIO) => {
                         ORDER BY time_stamp DESC
                         LIMIT 1
                     ) lm ON TRUE
-                    -- تعداد پیام‌های نخوانده‌ای که طرف مقابل فرستاده
                     LEFT JOIN LATERAL (
                         SELECT COUNT(*)::int AS unread_count
                         FROM chat
@@ -67,8 +122,9 @@ module.exports = (app, pool, socketIO) => {
       if (member.rows.length === 0) return response.status(403).send(false);
 
       const { rows } = await pool.query(
-        `SELECT message AS text, sender_id, username AS name,
-                connection_id AS room, chat_id AS key, time_stamp
+        `SELECT COALESCE(message, '') AS text, image_url, sender_id,
+                username AS name, connection_id AS room,
+                chat_id AS key, time_stamp
          FROM chat
          INNER JOIN users ON users.id = chat.sender_id
          WHERE connection_id = $1
@@ -104,4 +160,16 @@ module.exports = (app, pool, socketIO) => {
       response.status(500).send(false);
     }
   });
+
+  app.post(
+    "/api/chat/upload_image",
+    requireLogin,
+    handleChatImageUpload,
+    (request, response) => {
+      if (!request.file) {
+        return response.status(400).send({ error: "invalid_file" });
+      }
+      response.send({ image_url: `/images/chat/${request.file.filename}` });
+    },
+  );
 };
