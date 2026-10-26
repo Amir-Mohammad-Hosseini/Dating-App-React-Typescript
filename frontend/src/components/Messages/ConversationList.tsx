@@ -22,10 +22,6 @@ const ConversationList = () => {
 
      const typingTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
-    const onConversationUpdate = () => {
-      queryClient.invalidateQueries({ queryKey });
-    };
-    
     const onPresenceChanged = ({ userId, online, lastSeen }: PresenceDataType) => {
       queryClient.setQueryData<ConversationItemType[]>(
         queryKey,
@@ -55,21 +51,13 @@ const ConversationList = () => {
         );
       }
     };
-    
-    const onConnect = () => {
-      queryClient.invalidateQueries({ queryKey });
-    }
 
-    socket.on("conversation_updated", onConversationUpdate);
     socket.on("presence_changed", onPresenceChanged);
     socket.on("user_typing", onUserTyping);
-    socket.on("connect", onConnect);
 
     return () => {
-      socket.off("conversation_updated", onConversationUpdate);
       socket.off("presence_changed", onPresenceChanged);
       socket.off("user_typing", onUserTyping);
-      socket.off("connect", onConnect);
         typingTimers.forEach((timer) => clearTimeout(timer));
     };
   }, []);
