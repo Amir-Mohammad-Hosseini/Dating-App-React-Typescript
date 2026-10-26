@@ -1,3 +1,5 @@
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3001";
+
 const closeMenu = () => (document.activeElement as HTMLElement | null)?.blur();
 
 const MILLISECONDS_PER_DAY = 86_400_000;
@@ -55,5 +57,10 @@ export const formatLastSeen = (iso: string | null) => {
   }
   return `Last seen ${label}`;
 };
+
+export const formatChatImageUrl = (path : string) => {
+    return `${BACKEND_URL}${path}`
+}
+
 
 export default closeMenu;

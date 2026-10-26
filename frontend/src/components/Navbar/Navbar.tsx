@@ -11,9 +11,6 @@ const NAV_ITEMS = [
   { to: "/myProfile", label: "Profile", Icon: FaRegUser },
 ];
 
-// base/sm: tab in the bottom bar (icon over label)
-// md:      icon-only square in the sidebar
-// lg+:     full-width row with icon + label
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-xs transition hover:text-PrimaryColor md:size-12 md:justify-center md:p-0 lg:h-12 lg:w-full lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:text-base ${
     isActive ? "bg-TertiaryColor/20 text-PrimaryColor" : "text-SecondaryColor"

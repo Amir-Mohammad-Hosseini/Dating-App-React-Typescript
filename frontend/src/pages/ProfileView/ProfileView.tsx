@@ -80,7 +80,6 @@ const ProfileView = () => {
     (conversation: ConversationItemType) => conversation.user_id === id,
   );
 
-  console.log(presenceProfile)
 
   return (
     <>

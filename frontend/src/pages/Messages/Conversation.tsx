@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState, type SubmitEventHandler } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type SubmitEventHandler,
+} from "react";
 import { Link, useParams } from "react-router";
 import { GoChevronLeft, GoCommentDiscussion } from "react-icons/go";
 import { IoSend, IoImageOutline, IoEllipsisVertical } from "react-icons/io5";
 import socket from "../../lib/socket/socket";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import roomHistoryMessagesQuery from "../../lib/tanstack-query/Message/roomHistoryMessagesQuery";
 import queryClient from "../../lib/tanstack-query/queryClient";
 import { toast } from "sonner";
@@ -14,6 +20,10 @@ import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import HistoryMessage from "../../components/MessagesPage/HistoryMessage";
 import type HistoryMessageType from "../../components/MessagesPage/types";
 import closeMenu from "../../utils/conversation";
+import uploadChatImageMutation from "../../lib/tanstack-query/Message/uploadChatImageMutation";
+import ALLOWED_IMAGE_TYPES, {
+  MAX_IMAGE_SIZE,
+} from "../../utils/constants/conversation";
 
 const Conversation = () => {
   const { matchId } = useParams();
@@ -28,28 +38,30 @@ const Conversation = () => {
     isPending: isConversationsListQueryPending,
   } = useQuery(conversationsListQuery());
 
+  const { mutate: uploadImageMutate, isPending: isUploadImageMutationPending } =
+    useMutation(uploadChatImageMutation());
+
   const { handleShowBlockSwal } = useBlockProfile();
 
   useEffect(() => {
     if (!matchId) return;
 
     const markRead = () => {
-      if(document.visibilityState !== "visible")
-        return
-      socket.emit("mark_read" , {
-        room : matchId
-      })
-    }
+      if (document.visibilityState !== "visible") return;
+      socket.emit("mark_read", {
+        room: matchId,
+      });
+    };
 
     const joinRoom = () => {
       socket.emit("join_room", {
         room: matchId,
       });
-      markRead()
+      markRead();
     };
     const onReceive = () => {
       queryClient.invalidateQueries({ queryKey: ["historyMessages", matchId] });
-      markRead()
+      markRead();
     };
     const onConnect = () => {
       joinRoom();
@@ -96,6 +108,44 @@ const Conversation = () => {
     setDraft("");
   };
 
+  const handleSendImageAsMessage = (event: ChangeEvent<HTMLInputElement>) => {
+    const imageFile = event.target.files![0];
+    console.log(imageFile);
+
+    if (!imageFile) {
+      return;
+    }
+    if (!ALLOWED_IMAGE_TYPES.includes(imageFile.type)) {
+      toast.error("Only JPG, PNG, WebP or GIF images are allowed.");
+      return;
+    }
+    if (imageFile.size > MAX_IMAGE_SIZE) {
+      toast.error("Image is too large (max 5 MB).");
+      return;
+    }
+
+    uploadImageMutate(imageFile, {
+      onSuccess: (image_url) => {
+        socket.emit(
+          "send_message",
+          {
+            room: matchId,
+            image_url,
+          },
+          (response: { ok: boolean; error?: string }) => {
+            if (!response.ok) {
+              toast.error("Image was not sent. Try again.");
+            }
+          },
+        );
+      },
+    });
+  };
+
+  const handleLoadScrollToBottom = () => {
+    lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleBlockProfile = (profileId: number | string) => {
     handleShowBlockSwal(profileId);
     closeMenu();
@@ -111,6 +161,7 @@ const Conversation = () => {
     (conversation: ConversationItemType) =>
       conversation.connection_id === Number(matchId),
   );
+
 
   return (
     <div className="flex h-full">
@@ -147,9 +198,9 @@ const Conversation = () => {
                   {matchedUser.firstname}
                 </p>
                 <p
-                // className={`text-sm ${match.online ? "text-OnlineBgColor" : "text-SecondaryColor"}`}
+                className={`text-sm ${matchedUser.is_online ? "text-OnlineBgColor" : "text-SecondaryColor"}`}
                 >
-                  {/* {match.online ? "Online" : "Offline"} */}
+                  {matchedUser.is_online ? "Online" : "Offline"}
                 </p>
               </div>
             </Link>
@@ -223,26 +274,36 @@ const Conversation = () => {
         ) : (
           <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-6">
             {historyMessages.map(({ key, ...message }: HistoryMessageType) => (
-              <HistoryMessage key={key} {...message} />
+              <HistoryMessage
+                key={key}
+                {...message}
+                onImageLoad={handleLoadScrollToBottom}
+              />
             ))}
             <div ref={lastMessageRef} />
           </div>
         )}
 
-        {/* Composer */}
+        {/* Send Message Form */}
         <form
           onSubmit={handleSendMessage}
           className="flex shrink-0 items-center gap-2 border-t border-SecondaryColor/20 px-4 py-3 sm:px-6"
         >
           <label
             htmlFor="image-file"
-            className="border border-SecondaryColor/30 rounded-full size-10 cursor-pointer flex items-center justify-center text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor"
+            className={`border border-SecondaryColor/30 rounded-full size-10 cursor-pointer flex items-center justify-center text-SecondaryColor transition hover:border-PrimaryColor hover:text-PrimaryColor ${
+              isUploadImageMutationPending
+                ? "pointer-events-none animate-pulse opacity-60"
+                : ""
+            }`}
           >
             <input
               id="image-file"
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp,image/gif"
               aria-label="Attach a photo"
+              onChange={handleSendImageAsMessage}
+              disabled={isUploadImageMutationPending}
               className="sr-only"
             />
             <IoImageOutline className="size-4" aria-hidden="true" />

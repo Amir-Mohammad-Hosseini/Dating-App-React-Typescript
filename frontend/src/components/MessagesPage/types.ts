@@ -5,4 +5,6 @@ export default interface HistoryMessageType {
   sender_id: number;
   text: string;
   time_stamp: string;
+  image_url: string | null;
+  onImageLoad : () => void
 }
