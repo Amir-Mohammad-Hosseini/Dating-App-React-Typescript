@@ -10,11 +10,10 @@ export default function ActivityList({
   items,
   isLoading,
   isError,
-  onRetry = () => {},
   onLike,
 }: ActivityListType) {
   if (isLoading) return <ActivitySkeleton count={6} />;
-  if (isError) return <ActivityError onRetry={onRetry} />;
+  if (isError) return <ActivityError/>;
   if (!items || items.length === 0) return <ActivityEmpty variant={variant} />;
 
   return (
