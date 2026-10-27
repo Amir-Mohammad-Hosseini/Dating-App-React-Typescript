@@ -102,6 +102,7 @@ require("./routes/signup.js")(app, pool, bcrypt, transporter, crypto);
 require("./routes/browsing.js")(app, pool, transporter, socketIO);
 require("./routes/resetpassword.js")(app, pool, bcrypt, transporter, crypto);
 require("./routes/chat_api.js")(app, pool, socketIO);
+require("./routes/activity.js")(app, pool, socketIO);
 require("./routes/chat.js")(pool, socketIO);
 
 const PORT = config.PORT || 3001;

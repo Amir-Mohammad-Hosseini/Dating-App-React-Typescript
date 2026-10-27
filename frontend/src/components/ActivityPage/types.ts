@@ -1,4 +1,4 @@
-export interface ActivityItem {
+export interface ActivityItemType {
   user_id: number;
   firstname: string;
   username: string;
@@ -12,13 +12,19 @@ export interface ActivityItem {
   is_new: boolean;
 };
 
+export type ActivityVariantType = "visitors" | "likes";
 export default interface ActivityListType {
-  variant: ActivityVariant;
-  items?: ActivityItem[];
-  isLoading?: boolean;
+  variant: ActivityVariantType;
+  items?: ActivityItemType[];
   isError?: boolean;
   onRetry?: () => void;
   onLike?: (userId: number) => void;
 };
 
-export type ActivityVariant = "visitors" | "likes";
+export interface ActivityCardType {
+  item: ActivityItemType;
+  variant: ActivityVariantType;
+  onLike?: (userId: number) => void;
+  liking?: boolean;
+};
+

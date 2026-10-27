@@ -1,25 +1,20 @@
 import ActivityCard from "./ActivityCard";
 import ActivityEmpty, { ActivityError } from "./ActivityEmpty";
-import ActivitySkeleton from "./ActivitySkeleton";
 import type ActivityListType from "./types";
 
-
-/** Shared by VisitorsTab and LikesTab: <ActivityList variant="visitors" {...query} /> */
 export default function ActivityList({
   variant,
   items,
-  isLoading,
   isError,
   onLike,
 }: ActivityListType) {
-  if (isLoading) return <ActivitySkeleton count={6} />;
-  if (isError) return <ActivityError/>;
+  if (isError) return <ActivityError />;
   if (!items || items.length === 0) return <ActivityEmpty variant={variant} />;
 
   return (
-    <ul className="mx-auto grid max-w-5xl grid-cols-1 gap-3 lg:grid-cols-2">
+    <ul className="grid w-full grid-cols-1 gap-3 xl:grid-cols-2">
       {items.map((item) => (
-        <li key={item.user_id}>
+        <li key={item.user_id} className="min-w-0">
           <ActivityCard item={item} variant={variant} onLike={onLike} />
         </li>
       ))}

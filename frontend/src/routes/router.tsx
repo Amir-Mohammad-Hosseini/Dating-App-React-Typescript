@@ -24,8 +24,8 @@ import ErrorPage from "../pages/Errors/ErrorPage";
 import Pro from "../pages/Pro/Pro";
 import BlockedAccounts from "../pages/MyProfile/BlockedAccounts";
 import ActivityLayout from "../layouts/ActivityLayout/ActivityLayout";
-import VisitorsPage from "../pages/Activity/VisitorsTab";
-import LikesPage from "../pages/Activity/LikesTab";
+import VisitorsPage from "../pages/Activity/Visitors";
+import LikersPage from "../pages/Activity/Likers";
 
 const router = createBrowserRouter([
   {
@@ -85,7 +85,7 @@ const router = createBrowserRouter([
             children: [
               {index : true , element : <Navigate to="visitors" replace />},
               {path : "visitors" , element : <VisitorsPage />},
-              {path : "likes" , element : <LikesPage />},
+              {path : "likes" , element : <LikersPage />},
             ],
           },
           { path: "pro", element: <Pro /> },

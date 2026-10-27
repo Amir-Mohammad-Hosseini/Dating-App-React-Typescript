@@ -1,11 +1,11 @@
 import { Link } from "react-router";
 import { IoEyeOutline, IoHeartOutline, IoAlertCircleOutline } from "react-icons/io5";
-import type { ActivityVariant } from "./types";
+import type { ActivityVariantType } from "./types";
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-TertiaryColor focus-visible:ring-offset-2 focus-visible:ring-offset-PrimaryDarkBgColor";
 
-type EmptyProps = { variant: ActivityVariant };
+type EmptyProps = { variant: ActivityVariantType };
 
 export function ActivityEmpty({ variant }: EmptyProps) {
   const isVisitors = variant === "visitors";
