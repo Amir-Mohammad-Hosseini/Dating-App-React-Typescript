@@ -16,6 +16,8 @@ const {
   pgHost,
   EMAIL_ADDRESS,
   EMAIL_PASSWORD,
+  SMTP_HOST,
+  SMTP_PORT,
 } = require("./config");
 const http = require("http").Server(app); //required for socket to work
 
@@ -75,12 +77,28 @@ const connectToDatabase = () => {
 };
 connectToDatabase();
 
-var transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: EMAIL_ADDRESS,
-    pass: EMAIL_PASSWORD,
-  },
+// EMAIL SETUP
+// If SMTP_HOST is set (Mailpit in development), we use it with no login.
+// Otherwise we fall back to Gmail with EMAIL_ADDRESS / EMAIL_PASSWORD.
+const transporter = nodemailer.createTransport(
+  SMTP_HOST
+    ? {
+        host: SMTP_HOST,
+        port: Number(SMTP_PORT) || 1025,
+        secure: false,
+      }
+    : {
+        service: "gmail",
+        auth: {
+          user: EMAIL_ADDRESS,
+          pass: EMAIL_PASSWORD,
+        },
+      },
+);
+
+transporter.verify((error) => {
+  if (error) console.error("SMTP connection failed:", error.message);
+  else console.log("SMTP ready:", SMTP_HOST ? `${SMTP_HOST}:${SMTP_PORT}` : "gmail");
 });
 
 // Think about adding fieldname to naming if necessary.

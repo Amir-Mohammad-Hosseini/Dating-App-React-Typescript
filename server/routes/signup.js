@@ -61,97 +61,90 @@ module.exports = function (app, pool, bcrypt, transporter, crypto) {
           .then(() => {
             return (true)
           }).catch((error) => {
-            return (error)
+            // Our own validation errors are strings. Anything else is an unexpected error.
+            if (typeof error === 'string') return error
+            console.error('Unexpected error in signup validation: ', error)
+            return 'Something went wrong. Please check your data and try again!'
           })
       )
     }
 
     const signupValidationResult = await validateSignupData(username, firstname, lastname, email, password, confirmPassword)
 
-    if (signupValidationResult === true) {
-      const generateVerificationCode = async () => {
-        const retrieveUserId = async () => {
-          var sql = 'SELECT id FROM users WHERE username = $1;'
-          const result = await pool.query(sql, [username])
-          return result.rows[0]['id']
-        }
+    if (signupValidationResult !== true) {
+      return response.send(signupValidationResult)
+    }
 
-        // Generating a code and checking for the very unlikely case that a similar code already exists in the table.
-        while (true) {
-          var code = crypto.randomBytes(20).toString('hex')
-          var sql = 'SELECT * FROM email_verify WHERE verify_code = $1;'
-          const result = await pool.query(sql, [code])
-          if (result.rows.length < 1) {
-            console.log('No duplicates found for the newly generated verification code in signup.')
-            break
-          } else {
-            console.log('Found a duplicate for the newly generated verification code in signup. Proceeding to generate a new code.')
-            continue
-          }
-        }
-
-        retrieveUserId()
-          .then((user_id) => {
-            var sql = 'INSERT INTO email_verify (user_id, email, verify_code) VALUES ($1, $2, $3);'
-            pool.query(sql, [user_id, email, code])
-          }).catch(error => {
-            console.error('Error in signup: ', error)
-          })
-
-        return (code)
+    // Creates a unique code and saves it in email_verify.
+    const generateVerificationCode = async (userId) => {
+      let code
+      // Checking for the very unlikely case that a similar code already exists in the table.
+      while (true) {
+        code = crypto.randomBytes(20).toString('hex')
+        const result = await pool.query('SELECT * FROM email_verify WHERE verify_code = $1;', [code])
+        if (result.rows.length < 1) break
+        console.log('Found a duplicate for the newly generated verification code in signup. Generating a new code.')
       }
 
-      const sendVerificationCodeByEmail = (email, username, code) => {
+      await pool.query(
+        'INSERT INTO email_verify (user_id, email, verify_code) VALUES ($1, $2, $3);',
+        [userId, email, code]
+      )
+      return code
+    }
 
-        var mailOptions = {
+    const sendVerificationCodeByEmail = async (code) => {
+      const link = `${process.env.FRONTEND_URL}/confirm/${username}/${code}`
+      try {
+        const info = await transporter.sendMail({
           from: process.env.EMAIL_ADDRESS,
           to: email,
           subject: 'Verify your email address for Matcha',
           html: `<p>Click the link below to verify your account for Matcha</p>
-                <a href="http://localhost:3001/confirm/${username}/${code}">Link</a>
+                <a href="${link}">Link</a>
                 <p>- Matcha team</p>`
-        }
-
-        transporter.sendMail(mailOptions, function (error, info) {
-          if (error) {
-            console.error('Something went wrong when trying to send email: ', error)
-          } else {
-            console.log('Email sent successfully: ' + info.response)
-          }
         })
+        console.log('Email sent successfully: ' + info.response)
+      } catch (error) {
+        console.error('Something went wrong when trying to send email: ', error)
+        throw ('We could not send the verification email. Please try again later!')
       }
+    }
 
-      const hashPasswordAndSaveUser = async () => {
-        const hash = await bcrypt.hash(password, 10)
-        try {
-          const newUser = await pool.query(
-            'INSERT INTO users (username, firstname, lastname, email, password) VALUES($1, $2, $3, $4, $5) RETURNING *',
-            [username, firstname, lastname, email, hash]
-          )
-          sql = "INSERT INTO fame_rates (user_id) VALUES ($1)";
-          await pool.query(sql, [newUser.rows[0]['id']])
-          return
-        } catch (error) {
-          console.error("Something went wrong when trying to create a new user: ", error)
-          throw ('Something went wrong when trying to create the new user. Please try again!')
-        }
-
+    // If something fails after the user is created, we remove the half-created user
+    // so that the person can sign up again with the same username and email.
+    const removeNewUser = async (userId) => {
+      try {
+        await pool.query('DELETE FROM email_verify WHERE user_id = $1', [userId])
+        await pool.query('DELETE FROM fame_rates WHERE user_id = $1', [userId])
+        await pool.query('DELETE FROM users WHERE id = $1', [userId])
+      } catch (error) {
+        console.error('Failed to clean up the new user: ', error)
       }
+    }
 
-      // if (validateSignupData(request.body) == -1) {
-      // response.json('error')
-      // }
+    let userId = null
+    try {
+      const hash = await bcrypt.hash(password, 10)
+      const newUser = await pool.query(
+        'INSERT INTO users (username, firstname, lastname, email, password) VALUES($1, $2, $3, $4, $5) RETURNING id',
+        [username, firstname, lastname, email, hash]
+      )
+      userId = newUser.rows[0]['id']
+      await pool.query('INSERT INTO fame_rates (user_id) VALUES ($1)', [userId])
 
-      hashPasswordAndSaveUser()
-        .then(() => generateVerificationCode())
-        .then((code) => sendVerificationCodeByEmail(email, username, code))
-        .then(() => {
-          response.send(true)
-        }).catch((error) => {
-          response.send(error)
-        })
-    } else {
-      response.send(signupValidationResult)
+      const code = await generateVerificationCode(userId)
+      await sendVerificationCodeByEmail(code)
+
+      response.send(true)
+    } catch (error) {
+      console.error('Error in signup: ', error)
+      if (userId !== null) await removeNewUser(userId)
+      response.send(
+        typeof error === 'string'
+          ? error
+          : 'Something went wrong when trying to create the new user. Please try again!'
+      )
     }
   })
 
@@ -159,34 +152,37 @@ module.exports = function (app, pool, bcrypt, transporter, crypto) {
     const username = request.body.username
     const code = request.body.code
 
-    const checkCodeValidity = async () => {
-      var sql =
+    if (typeof username !== 'string' || typeof code !== 'string') {
+      return response.send('Invalid code!')
+    }
+
+    try {
+      // The code has to belong to THIS username.
+      const result = await pool.query(
         `SELECT * FROM email_verify
           INNER JOIN users
           ON email_verify.user_id = users.id
-          WHERE email_verify.verify_code = $1;`
-      const result = await pool.query(sql, [code])
+          WHERE email_verify.verify_code = $1
+          AND users.username = $2;`,
+        [code, username]
+      )
       if (result.rows.length < 1) {
+        const alreadyVerified = await pool.query(
+          `SELECT 1 FROM users WHERE username = $1 AND verified = 'YES'`,
+          [username]
+        )
+        if (alreadyVerified.rows.length > 0) return response.send(true)
+
         console.error('Verification failed.')
-        throw ('Invalid code!')
-      } else {
-        return (true)
+        return response.send('Invalid code!')
       }
-    }
 
-    const setAccountVerified = () => {
-      var sql = 'UPDATE users SET verified = \'YES\' WHERE username = $1'
-      pool.query(sql, [username])
-      var sql = 'DELETE FROM email_verify WHERE verify_code = $1'
-      pool.query(sql, [code])
+      await pool.query("UPDATE users SET verified = 'YES' WHERE username = $1", [username])
+      await pool.query('DELETE FROM email_verify WHERE verify_code = $1', [code])
+      response.send(true)
+    } catch (error) {
+      console.error('Error in verifyuser: ', error)
+      response.send('Something went wrong. Please try again!')
     }
-
-    checkCodeValidity()
-      .then(() => {
-        setAccountVerified()
-        response.send(true)
-      }).catch((error) => {
-        response.send(error)
-      })
   })
 }

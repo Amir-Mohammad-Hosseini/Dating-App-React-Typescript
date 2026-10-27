@@ -26,6 +26,7 @@ import BlockedAccounts from "../pages/MyProfile/BlockedAccounts";
 import ActivityLayout from "../layouts/ActivityLayout/ActivityLayout";
 import VisitorsPage from "../pages/Activity/Visitors";
 import LikersPage from "../pages/Activity/Likers";
+import VerifyEmail from "../pages/Auth/VerifyEmail";
 
 const router = createBrowserRouter([
   {
@@ -92,6 +93,7 @@ const router = createBrowserRouter([
         ],
       },
 
+      { path: "confirm/:username/:code", element: <VerifyEmail /> },
       { path: "*", element: <NotFound /> },
     ],
   },

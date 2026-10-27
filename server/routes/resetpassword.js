@@ -43,22 +43,21 @@ module.exports = function (app, pool, bcrypt, transporter, crypto) {
         }
 
         const sendResetMail = async (paramsForMail) => {
-            var mailOptions = {
-                from: process.env.EMAIL_ADDRESS,
-                to: paramsForMail.email,
-                subject: 'Here is the link to reset your password',
-                html: `<p>Click the link below to reset your password.</p>
-                        <a href="http://localhost:3001/resetpassword/${paramsForMail.username}/${paramsForMail.reset_code}">Link</a>
-                        <p>- Matcha team</p>`
+            const link = `${process.env.FRONTEND_URL}/resetpassword/${paramsForMail.username}/${paramsForMail.reset_code}`
+            try {
+                const info = await transporter.sendMail({
+                    from: process.env.EMAIL_ADDRESS,
+                    to: paramsForMail.email,
+                    subject: 'Here is the link to reset your password',
+                    html: `<p>Click the link below to reset your password.</p>
+                            <a href="${link}">Link</a>
+                            <p>- Matcha team</p>`
+                })
+                console.log('Email sent successfully: ' + info.response)
+            } catch (error) {
+                console.error('Something went wrong when trying to send email: ', error)
+                throw ('We could not send the reset email. Please try again later!')
             }
-            await transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                    console.error(error);
-                } else {
-                    console.log('Email sent successfully: ' + info.response)
-                }
-            })
-            return
         }
 
         checkForUserId()
@@ -67,7 +66,8 @@ module.exports = function (app, pool, bcrypt, transporter, crypto) {
             .then(() => {
                 response.send(true)
             }).catch((error) => {
-                response.send(error)
+                console.error(error)
+                response.send(typeof error === 'string' ? error : 'Something went wrong. Please try again!')
             })
     })
 

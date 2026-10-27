@@ -21,6 +21,13 @@ services:
     ports:
       - "8080:8080"
 
+  mailpit:
+    image: axllent/mailpit
+    restart: always
+    ports:
+      - "8025:8025"   # web panel: http://localhost:8025
+      - "1025:1025"   # SMTP
+
   server:
     build:
       dockerfile: Dockerfile.dev
@@ -32,6 +39,7 @@ services:
       - "3001:3001"
     depends_on:
       - db
+      - mailpit
     env_file:
       - .env
     restart: on-failure
