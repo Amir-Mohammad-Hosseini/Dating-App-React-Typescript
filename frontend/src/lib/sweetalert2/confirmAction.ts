@@ -13,8 +13,11 @@ type ConfirmActionProps = {
   input?: SweetAlertInput;
   inputPlaceholder?: string;
   html?: string;
+  inputOptions ?: object,
+  showCancelButton ?: boolean
   didOpen?: SweetAlertOptions["didOpen"];
   preConfirm?: SweetAlertOptions["preConfirm"];
+  inputValidator ?: (value : any) => void
 };
 
 export const confirmAction = async ({
@@ -27,6 +30,8 @@ export const confirmAction = async ({
   html,
   didOpen,
   inputPlaceholder,
+  inputOptions,
+  showCancelButton = true,
   preConfirm,
 }: ConfirmActionProps) => {
   const result = await Swal.fire({
@@ -38,12 +43,13 @@ export const confirmAction = async ({
     didOpen,
     inputPlaceholder,
     preConfirm,
-    showCancelButton: true,
+    showCancelButton,
     confirmButtonText,
     cancelButtonText: "Cancel",
     confirmButtonColor,
     cancelButtonColor: "#dc2626",
     reverseButtons: true,
+    inputOptions,
   focusCancel: !input && !html,
     showLoaderOnConfirm: !!preConfirm,
     allowOutsideClick: () => !Swal.isLoading(),

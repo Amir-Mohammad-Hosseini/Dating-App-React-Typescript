@@ -3,15 +3,21 @@ import closeMenu from "../../utils/conversation";
 import useBlockProfile from "../../hooks/BlockProfile/useBlockProfile";
 import type { ConversationOptionsType } from "./types";
 import queryClient from "../../lib/tanstack-query/queryClient";
+import useReportProfile from "../../hooks/ReportProfile/useReportProfile";
+import Spinner from "../Loader/Spinner";
+import useClearChat from "../../hooks/ClearChat/useClearChat";
 
 const ConversationOptions = ({
   userId,
   firstname,
   matchId
 }: ConversationOptionsType) => {
-  const { handleShowBlockSwal } = useBlockProfile();
+  const { handleShowBlockSwal , isBlockProfileMutatePending } = useBlockProfile();
+  const { handleShowReportSwal , isReportProfileMutationPending} = useReportProfile();
+  const {handleShowClearChatSwal , isClearChatMutationPending} = useClearChat()
 
   const handleClearChat = () => {
+    handleShowClearChatSwal(matchId)
     closeMenu();
   };
 
@@ -24,6 +30,7 @@ const ConversationOptions = ({
   };
 
   const handleReportUser = () => {
+    handleShowReportSwal(userId)
     closeMenu();
   };
 
@@ -45,27 +52,30 @@ const ConversationOptions = ({
           <button
             type="button"
             onClick={handleClearChat}
+            disabled={isClearChatMutationPending}
             className="rounded-xl text-PrimaryColor"
           >
-            Clear chat
+            {isClearChatMutationPending ? <Spinner /> :"Clear chat"}
           </button>
         </li>
         <li>
           <button
             type="button"
+            disabled={isReportProfileMutationPending}
             onClick={handleReportUser}
             className="rounded-xl text-TertiaryColor"
           >
-            Report {firstname}
+            {isReportProfileMutationPending ? <Spinner /> :`Report ${firstname}`}
           </button>
         </li>
         <li>
           <button
             type="button"
+            disabled={isBlockProfileMutatePending}
             onClick={() => handleBlockProfile(userId)}
             className="rounded-xl text-TertiaryColor"
           >
-            Block {firstname}
+            {isBlockProfileMutatePending ? <Spinner /> :`Block ${firstname}`}
           </button>
         </li>
       </ul>
