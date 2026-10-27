@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import RootLayout from "../layouts/RootLayout/RootLayout";
 import { OnboardingRoute, ProtectedRoute, AuthRoute } from "./../guards";
 import Welcome from "../pages/Auth/Welcome";
@@ -23,11 +23,14 @@ import NotFound from "../pages/Errors/NotFound";
 import ErrorPage from "../pages/Errors/ErrorPage";
 import Pro from "../pages/Pro/Pro";
 import BlockedAccounts from "../pages/MyProfile/BlockedAccounts";
+import ActivityLayout from "../layouts/ActivityLayout/ActivityLayout";
+import VisitorsPage from "../pages/Activity/VisitorsTab";
+import LikesPage from "../pages/Activity/LikesTab";
 
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
-    errorElement : <ErrorPage />,
+    errorElement: <ErrorPage />,
     children: [
       // Just for unlogged users
       {
@@ -76,6 +79,15 @@ const router = createBrowserRouter([
           { path: "settings", element: <Settings /> },
           { path: "settings/blocked", element: <BlockedAccounts /> },
           { path: "notifications", element: <Notifications /> },
+          {
+            path: "activity",
+            element: <ActivityLayout />,
+            children: [
+              {index : true , element : <Navigate to="visitors" replace />},
+              {path : "visitors" , element : <VisitorsPage />},
+              {path : "likes" , element : <LikesPage />},
+            ],
+          },
           { path: "pro", element: <Pro /> },
         ],
       },

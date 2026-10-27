@@ -1,0 +1,132 @@
+import { Link } from "react-router";
+import { IoChatbubbleOutline, IoHeart, IoHeartOutline } from "react-icons/io5";
+import { relativeTime } from "./relativeTime";
+import type { ActivityItem, ActivityVariant } from "./types";
+
+type Props = {
+  item: ActivityItem;
+  variant: ActivityVariant;
+  onLike?: (userId: number) => void;
+  liking?: boolean;
+};
+
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5435A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#25262A]";
+
+function secondaryText(item: ActivityItem, variant: ActivityVariant) {
+  const when = relativeTime(item.activity_time);
+  if (variant === "likes") return `Liked you ${when}`;
+  if (item.visit_count && item.visit_count > 1) {
+    return `Visited ${item.visit_count} times · last ${when}`;
+  }
+  return `Visited ${when}`;
+}
+
+export default function ActivityCard({ item, variant, onLike, liking }: Props) {
+  const isMatch = item.connection_id !== null;
+  const title = item.age ? `${item.firstname}, ${item.age}` : item.firstname;
+
+  return (
+    <div className="group relative flex items-center gap-3 rounded-2xl border border-white/5 bg-[#2E2F34] p-3 transition-colors hover:bg-[#34353B] sm:gap-4 sm:p-4">
+      {/* Whole-card link (stretched). Buttons sit above it with z-10. */}
+      <Link
+        to={`/users/${item.user_id}`}
+        aria-label={`View ${item.firstname}'s profile`}
+        className={`absolute inset-0 rounded-2xl ${focusRing}`}
+      />
+
+      {/* Avatar */}
+      <div className="relative shrink-0">
+        {item.picture_data ? (
+          <img
+            src={item.picture_data}
+            alt=""
+            className="size-14 rounded-full object-cover"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="flex size-14 items-center justify-center rounded-full bg-[#F5435A] text-xl font-semibold text-white"
+          >
+            {item.firstname.charAt(0).toUpperCase()}
+          </div>
+        )}
+        {item.is_online && (
+          <span
+            role="img"
+            aria-label="Online"
+            className="absolute bottom-0 right-0 size-3.5 rounded-full border-2 border-[#2E2F34] bg-emerald-400"
+          />
+        )}
+      </div>
+
+      {/* Text */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate font-semibold text-[#DCE0E4]">{title}</p>
+          {item.is_new && (
+            <span
+              role="img"
+              aria-label="New"
+              className="size-2 shrink-0 rounded-full bg-[#F5435A] shadow-[0_0_8px_#F5435A]"
+            />
+          )}
+          {isMatch && (
+            <span className="hidden shrink-0 rounded-full bg-[#F5435A]/15 px-2 py-0.5 text-[11px] font-medium text-[#F5435A] sm:inline">
+              Match
+            </span>
+          )}
+        </div>
+        <p className="truncate text-sm text-[#A3A8B0]">
+          {secondaryText(item, variant)}
+        </p>
+      </div>
+
+      {/* Action */}
+      <div className="relative z-10 shrink-0">
+        {isMatch ? (
+          <Link
+            to={`/messages/${item.connection_id}`}
+            aria-label={`Message ${item.firstname}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border border-[#DCE0E4]/30 px-3 py-2 text-sm font-medium text-[#DCE0E4] transition-colors hover:border-[#F5435A] hover:text-[#F5435A] ${focusRing}`}
+          >
+            <IoChatbubbleOutline aria-hidden="true" className="size-4" />
+            <span className="hidden sm:inline">Message</span>
+          </Link>
+        ) : item.i_liked ? (
+          <button
+            type="button"
+            disabled
+            aria-label={`You liked ${item.firstname}`}
+            className="inline-flex cursor-default items-center gap-1.5 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-[#A3A8B0]"
+          >
+            <IoHeart aria-hidden="true" className="size-4 text-[#F5435A]" />
+            <span>Liked</span>
+          </button>
+        ) : variant === "likes" ? (
+          <button
+            type="button"
+            onClick={() => onLike?.(item.user_id)}
+            disabled={liking}
+            aria-label={`Like ${item.firstname} back`}
+            className={`inline-flex items-center gap-1.5 rounded-full bg-[#F5435A] px-3.5 py-2 text-sm font-semibold text-[#25262A] transition-opacity hover:opacity-90 disabled:opacity-60 ${focusRing}`}
+          >
+            <IoHeart aria-hidden="true" className="size-4" />
+            <span>Like back</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onLike?.(item.user_id)}
+            disabled={liking}
+            aria-label={`Like ${item.firstname}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border border-[#F5435A] px-3.5 py-2 text-sm font-semibold text-[#F5435A] transition-colors hover:bg-[#F5435A] hover:text-[#25262A] disabled:opacity-60 ${focusRing}`}
+          >
+            <IoHeartOutline aria-hidden="true" className="size-4" />
+            <span>Like</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
