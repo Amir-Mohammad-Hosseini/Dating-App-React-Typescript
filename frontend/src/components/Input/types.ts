@@ -36,10 +36,9 @@ export interface RadioInputType<
   onChange?: (option: T) => void;
 }
 
-export interface TextareaInputType {
+export interface TextareaInputType extends Omit<ComponentPropsWithoutRef<"textarea"> , "defaultValue"> {
   text: string;
   extraDescription?: string;
-  name?: string;
   error?: string;
   defaultValue: string;
 }

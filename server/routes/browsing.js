@@ -1,4 +1,10 @@
 module.exports = (app, pool, transporter, socketIO) => {
+  const requireNumericId = (request, response, next) => {
+    if (!Number.isInteger(Number(request.params.id)))
+      return response.status(400).send(false);
+    next();
+  };
+
   // Great-circle distance in kilometers (Haversine formula).
   // Returns null if any coordinate is missing / not a finite number.
   const haversineKm = (lat1, lon1, lat2, lon2) => {
@@ -257,7 +263,7 @@ module.exports = (app, pool, transporter, socketIO) => {
           const inserted_notif_id = await pool.query(sql, [
             profile_id,
             notification,
-            `/profile/${session.userid}`,
+            `/users/${session.userid}`,
             session.userid,
           ]);
 
@@ -266,7 +272,7 @@ module.exports = (app, pool, transporter, socketIO) => {
             inserted_notif_id.rows[0]["notification_id"],
             notification,
             profile_id,
-            `/profile/${session.userid}`,
+            `/users/${session.userid}`,
           ).catch(console.error);
         } catch (sideEffectError) {
           console.error(
@@ -283,338 +289,358 @@ module.exports = (app, pool, transporter, socketIO) => {
     }
   });
 
-  app.post("/api/browsing/likeuser/:id", async (request, response) => {
-    const session = request.session;
+  app.post(
+    "/api/browsing/likeuser/:id",
+    requireNumericId,
+    async (request, response) => {
+      const session = request.session;
 
-    if (session.userid) {
-      var sql = `SELECT picture_data FROM user_pictures
+      if (session.userid) {
+        var sql = `SELECT picture_data FROM user_pictures
 						    WHERE user_id = $1 AND profile_pic = 'YES'`;
-      const { rows } = await pool.query(sql, [session.userid]);
-      if (
-        rows[0] == undefined ||
-        rows[0]["picture_data"] === null ||
-        rows[0]["picture_data"] ===
-          "http://localhost:3001/images/default_profilepic.jpeg"
-      ) {
-        return response.send("No profile picture");
-      } else {
-        const liked_person_id = request.params.id;
+        const { rows } = await pool.query(sql, [session.userid]);
+        if (
+          rows[0] == undefined ||
+          rows[0]["picture_data"] === null ||
+          rows[0]["picture_data"] ===
+            "http://localhost:3001/images/default_profilepic.jpeg"
+        ) {
+          return response.send("No profile picture");
+        } else {
+          const liked_person_id = request.params.id;
 
-        // you cannot like yourself.
-        if (Number(liked_person_id) === Number(session.userid))
-          return response.status(400).send("You cannot like yourself!");
+          // you cannot like yourself.
+          if (Number(liked_person_id) === Number(session.userid))
+            return response.status(400).send("You cannot like yourself!");
 
-        // Used by the frontend to show the match modal.
-        let isMatch = false;
-        let connectionId = null;
+          // Used by the frontend to show the match modal.
+          let isMatch = false;
+          let connectionId = null;
 
-        // preventing multiple presses of the like button
-        var sql = `SELECT * FROM likes WHERE liker_id = $1 AND target_id = $2`;
-        const likeAlreadyExistsCheck = await pool.query(sql, [
-          session.userid,
-          liked_person_id,
-        ]);
+          // preventing multiple presses of the like button
+          var sql = `SELECT * FROM likes WHERE liker_id = $1 AND target_id = $2`;
+          const likeAlreadyExistsCheck = await pool.query(sql, [
+            session.userid,
+            liked_person_id,
+          ]);
 
-        if (likeAlreadyExistsCheck.rows.length === 0) {
-          var sql = `INSERT INTO likes (liker_id, target_id) VALUES ($1, $2)`;
-          await pool.query(sql, [session.userid, liked_person_id]);
+          if (likeAlreadyExistsCheck.rows.length === 0) {
+            var sql = `INSERT INTO likes (liker_id, target_id) VALUES ($1, $2)`;
+            await pool.query(sql, [session.userid, liked_person_id]);
 
-          var sql = `UPDATE fame_rates SET like_pts = like_pts + 10, total_pts = total_pts + 10
+            var sql = `UPDATE fame_rates SET like_pts = like_pts + 10, total_pts = total_pts + 10
                     WHERE user_id = $1
                     AND like_pts <= 40 AND total_pts <= 90`;
-          pool.query(sql, [liked_person_id]);
+            pool.query(sql, [liked_person_id]);
 
-          var sql = `SELECT * FROM likes WHERE liker_id = $1 AND target_id = $2`;
-          const reciprocalLikeExistsCheck = await pool.query(sql, [
-            liked_person_id,
-            session.userid,
-          ]);
+            var sql = `SELECT * FROM likes WHERE liker_id = $1 AND target_id = $2`;
+            const reciprocalLikeExistsCheck = await pool.query(sql, [
+              liked_person_id,
+              session.userid,
+            ]);
 
-          var sql = `SELECT * FROM connections
+            var sql = `SELECT * FROM connections
 							      WHERE (user1_id = $1 AND user2_id = $2)
                     OR (user1_id = $2 AND user2_id = $1)`;
-          const connectionAlreadyExistsCheck = await pool.query(sql, [
-            session.userid,
-            liked_person_id,
-          ]);
+            const connectionAlreadyExistsCheck = await pool.query(sql, [
+              session.userid,
+              liked_person_id,
+            ]);
 
-          if (
-            reciprocalLikeExistsCheck.rows.length !== 0 &&
-            connectionAlreadyExistsCheck.rows.length === 0
-          ) {
-            var sql = `INSERT INTO connections (user1_id, user2_id)
+            if (
+              reciprocalLikeExistsCheck.rows.length !== 0 &&
+              connectionAlreadyExistsCheck.rows.length === 0
+            ) {
+              var sql = `INSERT INTO connections (user1_id, user2_id)
                       VALUES ($1, $2)
                       RETURNING connection_id`;
-            const room_id = await pool.query(sql, [
-              session.userid,
-              liked_person_id,
-            ]);
+              const room_id = await pool.query(sql, [
+                session.userid,
+                liked_person_id,
+              ]);
 
-            isMatch = true;
-            connectionId = room_id.rows[0]["connection_id"];
+              isMatch = true;
+              connectionId = room_id.rows[0]["connection_id"];
 
-            // Generate and send a notification to both parties.
-            var notification = `User ${session.username} also likes you!
+              // Generate and send a notification to both parties.
+              var notification = `User ${session.username} also likes you!
 										You are now able to chat with each other.`;
-            var sql = `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
+              var sql = `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
 									    VALUES ($1, $2, $3, $4)
                       RETURNING notification_id`;
-            var inserted_notif_id = await pool.query(sql, [
-              liked_person_id,
-              notification,
-              `/chat/${room_id.rows[0]["connection_id"]}`,
-              session.userid,
-            ]);
+              var inserted_notif_id = await pool.query(sql, [
+                liked_person_id,
+                notification,
+                `/messages/${room_id.rows[0]["connection_id"]}`,
+                session.userid,
+              ]);
 
-            sendNotification(
-              session.userid,
-              inserted_notif_id.rows[0]["notification_id"],
-              notification,
-              liked_person_id,
-              `/chat/${room_id.rows[0]["connection_id"]}`,
-            );
+              sendNotification(
+                session.userid,
+                inserted_notif_id.rows[0]["notification_id"],
+                notification,
+                liked_person_id,
+                `/messages/${room_id.rows[0]["connection_id"]}`,
+              );
 
-            notification = `Click here to start chatting with your new match!`;
-            var sql = `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
+              notification = `Click here to start chatting with your new match!`;
+              var sql = `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
 						          VALUES ($1, $2, $3, $4)
                       RETURNING notification_id`;
-            inserted_notif_id = await pool.query(sql, [
-              session.userid,
-              notification,
-              `/chat/${room_id.rows[0]["connection_id"]}`,
-              liked_person_id,
-            ]);
+              inserted_notif_id = await pool.query(sql, [
+                session.userid,
+                notification,
+                `/messages/${room_id.rows[0]["connection_id"]}`,
+                liked_person_id,
+              ]);
 
-            sendNotification(
-              liked_person_id,
-              inserted_notif_id.rows[0]["notification_id"],
-              notification,
-              session.userid,
-              `/chat/${room_id.rows[0]["connection_id"]}`,
-            );
+              sendNotification(
+                liked_person_id,
+                inserted_notif_id.rows[0]["notification_id"],
+                notification,
+                session.userid,
+                `/messages/${room_id.rows[0]["connection_id"]}`,
+              );
 
-            var sql = `UPDATE fame_rates SET connection_pts = connection_pts + 5, total_pts = total_pts + 5
+              var sql = `UPDATE fame_rates SET connection_pts = connection_pts + 5, total_pts = total_pts + 5
 								      WHERE (user_id = $1 AND connection_pts <= 25 )
 								      OR (user_id = $2 AND connection_pts <= 25)`;
-            pool.query(sql, [liked_person_id, session.userid]);
-          } else {
-            // If the other party hasn't liked you yet, send them a message that you have liked them.
-            var notification = `You have been liked by user ${session.username}`;
-            var sql = `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
+              pool.query(sql, [liked_person_id, session.userid]);
+            } else {
+              // If the other party hasn't liked you yet, send them a message that you have liked them.
+              var notification = `You have been liked by user ${session.username}`;
+              var sql = `INSERT INTO notifications (user_id, notification_text, redirect_path, sender_id)
                       VALUES ($1, $2, $3, $4)
                       RETURNING notification_id`;
-            var inserted_notif_id = await pool.query(sql, [
-              liked_person_id,
-              notification,
-              `/profile/${session.userid}`,
-              session.userid,
-            ]);
+              var inserted_notif_id = await pool.query(sql, [
+                liked_person_id,
+                notification,
+                `/users/${session.userid}`,
+                session.userid,
+              ]);
 
-            sendNotification(
-              session.userid,
-              inserted_notif_id.rows[0]["notification_id"],
-              notification,
-              liked_person_id,
-              `/profile/${session.userid}`,
-            );
+              sendNotification(
+                session.userid,
+                inserted_notif_id.rows[0]["notification_id"],
+                notification,
+                liked_person_id,
+                `/users/${session.userid}`,
+              );
+            }
           }
+          // JSON instead of a plain string, so the frontend knows about the match.
+          response
+            .status(200)
+            .send({ message: "Liked user!", isMatch, connectionId });
         }
-        // JSON instead of a plain string, so the frontend knows about the match.
-        response
-          .status(200)
-          .send({ message: "Liked user!", isMatch, connectionId });
+      } else {
+        response.status(401).send(false);
       }
-    } else {
-      response.status(401).send(false);
-    }
-  });
+    },
+  );
 
-  app.post("/api/browsing/unlikeuser/:id", async (request, response) => {
-    const session = request.session;
+  app.post(
+    "/api/browsing/unlikeuser/:id",
+    requireNumericId,
+    async (request, response) => {
+      const session = request.session;
 
-    if (session.userid) {
-      const unliked_person_id = request.params.id;
+      if (session.userid) {
+        const unliked_person_id = request.params.id;
 
-      var sql = `DELETE FROM likes WHERE liker_id = $1 AND target_id = $2`;
-      await pool.query(sql, [session.userid, unliked_person_id]);
+        var sql = `DELETE FROM likes WHERE liker_id = $1 AND target_id = $2`;
+        await pool.query(sql, [session.userid, unliked_person_id]);
 
-      sql = `SELECT * FROM likes WHERE target_id = $1`;
-      const likes = await pool.query(sql, [unliked_person_id]);
+        sql = `SELECT * FROM likes WHERE target_id = $1`;
+        const likes = await pool.query(sql, [unliked_person_id]);
 
-      if (likes.rows.length < 5 && likes.rows.length > 0) {
-        sql = `UPDATE fame_rates SET like_pts = like_pts - 10, total_pts = total_pts - 10
+        if (likes.rows.length < 5 && likes.rows.length > 0) {
+          sql = `UPDATE fame_rates SET like_pts = like_pts - 10, total_pts = total_pts - 10
 						  WHERE user_id = $1`;
-        await pool.query(sql, [unliked_person_id]);
-      }
+          await pool.query(sql, [unliked_person_id]);
+        }
 
-      sql = `DELETE FROM connections
+        sql = `DELETE FROM connections
 					  WHERE (user1_id = $1 AND user2_id = $2)
             OR (user1_id = $2 AND user2_id = $1)
             RETURNING *`;
-      const { rows } = await pool.query(sql, [
-        session.userid,
-        unliked_person_id,
-      ]);
-
-      if (rows.length !== 0) {
-        socketIO
-          .to(`user-${unliked_person_id}`)
-          .emit("conversation_updated", {});
-        socketIO.to(`user-${session.userid}`).emit("conversation_updated", {});
-        var notification = `The user ${session.username} has unliked you. You can no longer chat with each other.`;
-        sql = `INSERT INTO notifications (user_id, notification_text, sender_id)
-              VALUES ($1, $2, $3)
-							RETURNING notification_id`;
-        const inserted_notif_id = await pool.query(sql, [
-          unliked_person_id,
-          notification,
+        const { rows } = await pool.query(sql, [
           session.userid,
+          unliked_person_id,
         ]);
 
-        sendNotification(
+        if (rows.length !== 0) {
+          socketIO
+            .to(`user-${unliked_person_id}`)
+            .emit("conversation_updated", {});
+          socketIO
+            .to(`user-${session.userid}`)
+            .emit("conversation_updated", {});
+          var notification = `The user ${session.username} has unliked you. You can no longer chat with each other.`;
+          sql = `INSERT INTO notifications (user_id, notification_text, sender_id)
+              VALUES ($1, $2, $3)
+							RETURNING notification_id`;
+          const inserted_notif_id = await pool.query(sql, [
+            unliked_person_id,
+            notification,
+            session.userid,
+          ]);
+
+          sendNotification(
+            session.userid,
+            inserted_notif_id.rows[0]["notification_id"],
+            notification,
+            unliked_person_id,
+            null,
+          );
+
+          sql = `SELECT * FROM connections WHERE user1_id = $1 OR user2_id = $1`;
+          const connections = await pool.query(sql, [unliked_person_id]);
+
+          if (connections.rows.length < 6 && connections.rows.length > 0) {
+            sql = `UPDATE fame_rates SET connection_pts = connection_pts - 5, total_pts = total_pts - 5
+								WHERE user_id = $1`;
+            await pool.query(sql, [unliked_person_id]);
+          }
+        }
+        response.status(200).send("Unliked user!");
+      } else {
+        response.status(401).send(false);
+      }
+    },
+  );
+
+  app.post(
+    "/api/browsing/blockuser/:id",
+    requireNumericId,
+    async (request, response) => {
+      const session = request.session;
+
+      if (session.userid) {
+        const blocked_person_id = request.params.id;
+
+        // you cannot block yourself.
+        if (Number(blocked_person_id) === Number(session.userid))
+          return response.status(400).send("You cannot block yourself!");
+
+        let sql = `SELECT * FROM blocks
+                WHERE blocker_id = $1
+                AND target_id = $2`;
+        const already_blocked_check = await pool.query(sql, [
           session.userid,
-          inserted_notif_id.rows[0]["notification_id"],
-          notification,
-          unliked_person_id,
-          null,
-        );
+          blocked_person_id,
+        ]);
+
+        if (already_blocked_check.rows.length > 0)
+          return response.send("You have already blocked this user!");
+
+        sql = `INSERT INTO blocks (blocker_id, target_id) VALUES ($1, $2)`;
+        await pool.query(sql, [session.userid, blocked_person_id]);
+
+        sql = `DELETE FROM likes
+            WHERE (liker_id = $1 AND target_id = $2)
+            OR (liker_id = $2 AND target_id = $1)`;
+        await pool.query(sql, [session.userid, blocked_person_id]);
+
+        sql = `SELECT * FROM likes WHERE target_id = $1`;
+        const likes = await pool.query(sql, [blocked_person_id]);
+
+        if (likes.rows.length < 5 && likes.rows.length > 0) {
+          sql = `UPDATE fame_rates SET like_pts = like_pts - 10, total_pts = total_pts - 10
+						  WHERE user_id = $1`;
+          await pool.query(sql, [blocked_person_id]);
+        }
+
+        sql = `DELETE FROM connections
+					  WHERE (user1_id = $1 AND user2_id = $2)
+            OR (user1_id = $2 AND user2_id = $1)`;
+        await pool.query(sql, [session.userid, blocked_person_id]);
+        socketIO
+          .to(`user-${blocked_person_id}`)
+          .emit("conversation_updated", {});
+        socketIO.to(`user-${session.userid}`).emit("conversation_updated", {});
 
         sql = `SELECT * FROM connections WHERE user1_id = $1 OR user2_id = $1`;
-        const connections = await pool.query(sql, [unliked_person_id]);
+        const connections = await pool.query(sql, [blocked_person_id]);
 
         if (connections.rows.length < 6 && connections.rows.length > 0) {
           sql = `UPDATE fame_rates SET connection_pts = connection_pts - 5, total_pts = total_pts - 5
-								WHERE user_id = $1`;
-          await pool.query(sql, [unliked_person_id]);
-        }
-      }
-      response.status(200).send("Unliked user!");
-    } else {
-      response.status(401).send(false);
-    }
-  });
-
-  app.post("/api/browsing/blockuser/:id", async (request, response) => {
-    const session = request.session;
-
-    if (session.userid) {
-      const blocked_person_id = request.params.id;
-
-      // you cannot block yourself.
-      if (Number(blocked_person_id) === Number(session.userid))
-        return response.status(400).send("You cannot block yourself!");
-
-      let sql = `SELECT * FROM blocks
-                WHERE blocker_id = $1
-                AND target_id = $2`;
-      const already_blocked_check = await pool.query(sql, [
-        session.userid,
-        blocked_person_id,
-      ]);
-
-      if (already_blocked_check.rows.length > 0)
-        return response.send("You have already blocked this user!");
-
-      sql = `INSERT INTO blocks (blocker_id, target_id) VALUES ($1, $2)`;
-      await pool.query(sql, [session.userid, blocked_person_id]);
-
-      sql = `DELETE FROM likes
-            WHERE (liker_id = $1 AND target_id = $2)
-            OR (liker_id = $2 AND target_id = $1)`;
-      await pool.query(sql, [session.userid, blocked_person_id]);
-
-      sql = `SELECT * FROM likes WHERE target_id = $1`;
-      const likes = await pool.query(sql, [blocked_person_id]);
-
-      if (likes.rows.length < 5 && likes.rows.length > 0) {
-        sql = `UPDATE fame_rates SET like_pts = like_pts - 10, total_pts = total_pts - 10
-						  WHERE user_id = $1`;
-        await pool.query(sql, [blocked_person_id]);
-      }
-
-      sql = `DELETE FROM connections
-					  WHERE (user1_id = $1 AND user2_id = $2)
-            OR (user1_id = $2 AND user2_id = $1)`;
-      await pool.query(sql, [session.userid, blocked_person_id]);
-      socketIO.to(`user-${blocked_person_id}`).emit("conversation_updated", {});
-      socketIO.to(`user-${session.userid}`).emit("conversation_updated", {});
-
-      sql = `SELECT * FROM connections WHERE user1_id = $1 OR user2_id = $1`;
-      const connections = await pool.query(sql, [blocked_person_id]);
-
-      if (connections.rows.length < 6 && connections.rows.length > 0) {
-        sql = `UPDATE fame_rates SET connection_pts = connection_pts - 5, total_pts = total_pts - 5
 							WHERE user_id = $1`;
-        await pool.query(sql, [blocked_person_id]);
+          await pool.query(sql, [blocked_person_id]);
+        }
+
+        response.status(200).send("Blocked user!");
+      } else {
+        response.status(401).send(false);
       }
+    },
+  );
 
-      response.status(200).send("Blocked user!");
-    } else {
-      response.status(401).send(false);
-    }
-  });
+  app.post(
+    "/api/browsing/reportuser/:id",
+    requireNumericId,
+    async (request, response) => {
+      const session = request.session;
 
-  app.post("/api/browsing/reportuser/:id", async (request, response) => {
-    const session = request.session;
+      if (session.userid) {
+        try {
+          const reported_person_id = request.params.id;
 
-    if (session.userid) {
-      try {
-        const reported_person_id = request.params.id;
-
-        var sql = `SELECT * FROM reports
+          var sql = `SELECT * FROM reports
                   WHERE sender_id = $1
                   AND target_id = $2`;
-        var reports = await pool.query(sql, [
-          session.userid,
-          reported_person_id,
-        ]);
+          var reports = await pool.query(sql, [
+            session.userid,
+            reported_person_id,
+          ]);
 
-        if (reports.rows.length === 0) {
-          var sql = `INSERT INTO reports (sender_id, target_id) VALUES ($1, $2)`;
-          await pool.query(sql, [session.userid, reported_person_id]);
+          if (reports.rows.length === 0) {
+            var sql = `INSERT INTO reports (sender_id, target_id) VALUES ($1, $2)`;
+            await pool.query(sql, [session.userid, reported_person_id]);
 
-          var sql = `SELECT username FROM users WHERE id = $1`;
-          var { rows } = await pool.query(sql, [reported_person_id]);
+            var sql = `SELECT username FROM users WHERE id = $1`;
+            var { rows } = await pool.query(sql, [reported_person_id]);
 
-          const sendReportMail = (username, id, sender_id) => {
-            var mailOptions = {
-              from: process.env.EMAIL_ADDRESS,
-              to: process.env.EMAIL_ADDRESS,
-              subject: `Fake user report: ${id}, ${username}`,
-              html: `<h1>Hello!</h1>
+            const sendReportMail = (username, id, sender_id) => {
+              var mailOptions = {
+                from: process.env.EMAIL_ADDRESS,
+                to: process.env.EMAIL_ADDRESS,
+                subject: `Fake user report: ${id}, ${username}`,
+                html: `<h1>Hello!</h1>
 								<p>User ID ${session.userid} on Matcha has reported a user as a fake account.</p>
 								<p>The reported person's username is ${username} and ID is ${id}.</p>
 								<p>Please investigate.</p>
 								<p>- Matcha App</p>`,
+              };
+
+              transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                  console.error(error);
+                } else {
+                  // console.log('Email sent: ' + info.response)
+                }
+              });
             };
 
-            transporter.sendMail(mailOptions, function (error, info) {
-              if (error) {
-                console.error(error);
-              } else {
-                // console.log('Email sent: ' + info.response)
-              }
-            });
-          };
+            sendReportMail(
+              rows[0]["username"],
+              reported_person_id,
+              session.userid,
+            );
 
-          sendReportMail(
-            rows[0]["username"],
-            reported_person_id,
-            session.userid,
-          );
-
-          response.status(200).send("Reported user!");
-        } else {
-          response.send(
-            "You have already reported this user. The Matcha team has been notified.",
-          );
+            response.status(200).send("Reported user!");
+          } else {
+            response.send(
+              "You have already reported this user. The Matcha team has been notified.",
+            );
+          }
+        } catch (error) {
+          console.log(error);
+          response.status(500).send(false);
         }
-      } catch (error) {
-        console.log(error);
-        response.status(500).send(false);
+      } else {
+        response.status(401).send(false);
       }
-    } else {
-      response.status(401).send(false);
-    }
-  });
+    },
+  );
 };

@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import replaceDirectPath from "../../utils/notifications";
 import Logo from "../Logo/Logo";
 import type NotificationItemType from "./types";
 import { Link, useNavigate } from "react-router";
@@ -22,15 +21,13 @@ const NotificationItem = ({
     readNotificationMutate(id);
   };
 
-  const hrefPath = replaceDirectPath(redirect_path);
-
   if (isReadNotificationMutatePending) {
     return <Spinner />;
   }
 
   return (
     <li key={id} onClick={handleReadNotification}>
-      <Link to={hrefPath || "/notifications"} className="block">
+      <Link to={redirect_path || "/notifications"} className="block">
         <div
           className={`flex items-start gap-3 rounded-2xl px-4 py-3 transition hover:bg-SecondaryDarkBgColor/60 ${
             read === "NO" ? "bg-TertiaryColor/10" : ""

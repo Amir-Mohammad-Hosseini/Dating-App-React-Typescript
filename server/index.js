@@ -1,4 +1,5 @@
 const express = require("express");
+require("express-async-errors");
 const app = express();
 const cors = require("cors");
 const session = require("express-session");
@@ -122,6 +123,16 @@ require("./routes/resetpassword.js")(app, pool, bcrypt, transporter, crypto);
 require("./routes/chat_api.js")(app, pool, socketIO);
 require("./routes/activity.js")(app, pool, socketIO);
 require("./routes/chat.js")(pool, socketIO);
+
+app.use((error, request, response, next) => {
+  console.error("Unhandled route error:", error);
+  if (response.headersSent) return next(error);
+  response.status(500).send(false);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection:", reason);
+});
 
 const PORT = config.PORT || 3001;
 

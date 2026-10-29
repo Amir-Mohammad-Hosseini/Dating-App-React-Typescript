@@ -74,28 +74,37 @@ module.exports = function (app, pool, bcrypt, transporter, crypto) {
     app.post('/api/setnewpassword', async (request, response) => {
         const { user, code, password, confirmPassword } = request.body
 
+        if (typeof user !== 'string' || typeof code !== 'string' ||
+            typeof password !== 'string' || typeof confirmPassword !== 'string') {
+            return response.send("Please fill in all the fields.")
+        }
         if (password !== confirmPassword) {
             return response.send("The entered passwords are not the same!")
         }
-        else if (!password.match(/(?=^.{8,30}$)(?=.*\d)(?=.*[!.@#$%^&*]+)(?=.*[A-Z])(?=.*[a-z]).*$/)) {
+        if (!password.match(/(?=^.{8,30}$)(?=.*\d)(?=.*[!.@#$%^&*]+)(?=.*[A-Z])(?=.*[a-z]).*$/)) {
             return response.send("Please ensure your password has a length between 8 and 30 characters, contains one lowercase character (a-z), one uppercase character (A-Z), one numeric character (0-9), and one special character (!.@#$%^&*).")
         }
-        else {
-            var sql = `SELECT * FROM password_reset
-						INNER JOIN users ON password_reset.user_id = users.id
-						WHERE users.username = $1
-                        AND password_reset.reset_code = $2`
-            const { rows } = await pool.query(sql, [user, code])
+
+        try {
+            const { rows } = await pool.query(
+                `SELECT users.id FROM password_reset
+                INNER JOIN users ON password_reset.user_id = users.id
+                WHERE users.username = $1
+                AND password_reset.reset_code = $2
+                AND password_reset.expire_time > CURRENT_TIMESTAMP`,
+                [user, code])
+
             if (rows.length === 0) {
-                response.send("Password reset code not found!")
-            } else {
-                const hash = await bcrypt.hash(password, 10);
-                var sql = "UPDATE users SET password = $1 WHERE username = $2"
-                await pool.query(sql, [hash, user])
-                var sql = "DELETE FROM password_reset WHERE user_id = $1"
-                await pool.query(sql, [rows[0]['id']])
-                response.send(true)
+                return response.send("This reset link is invalid or has expired.")
             }
+
+            const hash = await bcrypt.hash(password, 10)
+            await pool.query("UPDATE users SET password = $1 WHERE id = $2", [hash, rows[0].id])
+            await pool.query("DELETE FROM password_reset WHERE user_id = $1", [rows[0].id])
+            response.send(true)
+        } catch (error) {
+            console.error('Error in setnewpassword: ', error)
+            response.send('Something went wrong. Please try again!')
         }
     })
 }

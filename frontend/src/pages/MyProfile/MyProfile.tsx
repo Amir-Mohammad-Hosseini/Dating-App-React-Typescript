@@ -31,7 +31,7 @@ import {
 } from "../../lib/tanstack-query/MyProfile/myProfileMutation";
 import queryClient from "../../lib/tanstack-query/queryClient";
 import { toast } from "sonner";
-import createFormDataFromPhotos from "./../../utils/myProfileUtils"
+import createFormDataFromPhotos from "./../../utils/myProfileUtils";
 
 export type PhotoItem =
   | { kind: "existing"; id: number; url: string }
@@ -40,6 +40,8 @@ export type PhotoItem =
 export type PhotoSlot = PhotoItem | null;
 
 const MyProfile = () => {
+  const [bioLength , setBioLength] = useState<number>(0)
+
   const {
     register,
     handleSubmit,
@@ -94,6 +96,12 @@ const MyProfile = () => {
     }
   }, [myProfileDatas]);
 
+  useEffect(() => {
+    if(myProfileDatas){
+      setBioLength(myProfileDatas?.biography.length)
+    }
+  } , [myProfileDatas])
+
   const isMyProfileQueryPending =
     isMyProfileDatasQueryPending || isMyLocationDatasQueryPending;
 
@@ -144,7 +152,6 @@ const MyProfile = () => {
       }
     } catch (error) {
       toast.error("An error occurred");
-      console.log(error)
     }
   };
 
@@ -182,6 +189,15 @@ const MyProfile = () => {
     });
   };
 
+  const handleChangeBioCountText = (
+    event: ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    const biographyContent = event.target.value;
+    setTimeout(() => {
+      setBioLength(biographyContent.length)
+    }, 500);
+  };
+
   const handleAddInterest = (interest: string) => {
     setMyInterests((prevInterests) => [...prevInterests, interest]);
   };
@@ -193,8 +209,6 @@ const MyProfile = () => {
   };
 
   const myPhotosNumber = myPhotos.filter((photo) => photo).length;
-
-  console.log("MY PROFILE DATAS GOT FROM SERVER", myProfileDatas);
 
   return (
     <div className="relative md:flex md:overflow-x-hidden">
@@ -337,9 +351,11 @@ const MyProfile = () => {
           <TextareaInput
             text="Bio"
             defaultValue={biography}
-            // extraDescription={`${biography.length}/300`}
-            {...register("biography")}
+            {...register("biography", {
+              onChange: handleChangeBioCountText,
+            })}
             error={errors.biography?.message}
+            extraDescription={`${bioLength}/300`}
           />
         </section>
 
