@@ -27,6 +27,8 @@ import ActivityLayout from "../layouts/ActivityLayout/ActivityLayout";
 import VisitorsPage from "../pages/Activity/Visitors";
 import LikersPage from "../pages/Activity/Likers";
 import VerifyEmail from "../pages/Auth/VerifyEmail";
+import ForgotPassword from "../pages/Auth/ForgotPassword";
+import ResetPassword from "../pages/Auth/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +42,7 @@ const router = createBrowserRouter([
           { index: true, element: <Welcome /> },
           { path: "login", element: <Login /> },
           { path: "signup", element: <Register /> },
+          { path: "forgot-password", element: <ForgotPassword /> },
         ],
       },
 
@@ -84,15 +87,16 @@ const router = createBrowserRouter([
             path: "activity",
             element: <ActivityLayout />,
             children: [
-              {index : true , element : <Navigate to="visitors" replace />},
-              {path : "visitors" , element : <VisitorsPage />},
-              {path : "likes" , element : <LikersPage />},
+              { index: true, element: <Navigate to="visitors" replace /> },
+              { path: "visitors", element: <VisitorsPage /> },
+              { path: "likes", element: <LikersPage /> },
             ],
           },
           { path: "pro", element: <Pro /> },
         ],
       },
 
+      { path: "/reset-password/:username/:code", element: <ResetPassword /> },
       { path: "confirm/:username/:code", element: <VerifyEmail /> },
       { path: "*", element: <NotFound /> },
     ],

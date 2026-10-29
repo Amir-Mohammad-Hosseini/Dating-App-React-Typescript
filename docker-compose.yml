@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   db:
     image: postgres
     environment:
@@ -25,8 +24,8 @@ services:
     image: axllent/mailpit
     restart: always
     ports:
-      - "8025:8025"   # web panel: http://localhost:8025
-      - "1025:1025"   # SMTP
+      - "8025:8025" # web panel: http://localhost:8025
+      - "1025:1025" # SMTP
 
   server:
     build:

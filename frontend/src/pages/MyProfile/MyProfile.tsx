@@ -346,7 +346,7 @@ const MyProfile = () => {
         {/* Interests */}
         <section className="mx-6 mt-6">
           <h4 className="mb-3 text-xl font-semibold">Interests</h4>
-          <div className="grid grid-cols-2 items-start">
+          <div className="grid grid-cols-none gap-y-12 lg:grid-cols-2 items-start">
             {myInterests.length ? (
               <div className="flex flex-wrap gap-2">
                 {myInterests.map((interest: any) => (

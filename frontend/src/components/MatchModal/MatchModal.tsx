@@ -3,6 +3,7 @@ import useAppStore from "../../lib/zustand/store";
 import { useQuery } from "@tanstack/react-query";
 import myProfileQuery from "../../lib/tanstack-query/GetMe/myProfileQuery";
 import LoadingOverlay from "../Loader/LoadingOverlay";
+import { Link } from "react-router";
 
 const MatchModal = () => {
   const match = useAppStore((state) => state.match);
@@ -26,8 +27,6 @@ const MatchModal = () => {
   if (isError) {
     throw new Error(error?.message || "An error occurred");
   }
-
-  console.log(myProfileDatas);
 
   const myProfilePicture = myProfileDatas.profile_pic.picture_data;
   const myFirstName = myProfileDatas.firstname;
@@ -106,12 +105,12 @@ const MatchModal = () => {
             </p>
 
             <div className="mt-8 flex w-full flex-col gap-3 md:flex-row-reverse lg:flex-col">
-              <button
-                type="button"
-                className="h-14 cursor-pointer rounded-InputRadius bg-TertiaryColor font-semibold text-PrimaryColor shadow-[0_10px_26px_rgba(245,67,90,0.32)] transition hover:brightness-110 md:flex-1 lg:flex-none"
+              <Link
+                to={`/messages/${match.connectionId}`}
+                className="flex items-center justify-center h-14 cursor-pointer rounded-InputRadius bg-TertiaryColor font-semibold text-PrimaryColor shadow-[0_10px_26px_rgba(245,67,90,0.32)] transition hover:brightness-110 md:flex-1 lg:flex-none"
               >
                 Send a message
-              </button>
+              </Link>
               <button
                 onClick={closeMatchModal}
                 type="button"
