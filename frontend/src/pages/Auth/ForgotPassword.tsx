@@ -4,7 +4,7 @@ import Input from "../../components/Input/Input";
 import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import forgotPasswordSchema, { type ForgotPasswordSchemaType } from "../../lib/zod/Auth/extendSchemas/forgotPasswordSchema";
+import forgotPasswordSchema, { type ForgotPasswordFormType } from "../../lib/zod/Auth/extendSchemas/forgotPasswordSchema";
 import { useMutation } from "@tanstack/react-query";
 import forgotPasswordMutation from "../../lib/tanstack-query/Auth/ForgotPassword/forgotPasswordMutation";
 import { useState } from "react";
@@ -13,14 +13,14 @@ import Spinner from "../../components/Loader/Spinner";
 const ForgotPassword = () => {
   const [sentTo , setSentTo] =useState<string | null>(null)
 
-  const {register , handleSubmit , formState : {errors}}=useForm({
+  const {register , handleSubmit , formState : {errors}}=useForm<ForgotPasswordFormType>({
     resolver : zodResolver(forgotPasswordSchema)
   })
 
   const {mutate : forgotPasswordMutate , isPending : isForgotPasswordMutatePending} = useMutation(forgotPasswordMutation(setSentTo))
 
 
-const onValid = (data : ForgotPasswordSchemaType) => {
+const onValid = (data : ForgotPasswordFormType) => {
   forgotPasswordMutate(data.email)
 }
 

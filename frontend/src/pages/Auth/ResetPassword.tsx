@@ -1,28 +1,30 @@
-import { Link } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import resetPasswordSchema, { type ResetPasswordFormType } from "../../lib/zod/Auth/extendSchemas/resetPasswordSchema";
+import { useMutation } from "@tanstack/react-query";
+import resetPasswordMutation from "../../lib/tanstack-query/Auth/ResetPassword/resetPasswordMutation";
+import Spinner from "../../components/Loader/Spinner";
 const ResetPassword = () => {
-  //   const navigate = useNavigate();
-  //   // TODO: adjust to the real link shape (useParams if it's /reset-password/:username/:code)
-  //   const [searchParams] = useSearchParams();
-  //   const token = searchParams.get("token");
+  const {username , code : token} = useParams()
+    const navigate = useNavigate();
 
-  //   const {
-  //     register,
-  //     handleSubmit,
-  //     formState: { errors },
-  //   } = useForm<ResetPasswordFormType>({
-  //     resolver: zodResolver(resetPasswordSchema),
-  //   });
+    const {
+      register,
+      handleSubmit,
+      formState: { errors },
+    } = useForm<ResetPasswordFormType>({
+      resolver: zodResolver(resetPasswordSchema),
+    });
 
-  //   const { mutate, isPending } = useMutation(resetPasswordMutation(navigate));
+    const { mutate : resetPasswordMutate, isPending : isResetPasswordMutatePending } = useMutation(resetPasswordMutation(navigate));
 
-  //   const onValid = (data: ResetPasswordFormType) => {
-  //     mutate({ ...data, token: token! });
-  //   };
-
-  const token = null;
+  const onValid = (data : ResetPasswordFormType) => {
+    resetPasswordMutate({ user : username! , code : token! , ...data})
+  }
 
   if (!token) {
     return (
@@ -46,10 +48,10 @@ const ResetPassword = () => {
       bannerText="A fresh start, and right back to it."
       title="Choose a new password"
       description="Use at least 8 characters."
-      //   onSubmit={handleSubmit(onValid)}
+        onSubmit={handleSubmit(onValid)}
     >
       <div className="flex gap-3">
-        {/* <Input
+        <Input
           text="Password"
           type="password"
           placeholder="••••••••"
@@ -62,14 +64,13 @@ const ResetPassword = () => {
           placeholder="••••••••"
           {...register("confirmPassword")}
           error={errors.confirmPassword?.message}
-        /> */}
+        />
       </div>
       <Button
         text="Reset password"
         type="submit"
-        // isSubmitting={isPending}
-        isSubmitting={false}
-        submittingText="Saving..."
+        isSubmitting={isResetPasswordMutatePending}
+        submittingText={<Spinner />}
       />
       <p className="my-2 text-SecondaryColor">
         Back to{" "}

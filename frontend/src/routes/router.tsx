@@ -96,7 +96,7 @@ const router = createBrowserRouter([
         ],
       },
 
-      { path: "/reset-password/:username/:code", element: <ResetPassword /> },
+      { path: "/resetpassword/:username/:code", element: <ResetPassword /> },
       { path: "confirm/:username/:code", element: <VerifyEmail /> },
       { path: "*", element: <NotFound /> },
     ],
