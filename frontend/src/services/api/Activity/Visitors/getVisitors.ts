@@ -1,8 +1,8 @@
 import customFetch from "../../../../lib/axios/customFetch"
+import ENDPOINTS from "../../endpoints"
 
 const getVisitors = async () => {
-    const response = await customFetch("profile/visitors")
-    return response.data
+    return (await customFetch(ENDPOINTS.ACTIVITY.VISITORS)).data
 }
 
 export default  getVisitors

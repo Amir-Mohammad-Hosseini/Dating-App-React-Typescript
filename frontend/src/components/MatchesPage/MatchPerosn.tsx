@@ -27,7 +27,7 @@ const MatchPerson = ({ firstname, picture_data, user_id }: MatchPersonType) => {
               <span>{firstname.slice(0, 1).toUpperCase()}</span>
             )}
           </span>
-          {presenceProfile.is_online && (
+          {presenceProfile?.is_online && (
             <span
               aria-hidden="true"
               className="absolute right-0 bottom-1 size-4 rounded-full border-[3px] border-PrimaryDarkBgColor bg-OnlineBgColor lg:bottom-2 lg:right-1 lg:size-6"

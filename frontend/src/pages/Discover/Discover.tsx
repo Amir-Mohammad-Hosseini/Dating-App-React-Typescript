@@ -7,7 +7,6 @@ import FilterPanel from "../../components/DiscoverPage/FilterPanel";
 import Navbar from "../../components/Navbar/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import discoverPeopleQuery from "../../lib/tanstack-query/Discover/discoverPeopleQuery";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import UpNextProfiles from "../../components/DiscoverPage/UpNextProfiles";
 import type { SortedUser } from "../../types/discover";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -21,6 +20,7 @@ import DEFAULT_DISCOVER_FILTERS, {
 import RadioInput from "../../components/Input/RadioInput";
 import MatchModal from "../../components/MatchModal/MatchModal";
 import NotificationLogo from "../../components/NotificationLogo/NotificationLogo";
+import { PageLoader } from "../../components/Loader";
 
 const Discover = () => {
   const [filters, setFilters] = useState(DEFAULT_DISCOVER_FILTERS);
@@ -82,7 +82,7 @@ const Discover = () => {
   };
 
   if (isPending) {
-    return <LoadingOverlay show />;
+    return <PageLoader />
   }
   if (isError) {
     throw new Error("An error occurred");

@@ -1,8 +1,8 @@
 import customFetch from "../../../lib/axios/customFetch"
+import ENDPOINTS from "../endpoints"
 
 const getConversationsList = async () => {
-    const response = await customFetch("chat/chat_connections")
-    return response.data
+    return (await customFetch(ENDPOINTS.CONVERSATIONS)).data
 }
 
 export default getConversationsList

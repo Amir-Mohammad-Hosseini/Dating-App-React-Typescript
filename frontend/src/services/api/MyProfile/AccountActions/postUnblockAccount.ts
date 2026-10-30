@@ -1,8 +1,14 @@
-import customFetch from "../../../../lib/axios/customFetch"
+import customFetch from "../../../../lib/axios/customFetch";
+import ENDPOINTS from "../../endpoints";
 
-const postUnblockAccount =async (accountId : number | string) => {
-    const response = await customFetch.delete(`profile/unblock/${accountId}`)
-    return response.data
-}
+const postUnblockAccount = async (
+  accountId: number | string,
+) => {
+  const response = await customFetch.delete(
+    ENDPOINTS.MY_PROFILE.ACCOUNT_ACTIONS.UNBLOCK_ACCOUNT(accountId),
+  );
 
-export default postUnblockAccount
+  return response.data;
+};
+
+export default postUnblockAccount;

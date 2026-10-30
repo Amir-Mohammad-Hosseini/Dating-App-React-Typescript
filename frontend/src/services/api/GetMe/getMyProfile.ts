@@ -1,8 +1,8 @@
-import customFetch from "../../../lib/axios/customFetch"
+import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
-const getMyProfile = async () =>  {
-    const response = await customFetch("profile")
-    return response.data
-}
+const getMyProfile = async () => {
+  return (await customFetch(ENDPOINTS.GET_ME)).data;
+};
 
-export default getMyProfile
+export default getMyProfile;

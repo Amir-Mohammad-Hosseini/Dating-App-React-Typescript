@@ -1,9 +1,9 @@
-import customFetch from "../../../lib/axios/customFetch"
+import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
-const postUnLikeProfile = async (userId : number) => {
-    const response = await customFetch.post(`browsing/unlikeuser/${userId}`)
-    console.log(response)
-    return response.data
-}
+const postUnLikeProfile = async (userId: number) => {
+  return (await customFetch.post(ENDPOINTS.DISCOVER.UNLIKE_PROFILE(userId)))
+    .data;
+};
 
-export default postUnLikeProfile
+export default postUnLikeProfile;

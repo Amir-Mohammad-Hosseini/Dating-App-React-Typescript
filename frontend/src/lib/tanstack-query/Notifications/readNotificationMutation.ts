@@ -1,11 +1,11 @@
 import type { NavigateFunction } from "react-router";
-import patchReadMutation from "../../../services/api/Notifications/patchReadMutation";
+import patchReadNotifications from "../../../services/api/Notifications/patchReadNotifications";
 import { toast } from "sonner";
 import queryClient from "../queryClient";
 
 const readNotificationMutation = (navigate: NavigateFunction) => {
   return {
-    mutationFn: patchReadMutation,
+    mutationFn: patchReadNotifications,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["notifications"],

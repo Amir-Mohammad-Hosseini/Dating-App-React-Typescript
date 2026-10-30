@@ -1,10 +1,10 @@
 import { toast } from "sonner";
-import patchRealAllNotifications from "../../../services/api/Notifications/patchRealAllNotifications";
+import patchReadAllNotifications from "../../../services/api/Notifications/patchReadAllNotifications";
 import queryClient from "../queryClient";
 
 const readAllNotificationsMutation = () => {
   return {
-    mutationFn: patchRealAllNotifications,
+    mutationFn: patchReadAllNotifications,
     onSuccess : () => {
         queryClient.invalidateQueries({
             queryKey : ["notifications"]

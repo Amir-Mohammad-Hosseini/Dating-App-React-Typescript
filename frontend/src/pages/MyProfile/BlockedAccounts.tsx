@@ -2,18 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { FaChevronLeft } from "react-icons/fa";
 import { Link } from "react-router";
 import blockedAccountsQuery from "../../lib/tanstack-query/MyProfile/AccountActions/blockedAccountsQuery";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import BlockedAccountItem from "../../components/BlockedAccountsPage/BlockedAccountItem";
+import { PageLoader } from "../../components/Loader";
 
 const BlockedAccounts = () => {
   const { data: blockedAccounts, isPending: isBlockedAccountsQueryPending } =
     useQuery(blockedAccountsQuery());
 
   if (isBlockedAccountsQueryPending) {
-    return <LoadingOverlay show />;
+    return <PageLoader />
   }
 
-  console.log(blockedAccounts);
   return (
     <main className="min-h-screen bg-PrimaryDarkBgColor px-4 py-6 text-PrimaryColor sm:px-6 md:py-10">
       <div className="mx-auto w-full max-w-xl lg:max-w-2xl">

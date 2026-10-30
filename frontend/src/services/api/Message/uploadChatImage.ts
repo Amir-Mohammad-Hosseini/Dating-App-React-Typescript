@@ -1,9 +1,10 @@
 import customFetch from "../../../lib/axios/customFetch"
+import ENDPOINTS from "../endpoints"
 
 const uploadChatImage = async (file : File) => {
     const formData = new FormData()
     formData.append("image" , file)
-    const response = await customFetch.post("chat/upload_image" , formData , {
+    const response = await customFetch.post(ENDPOINTS.MESSAGE.CHAT_IMAGE_MESSAGE , formData , {
         headers : {
             "Content-Type" : "multipart/form-data"
         }

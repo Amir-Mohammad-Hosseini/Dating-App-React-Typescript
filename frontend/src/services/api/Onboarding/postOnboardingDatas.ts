@@ -1,9 +1,17 @@
-import customFetch from "../../../lib/axios/customFetch"
-import type { OnboardingData } from "../../../lib/zustand/slices/createOnboardingSlice"
+import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
-const postOnboardingDatas = async (onboardingDatas : OnboardingData) => {
-    const response = await customFetch.post("profile/setup" , onboardingDatas)
-    return response
-}
+import type { OnboardingData } from "../../../lib/zustand/slices/createOnboardingSlice";
 
-export default postOnboardingDatas
+const postOnboardingDatas = async (
+  onboardingDatas: OnboardingData,
+) => {
+  const response = await customFetch.post(
+    ENDPOINTS.ONBOARDING.SETUP,
+    onboardingDatas,
+  );
+
+  return response;
+};
+
+export default postOnboardingDatas;

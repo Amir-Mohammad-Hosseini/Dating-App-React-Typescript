@@ -1,11 +1,11 @@
 import Navbar from "../../components/Navbar/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import notificationsQuery from "../../lib/tanstack-query/Notifications/notificationsQuery";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import NotificationItem from "../../components/NoticationsPage/NotificationItem";
 import type NotificationItemType from "../../components/NoticationsPage/types";
 
 import NotificationsPageHeader from "../../components/NoticationsPage/NotificationsPageHeader";
+import { PageLoader } from "../../components/Loader";
 
 const Notifications = () => {
   const {
@@ -16,7 +16,7 @@ const Notifications = () => {
   } = useQuery(notificationsQuery());
 
   if (isNotificationsQueryPending) {
-    return <LoadingOverlay show />;
+    return <PageLoader />
   }
   if (isNotificationsQueryError) {
     throw new Error(notificationsQueryError.message);

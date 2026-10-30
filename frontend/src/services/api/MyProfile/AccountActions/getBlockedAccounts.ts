@@ -1,8 +1,12 @@
-import customFetch from "../../../../lib/axios/customFetch"
+import customFetch from "../../../../lib/axios/customFetch";
+import ENDPOINTS from "../../endpoints";
 
 const getBlockedAccounts = async () => {
-    const response = await customFetch("profile/blocked")
-    return response.data
-}
+  const response = await customFetch(
+    ENDPOINTS.MY_PROFILE.ACCOUNT_ACTIONS.BLOCKED_ACCOUNTS,
+  );
 
-export default getBlockedAccounts
+  return response.data;
+};
+
+export default getBlockedAccounts;

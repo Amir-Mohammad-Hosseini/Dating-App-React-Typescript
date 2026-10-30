@@ -1,9 +1,8 @@
-import customFetch from "../../../lib/axios/customFetch"
+import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
-const postLikeProfile = async (userId : number) => {
-    const response = await customFetch.post(`browsing/likeuser/${userId}`)
-    console.log(response)
-    return response.data
-}
+const postLikeProfile = async (userId: number) => {
+  return (await customFetch.post(ENDPOINTS.DISCOVER.LIKE_PROFILE(userId))).data;
+};
 
-export default postLikeProfile
+export default postLikeProfile;

@@ -1,7 +1,6 @@
 import { useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import profileViewQuery from "../../lib/tanstack-query/ProfileView/profileViewQuery";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import ProfileViewInterests from "../../components/ProfileViewPage/ProfileViewInterests";
 import ProfileViewAbout from "../../components/ProfileViewPage/ProfileViewAbout";
 import ProfileViewBasics from "../../components/ProfileViewPage/ProfileViewBasics";
@@ -15,6 +14,7 @@ import ProfileViewTopbar from "../../components/ProfileViewPage/ProfileViewTopba
 import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
 import type ConversationItemType from "../../components/Messages/types";
 import usePresenceProfile from "../../hooks/Conversations/usePresenceProfile";
+import { PageLoader } from "../../components/Loader";
 
 const ProfileView = () => {
   const { userId: userIdParam } = useParams();
@@ -45,7 +45,7 @@ const ProfileView = () => {
   }
 
   if (isPending) {
-    return <LoadingOverlay show />;
+    return <PageLoader />
   }
 
   if (isProfileViewQueryError) {

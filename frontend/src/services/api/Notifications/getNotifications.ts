@@ -1,8 +1,12 @@
-import customFetch from "../../../lib/axios/customFetch"
+import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
 const getNotifications = async () => {
-    const response = await customFetch("profile/notifications")
-    return response.data
-}
+  const response = await customFetch(
+    ENDPOINTS.MY_PROFILE.NOTIFICATIONS.LIST,
+  );
 
-export default getNotifications
+  return response.data;
+};
+
+export default getNotifications;

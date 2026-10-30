@@ -1,11 +1,10 @@
 import customFetch from "../../../../lib/axios/customFetch"
+import ENDPOINTS from "../../endpoints"
 
 const postForgotPasswordEmail = async (email : string) => {
-    const response = await customFetch.post("resetpassword" , {
+    const response = await customFetch.post(ENDPOINTS.AUTH.FORGOT_PASSWORD , {
         resetvalue : email
     })
-
-    console.log(response.data)
     return response.data
 }
 

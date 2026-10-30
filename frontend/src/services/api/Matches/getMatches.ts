@@ -1,8 +1,8 @@
-import customFetch from "../../../lib/axios/customFetch"
+import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
 const getMatches = async () => {
-    const response = await customFetch("chat/chat_connections")
-    return response.data
-}
+  return (await customFetch(ENDPOINTS.MATCHES)).data;
+};
 
-export default getMatches
+export default getMatches;

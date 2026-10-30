@@ -3,16 +3,16 @@ import Navbar from "../../components/Navbar/Navbar";
 import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import matchesQuery from "../../lib/tanstack-query/Matches/matchesQuery";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import MatchPerosn from "../../components/MatchesPage/MatchPerosn";
 import type MatchPersonType from "../../components/MatchesPage/types";
 import NotificationLogo from "../../components/NotificationLogo/NotificationLogo";
+import { PageLoader } from "../../components/Loader";
 
 const Matches = () => {
   const { data: matchesPeople, isPending } = useQuery(matchesQuery());
 
   if (isPending) {
-    return <LoadingOverlay show />;
+    return <PageLoader />
   }
 
   return (

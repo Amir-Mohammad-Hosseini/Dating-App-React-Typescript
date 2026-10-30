@@ -1,8 +1,8 @@
 import customFetch from "../../../../lib/axios/customFetch"
+import ENDPOINTS from "../../endpoints"
 
 const getLikers = async () => {
-    const response = await customFetch("profile/likers")
-    return response.data
+     return (await customFetch(ENDPOINTS.ACTIVITY.LIKERS)).data
 }
 
 export default  getLikers

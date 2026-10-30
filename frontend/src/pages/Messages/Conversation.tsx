@@ -15,7 +15,6 @@ import queryClient from "../../lib/tanstack-query/queryClient";
 import { toast } from "sonner";
 import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
 import type ConversationItemType from "../../components/Messages/types";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
 import HistoryMessage from "../../components/MessagesPage/HistoryMessage";
 import type HistoryMessageType from "../../components/MessagesPage/types";
 import uploadChatImageMutation from "../../lib/tanstack-query/Message/uploadChatImageMutation";
@@ -24,6 +23,7 @@ import ALLOWED_IMAGE_TYPES, {
 } from "../../utils/constants/conversation";
 import ConversationOtherProfile from "../../components/ConversationPage/ConversationOtherProfile";
 import ConversationOptions from "../../components/ConversationPage/ConversationOptions";
+import { PageLoader } from "../../components/Loader";
 
 const Conversation = () => {
   const { matchId } = useParams();
@@ -147,7 +147,7 @@ const Conversation = () => {
   const isQueryPending =
     isHistoryMessagesQueryPending || isConversationsListQueryPending;
   if (isQueryPending) {
-    return <LoadingOverlay show />;
+    return <PageLoader />
   }
 
   const matchedUser: ConversationItemType = conversationsList.find(

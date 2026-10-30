@@ -1,7 +1,8 @@
 import customFetch from "../../../../lib/axios/customFetch";
+import ENDPOINTS from "../../endpoints";
 
 const postVerifyEmail = async (username: string, code: string) => {
-  const response = await customFetch.post("signup/verifyuser", {
+  const response = await customFetch.post(ENDPOINTS.AUTH.VERIFY_EMAIL, {
     username,
     code,
   });

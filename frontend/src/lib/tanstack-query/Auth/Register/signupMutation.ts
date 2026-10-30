@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import postSignup from "../../../../services/api/Auth/Register/postSignup";
+import postSignup from "../../../../services/api/Auth/Signup/postSignup";
 import type { NavigateFunction } from "react-router";
 
 const signupMutation = (navigate: NavigateFunction) => {

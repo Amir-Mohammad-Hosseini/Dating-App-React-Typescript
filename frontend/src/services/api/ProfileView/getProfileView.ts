@@ -1,8 +1,10 @@
-import customFetch from "../../../lib/axios/customFetch"
+import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
-const getProfileView = async(userId : number | string) => {
-    const response = await customFetch(`browsing/profile/${userId}`)
-    return response.data
-}
+const getProfileView = async (userId: number | string) => {
+  const response = await customFetch(ENDPOINTS.PROFILE_VIEW(userId));
 
-export default getProfileView
+  return response.data;
+};
+
+export default getProfileView;

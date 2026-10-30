@@ -1,8 +1,8 @@
 import customFetch from "../../../lib/axios/customFetch";
+import ENDPOINTS from "../endpoints";
 
 const getUserLists = async () => {
-  const response = await customFetch("browsing/userlists");
-  return response.data;
+   return (await customFetch(ENDPOINTS.DISCOVER.USERS_LIST)).data
 };
 
 export default getUserLists;

@@ -25,9 +25,6 @@ const ActivityLayout = () => {
     return <LoadingOverlay show />;
   }
 
-  console.log("VISITORS", visitorsData);
-  console.log("LIKERS", likersData);
-
   const visitorsCount = (visitorsData || []).length;
   const likersCount = (likersData || []).length;
   return (
