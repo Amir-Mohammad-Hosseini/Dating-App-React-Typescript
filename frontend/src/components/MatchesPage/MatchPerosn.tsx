@@ -3,7 +3,7 @@ import type MatchPersonType from "./types";
 import usePresenceProfile from "../../hooks/Conversations/usePresenceProfile";
 import LoadingOverlay from "../Loader/LoadingOverlay";
 
-const MatchPerosn = ({ firstname, picture_data, user_id }: MatchPersonType) => {
+const MatchPerson = ({ firstname, picture_data, user_id }: MatchPersonType) => {
   const { presenceProfile, isPresenceProfileQueryPending } =
     usePresenceProfile(user_id);
   if (isPresenceProfileQueryPending) {
@@ -42,4 +42,4 @@ const MatchPerosn = ({ firstname, picture_data, user_id }: MatchPersonType) => {
   );
 };
 
-export default MatchPerosn;
+export default MatchPerson;

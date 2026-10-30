@@ -1,6 +1,12 @@
 const TOTAL = 4;
 
-const StepBar = ({ step , className = "" }: { step: number , className ?: string }) => (
+const StepBar = ({
+  step,
+  className = "",
+}: {
+  step: number;
+  className?: string;
+}) => (
   <div
     className="flex flex-1 items-center gap-2"
     role="progressbar"
@@ -19,4 +25,4 @@ const StepBar = ({ step , className = "" }: { step: number , className ?: string
   </div>
 );
 
-export default StepBar
+export default StepBar;

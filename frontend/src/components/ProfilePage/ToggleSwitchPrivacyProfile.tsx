@@ -1,14 +1,11 @@
+import type { ToggleSwitchPrivacyProfileType } from "./types";
+
 const ToggleSwitchPrivacyProfile = ({
   label,
   description,
   defaultChecked,
   disabled,
-}: {
-  label: string;
-  description?: string;
-  defaultChecked?: boolean;
-  disabled?: boolean;
-}) => (
+}: ToggleSwitchPrivacyProfileType) => (
   <div className="flex items-start justify-between gap-4">
     <div>
       <p className="text-PrimaryColor text-sm">{label}</p>
@@ -32,4 +29,4 @@ const ToggleSwitchPrivacyProfile = ({
   </div>
 );
 
-export default ToggleSwitchPrivacyProfile
+export default ToggleSwitchPrivacyProfile;

@@ -6,13 +6,17 @@ import LoadingOverlay from "../Loader/LoadingOverlay";
 import type NotificationItemType from "../NoticationsPage/types";
 
 const NotificationLogo = () => {
-    const {data : notificationsData , isPending : isNotificationsQueryPending} = useQuery(notificationsQuery())
+  const { data: notificationsData, isPending: isNotificationsQueryPending } =
+    useQuery(notificationsQuery());
 
-    if(isNotificationsQueryPending) {
-        return <LoadingOverlay show />
-    }
+  if (isNotificationsQueryPending) {
+    return <LoadingOverlay show />;
+  }
 
-    const unReadNotificationsCount = notificationsData.filter((notif : NotificationItemType) => notif.read === "NO")?.length || 0
+  const unReadNotificationsCount =
+    notificationsData.filter(
+      (notif: NotificationItemType) => notif.read === "NO",
+    )?.length || 0;
 
   return (
     <Link

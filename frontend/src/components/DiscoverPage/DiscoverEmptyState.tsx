@@ -1,4 +1,3 @@
-// components/DiscoverPage/DiscoverEmptyState.tsx
 import { motion } from "motion/react";
 import { Link } from "react-router";
 import { GoCheck } from "react-icons/go";

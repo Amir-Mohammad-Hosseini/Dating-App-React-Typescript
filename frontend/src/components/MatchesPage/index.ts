@@ -1,0 +1,1 @@
+export {default as MatchPerson} from "./MatchPerosn"

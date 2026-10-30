@@ -10,27 +10,30 @@ import useClearChat from "../../hooks/ClearChat/useClearChat";
 const ConversationOptions = ({
   userId,
   firstname,
-  matchId
+  matchId,
 }: ConversationOptionsType) => {
-  const { handleShowBlockSwal , isBlockProfileMutatePending } = useBlockProfile();
-  const { handleShowReportSwal , isReportProfileMutationPending} = useReportProfile();
-  const {handleShowClearChatSwal , isClearChatMutationPending} = useClearChat()
+  const { handleShowBlockSwal, isBlockProfileMutatePending } =
+    useBlockProfile();
+  const { handleShowReportSwal, isReportProfileMutationPending } =
+    useReportProfile();
+  const { handleShowClearChatSwal, isClearChatMutationPending } =
+    useClearChat();
 
   const handleClearChat = () => {
-    handleShowClearChatSwal(matchId)
+    handleShowClearChatSwal(matchId);
     closeMenu();
   };
 
   const handleBlockProfile = (profileId: number | string) => {
     handleShowBlockSwal(profileId);
     queryClient.invalidateQueries({
-      queryKey: ["historyMessages" , "conversations" , matchId],
+      queryKey: ["historyMessages", "conversations", matchId],
     });
     closeMenu();
   };
 
   const handleReportUser = () => {
-    handleShowReportSwal(userId)
+    handleShowReportSwal(userId);
     closeMenu();
   };
 
@@ -55,7 +58,7 @@ const ConversationOptions = ({
             disabled={isClearChatMutationPending}
             className="rounded-xl text-PrimaryColor"
           >
-            {isClearChatMutationPending ? <Spinner /> :"Clear chat"}
+            {isClearChatMutationPending ? <Spinner /> : "Clear chat"}
           </button>
         </li>
         <li>
@@ -65,7 +68,11 @@ const ConversationOptions = ({
             onClick={handleReportUser}
             className="rounded-xl text-TertiaryColor"
           >
-            {isReportProfileMutationPending ? <Spinner /> :`Report ${firstname}`}
+            {isReportProfileMutationPending ? (
+              <Spinner />
+            ) : (
+              `Report ${firstname}`
+            )}
           </button>
         </li>
         <li>
@@ -75,7 +82,7 @@ const ConversationOptions = ({
             onClick={() => handleBlockProfile(userId)}
             className="rounded-xl text-TertiaryColor"
           >
-            {isBlockProfileMutatePending ? <Spinner /> :`Block ${firstname}`}
+            {isBlockProfileMutatePending ? <Spinner /> : `Block ${firstname}`}
           </button>
         </li>
       </ul>

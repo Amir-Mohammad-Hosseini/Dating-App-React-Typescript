@@ -1,8 +1,9 @@
 import getConversationsList from "../../../services/api/Conversations/getConversationsList"
+import queryKeys from "../queryKeys"
 
 const conversationsListQuery = () => {
     return {
-        queryKey : ["conversations"],
+        queryKey : queryKeys.conversations.list,
         queryFn : getConversationsList
     }
 }

@@ -1,18 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import ActivityList from "../../components/ActivityPage/ActivityList";
 import visitorsQuery from "../../lib/tanstack-query/Activity/visitorsQuery";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
+import { PageLoader } from "../../components/Loader";
 
 const VisitorsPage = () => {
+  const {
+    data: visitorsData,
+    isPending: isVisitorsQueryPending,
+    isError: isVisitirsQueryError,
+  } = useQuery(visitorsQuery());
 
-    const { data: visitorsData, isPending: isVisitorsQueryPending, isError : isVisitirsQueryError } =
-    useQuery(visitorsQuery());
+  if (isVisitorsQueryPending) {
+    return <PageLoader />
+  }
 
-    if(isVisitorsQueryPending){
-      return <LoadingOverlay show />
-    }
+  return (
+    <ActivityList
+      variant="visitors"
+      items={visitorsData}
+      isError={isVisitirsQueryError}
+    />
+  );
+};
 
-  return <ActivityList variant="visitors" items={visitorsData} isError={isVisitirsQueryError} />;
-}
-
-export default  VisitorsPage
+export default VisitorsPage;

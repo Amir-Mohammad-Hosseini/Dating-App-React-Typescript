@@ -1,7 +1,8 @@
 import { GoCheck } from "react-icons/go";
 import { IoClose } from "react-icons/io5";
+import type FeatureCellType from "./types";
 
-const FeatureCell = ({ value }: { value: boolean | string }) => {
+const FeatureCell = ({ value }: FeatureCellType) => {
   if (typeof value === "string") {
     return <span className="text-sm text-SecondaryColor">{value}</span>;
   }

@@ -21,28 +21,27 @@ const CardStack = forwardRef<CardStackHandle, CardStackProps>(
     const { mutate: unLikeProfileMutate, isPending: isUnLikeProfilePending } =
       useMutation(unLikeProfileMutation());
 
-      const isPending = isLikeProfilePending || isUnLikeProfilePending
+    const isPending = isLikeProfilePending || isUnLikeProfilePending;
 
     useImperativeHandle(ref, () => ({
       triggerTopSwipe: (direction: 1 | -1) =>
         showSwipeCardRef.current?.triggerSwipe(direction),
     }));
 
-    const handleSwipeCard = (status: string , person : SortedUser) => {
-      console.log(status, "STATUS" , person);
-      if(status === "like"){
-        likeProfileMutate(person)
-      }else if(status === "nope"){
-        unLikeProfileMutate(person)
+    const handleSwipeCard = (status: string, person: SortedUser) => {
+      console.log(status, "STATUS", person);
+      if (status === "like") {
+        likeProfileMutate(person);
+      } else if (status === "nope") {
+        unLikeProfileMutate(person);
       }
       setCards((prev) => prev.slice(1));
       onChangeCurrentIndex();
     };
 
-    if(isPending){
-      return < LoadingOverlay show />
+    if (isPending) {
+      return <LoadingOverlay show />;
     }
-
 
     return (
       <div className="relative mx-auto w-full max-w-95 aspect-2/3">

@@ -21,7 +21,7 @@ const useLogoutProfile = () => {
     }
   };
 
-  return {isLogoutMutatePending , handleShowLogoutSwal}
+  return { isLogoutMutatePending, handleShowLogoutSwal };
 };
 
 export default useLogoutProfile;

@@ -6,12 +6,12 @@ type AddInterestInputType = {
 const AddInterestInput = ({ onAddInterest }: AddInterestInputType) => {
   const interestInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAddInterest = (event : React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
+  const handleAddInterest = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     const interestValue = interestInputRef.current!.value.trim();
     if (interestValue.length) {
       onAddInterest(interestValue);
-      interestInputRef.current!.value = ""
+      interestInputRef.current!.value = "";
     }
   };
   return (

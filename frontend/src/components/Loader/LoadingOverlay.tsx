@@ -1,18 +1,7 @@
 import Spinner from "./Spinner";
+import type LoadingOverlayType from "./types";
 
-type LoadingOverlayProps = {
-  show: boolean;
-  size?: "sm" | "md" | "lg";
-};
-
-/**
- * Drop inside any `relative` container that needs a "refreshing" state
- * without unmounting its content — e.g. the Discover stack while the next
- * batch loads, or a Messages list mid-refetch.
- *
- * Usage: <div className="relative"> ... <LoadingOverlay show={isFetching} /> </div>
- */
-const LoadingOverlay = ({ show, size = "md" }: LoadingOverlayProps) => {
+const LoadingOverlay = ({ show, size = "md" }: LoadingOverlayType) => {
   if (!show) return null;
 
   return (

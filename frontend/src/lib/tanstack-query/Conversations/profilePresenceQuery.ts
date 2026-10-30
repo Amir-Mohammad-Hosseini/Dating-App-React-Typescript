@@ -1,8 +1,9 @@
 import getProfilePresence from "../../../services/api/Message/getProfilePresence";
+import queryKeys from "../queryKeys";
 
 const profilePresenceQuery = (userId?: number | string) => {
   return {
-    queryKey: ["presence", userId],
+    queryKey: queryKeys.conversations.presence.user(userId),
     queryFn: () => getProfilePresence(userId!),
     refetchInterval: 30_000,
   };

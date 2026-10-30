@@ -1,0 +1,9 @@
+export { default as SettingAccountActionButton } from "./SettingAccountActionButton";
+export { default as SettingAccountActions } from "./SettingAccountActions";
+export { default as SettingAccountPanel } from "./SettingAccountPanel";
+export { default as SettingClickableButton } from "./SettingClickableButton";
+export { default as SettingNotificationsPanel } from "./SettingNotificationsPanel";
+export { default as SettingPrivacyPanel } from "./SettingPrivacyPanel";
+export { default as SettingsTabs } from "./SettingsTabs";
+export { default as SettingSupportPanel } from "./SettingSupportPanel";
+export { default as SettingSwitchButton } from "./SettingSwitchButton";

@@ -1,8 +1,9 @@
 import getLikers from "../../../services/api/Activity/Likers/getLikers"
+import queryKeys from "../queryKeys"
 
 const likersQuery = () => {
     return {
-        queryKey : ["likers"],
+        queryKey : queryKeys.activity.likers,
         queryFn : getLikers
     }
 }

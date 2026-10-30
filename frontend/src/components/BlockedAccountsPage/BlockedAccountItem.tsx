@@ -14,7 +14,7 @@ const BlockedAccountItem = ({
     isPending: isUnblockedAccountMutationPending,
   } = useMutation(unblockAccountMutation());
   const handleUnblockAccount = (accountId: number | string) => {
-    unblockAccountMutate(accountId)
+    unblockAccountMutate(accountId);
   };
   return (
     <li className="flex items-center gap-3 p-4 sm:gap-4">

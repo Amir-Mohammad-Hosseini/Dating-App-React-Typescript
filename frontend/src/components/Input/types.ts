@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
-import type { Control, FieldValues, Path } from "react-hook-form";
+import type { Control, ControllerRenderProps, FieldValues, Path } from "react-hook-form";
 
 export default interface InputType {
   text: string;
@@ -35,6 +35,19 @@ export interface RadioInputType<
   selectedValue?: string;
   onChange?: (option: T) => void;
 }
+
+export interface BirthdayFieldProps<T extends FieldValues> {
+  field: ControllerRenderProps<T, Path<T>>;
+  error?: string;
+};
+
+
+export interface BirthdayInputType<T extends FieldValues> {
+  name: Path<T>;
+  control: Control<T>;
+  error?: string;
+};
+
 
 export interface TextareaInputType extends Omit<ComponentPropsWithoutRef<"textarea"> , "defaultValue"> {
   text: string;

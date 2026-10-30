@@ -1,7 +1,9 @@
 import { Link } from "react-router";
 import { IoChatbubbleOutline, IoHeart, IoHeartOutline } from "react-icons/io5";
 import type { ActivityCardType } from "./types";
-import whenActivityHappenedTime, { focusRingStyles } from "../../utils/activity";
+import whenActivityHappenedTime, {
+  focusRingStyles,
+} from "../../utils/activity";
 
 const ActivityCard = ({ item, variant, onLike, liking }: ActivityCardType) => {
   const isMatch = item.connection_id !== null;
@@ -109,6 +111,6 @@ const ActivityCard = ({ item, variant, onLike, liking }: ActivityCardType) => {
       </div>
     </div>
   );
-}
+};
 
-export default  ActivityCard
+export default ActivityCard;

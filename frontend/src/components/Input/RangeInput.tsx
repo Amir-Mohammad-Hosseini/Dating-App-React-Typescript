@@ -3,7 +3,15 @@ import type { RangeInputType } from "./types";
 
 const RangeInput = forwardRef<HTMLInputElement, RangeInputType>(
   (
-    { text, name, min, max, extraDescription, defaultValue , ...props }: RangeInputType,
+    {
+      text,
+      name,
+      min,
+      max,
+      extraDescription,
+      defaultValue,
+      ...props
+    }: RangeInputType,
     ref,
   ) => {
     const id = useId();

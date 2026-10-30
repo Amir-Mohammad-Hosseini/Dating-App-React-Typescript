@@ -1,8 +1,9 @@
 import getBlockedAccounts from "../../../../services/api/MyProfile/AccountActions/getBlockedAccounts"
+import queryKeys from "../../queryKeys"
 
 const blockedAccountsQuery = () => {
     return {
-        queryKey : ["blockedAccounts"],
+        queryKey : queryKeys.blockes.all,
         queryFn : getBlockedAccounts
     }
 }

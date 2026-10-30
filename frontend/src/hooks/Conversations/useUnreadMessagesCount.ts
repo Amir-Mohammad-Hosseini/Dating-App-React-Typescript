@@ -12,28 +12,32 @@ const useUnreadMessagesCount = () => {
   } = useQuery(conversationsListQuery());
 
   useEffect(() => {
-    const queryKey = conversationsListQuery().queryKey
+    const queryKey = conversationsListQuery().queryKey;
 
     const refetchList = () => {
-        queryClient.invalidateQueries({queryKey})
-    }
+      queryClient.invalidateQueries({ queryKey });
+    };
 
-    socket.on("conversation_updated" , refetchList)
-    socket.on("connect" , refetchList)
-    
+    socket.on("conversation_updated", refetchList);
+    socket.on("connect", refetchList);
+
     return () => {
-        socket.off("conversation_updated" , refetchList)
-        socket.off("connect" , refetchList)
+      socket.off("conversation_updated", refetchList);
+      socket.off("connect", refetchList);
+    };
+  }, []);
 
-    }
-  } , [])
+  const unreadMessagesCount = (conversationsList ?? []).reduce(
+    (prev: number, curr: ConversationItemType) => {
+      return prev + curr.unread_count;
+    },
+    0,
+  );
 
-  const unreadMessagesCount = (conversationsList ?? []).reduce((prev : number , curr : ConversationItemType) => {
-    return prev + curr.unread_count
-  } , 0)
+  return {
+    unreadMessagesCount,
+    isMessagesCountPending: isConversationsListQueryPending,
+  };
+};
 
-
-  return {unreadMessagesCount,isMessagesCountPending : isConversationsListQueryPending}
-}
-
-export default  useUnreadMessagesCount
+export default useUnreadMessagesCount;

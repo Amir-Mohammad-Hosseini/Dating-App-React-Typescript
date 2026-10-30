@@ -1,18 +1,7 @@
 import Logo from "../../components/Logo/Logo";
-import { AiOutlineHome } from "react-icons/ai";
-import { FaHeart, FaRegUser } from "react-icons/fa6";
-import { LuMessageSquare } from "react-icons/lu";
 import useUnreadMessagesCount from "../../hooks/Conversations/useUnreadMessagesCount";
+import NAV_ITEMS from "../../utils/constants/navbar";
 import NavLinkItem from "./NavLinkItem";
-import { FaEye } from "react-icons/fa";
-
-const NAV_ITEMS = [
-  { to: "/discover", label: "Discover", Icon: AiOutlineHome },
-  { to: "/matches", label: "Matches", Icon: FaHeart },
-  { to: "/activity", label: "Activity", Icon: FaEye },
-  { to: "/messages", label: "Messages", Icon: LuMessageSquare },
-  { to: "/myProfile", label: "Profile", Icon: FaRegUser },
-];
 
 const Navbar = () => {
   const { unreadMessagesCount } = useUnreadMessagesCount();

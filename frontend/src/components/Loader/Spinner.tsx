@@ -1,24 +1,8 @@
-type SpinnerSize = "sm" | "md" | "lg";
+import SPINNER_SIZE_MAP from "../../utils/constants/spinner";
+import type { SpinnerType } from "./types";
 
-const SIZE_MAP: Record<SpinnerSize, { ring: number; overlap: number; border: number }> = {
-  sm: { ring: 16, overlap: 6, border: 2 },
-  md: { ring: 26, overlap: 10, border: 2.5 },
-  lg: { ring: 40, overlap: 15, border: 3 },
-};
-
-type SpinnerProps = {
-  size?: SpinnerSize;
-  className?: string;
-};
-
-/**
- * Two overlapping rings, spinning in opposite directions — a nod to the
- * Ember wordmark's interlocking circles. Pure Tailwind core utilities
- * (animate-spin) plus a couple of arbitrary values, no tailwind.config
- * changes needed.
- */
-const Spinner = ({ size = "md", className = "" }: SpinnerProps) => {
-  const { ring, overlap, border } = SIZE_MAP[size];
+const Spinner = ({ size = "md", className = "" }: SpinnerType) => {
+  const { ring, overlap, border } = SPINNER_SIZE_MAP[size];
   const boxWidth = ring * 2 - overlap;
 
   return (

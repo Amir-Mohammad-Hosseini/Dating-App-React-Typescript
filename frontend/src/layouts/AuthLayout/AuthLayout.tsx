@@ -1,5 +1,5 @@
-import HeroBanner from "../../components/HeroBanner/HeroBanner";
-import Logo from "../../components/Logo/Logo";
+import { HeroBanner } from "../../components/HeroBanner";
+import { Logo } from "../../components/Logo";
 import type AuthLayoutType from "./types";
 
 const AuthLayout = ({

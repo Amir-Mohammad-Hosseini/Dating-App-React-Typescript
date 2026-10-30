@@ -1,5 +1,9 @@
 import { Link } from "react-router";
-import { IoEyeOutline, IoHeartOutline, IoAlertCircleOutline } from "react-icons/io5";
+import {
+  IoEyeOutline,
+  IoHeartOutline,
+  IoAlertCircleOutline,
+} from "react-icons/io5";
 import type { ActivityVariantType } from "./types";
 
 const focusRing =
@@ -7,7 +11,7 @@ const focusRing =
 
 type EmptyProps = { variant: ActivityVariantType };
 
-export function ActivityEmpty({ variant }: EmptyProps) {
+const ActivityEmpty = ({ variant }: EmptyProps) => {
   const isVisitors = variant === "visitors";
   const Icon = isVisitors ? IoEyeOutline : IoHeartOutline;
 
@@ -34,7 +38,7 @@ export function ActivityEmpty({ variant }: EmptyProps) {
       )}
     </div>
   );
-}
+};
 
 export function ActivityError() {
   return (
@@ -43,7 +47,10 @@ export function ActivityError() {
       className="flex flex-col items-center justify-center px-6 py-20 text-center"
     >
       <div className="mb-5 flex size-16 items-center justify-center rounded-2xl bg-[#2E2F34]">
-        <IoAlertCircleOutline aria-hidden="true" className="size-8 text-TertiaryColor" />
+        <IoAlertCircleOutline
+          aria-hidden="true"
+          className="size-8 text-TertiaryColor"
+        />
       </div>
       <h2 className="font-display text-2xl italic text-PrimaryColor">
         Couldn't load this list

@@ -1,7 +1,4 @@
-type InterestChipType = {
-  label: string;
-  onDeleteInterest: (interest: string) => void;
-};
+import type InterestChipType from "./types";
 
 const InterestChip = ({ label, onDeleteInterest }: InterestChipType) => {
   const selected = true;

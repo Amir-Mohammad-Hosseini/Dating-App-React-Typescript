@@ -1,6 +1,6 @@
 import type LogoType from "./types";
 
-export default function Logo({isShowText , className=""} : LogoType) {
+const Logo =({isShowText , className=""} : LogoType) => {
   return (
     <div
     className={`flex items-center ${className}`}>
@@ -23,3 +23,5 @@ export default function Logo({isShowText , className=""} : LogoType) {
     </div>
   );
 }
+
+export default Logo

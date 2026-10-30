@@ -4,25 +4,33 @@ import Input from "../../components/Input/Input";
 import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import forgotPasswordSchema, { type ForgotPasswordFormType } from "../../lib/zod/Auth/extendSchemas/forgotPasswordSchema";
+import forgotPasswordSchema, {
+  type ForgotPasswordFormType,
+} from "../../lib/zod/Auth/extendSchemas/forgotPasswordSchema";
 import { useMutation } from "@tanstack/react-query";
 import forgotPasswordMutation from "../../lib/tanstack-query/Auth/ForgotPassword/forgotPasswordMutation";
 import { useState } from "react";
 import Spinner from "../../components/Loader/Spinner";
 
 const ForgotPassword = () => {
-  const [sentTo , setSentTo] =useState<string | null>(null)
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
-  const {register , handleSubmit , formState : {errors}}=useForm<ForgotPasswordFormType>({
-    resolver : zodResolver(forgotPasswordSchema)
-  })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordFormType>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
 
-  const {mutate : forgotPasswordMutate , isPending : isForgotPasswordMutatePending} = useMutation(forgotPasswordMutation(setSentTo))
+  const {
+    mutate: forgotPasswordMutate,
+    isPending: isForgotPasswordMutatePending,
+  } = useMutation(forgotPasswordMutation(setSentTo));
 
-
-const onValid = (data : ForgotPasswordFormType) => {
-  forgotPasswordMutate(data.email)
-}
+  const onValid = (data: ForgotPasswordFormType) => {
+    forgotPasswordMutate(data.email);
+  };
 
   if (sentTo) {
     return (
@@ -74,7 +82,10 @@ const onValid = (data : ForgotPasswordFormType) => {
       />
       <p className="my-2 text-SecondaryColor">
         Remembered it?{" "}
-        <Link className="text-TertiaryColor font-bold cursor-pointer" to="/login">
+        <Link
+          className="text-TertiaryColor font-bold cursor-pointer"
+          to="/login"
+        >
           Log in
         </Link>
       </p>

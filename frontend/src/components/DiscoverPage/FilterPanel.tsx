@@ -6,7 +6,10 @@ import { useForm } from "react-hook-form";
 import type { DiscoverFilters } from "../../utils/constants/discover";
 import DEFAULT_DISCOVER_FILTERS from "../../utils/constants/discover";
 
-const FilterPanel = ({ fieldsClassName = "" , onApplyFilters }: FilterPanelType) => {
+const FilterPanel = ({
+  fieldsClassName = "",
+  onApplyFilters,
+}: FilterPanelType) => {
   const { register, handleSubmit, watch } = useForm<DiscoverFilters>({
     defaultValues: {
       ...DEFAULT_DISCOVER_FILTERS,
@@ -23,7 +26,7 @@ const FilterPanel = ({ fieldsClassName = "" , onApplyFilters }: FilterPanelType)
   ]);
 
   const onSubmit = (data: DiscoverFilters) => {
-    onApplyFilters(data)
+    onApplyFilters(data);
   };
 
   return (
@@ -33,7 +36,7 @@ const FilterPanel = ({ fieldsClassName = "" , onApplyFilters }: FilterPanelType)
       <div className={`flex flex-col gap-4 ${fieldsClassName}`}>
         <RangeInput
           text="Distance"
-          {...register("max_distance" , {valueAsNumber : true})}
+          {...register("max_distance", { valueAsNumber: true })}
           min={1}
           max={50}
           defaultValue={25}

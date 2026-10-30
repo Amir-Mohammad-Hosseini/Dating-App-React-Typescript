@@ -1,10 +1,10 @@
 import { NavLink, Outlet } from "react-router";
-import Navbar from "../../components/Navbar/Navbar";
-import NotificationLogo from "../../components/NotificationLogo/NotificationLogo";
 import { useQuery } from "@tanstack/react-query";
 import visitorsQuery from "../../lib/tanstack-query/Activity/visitorsQuery";
 import likersQuery from "../../lib/tanstack-query/Activity/likersQuery";
-import LoadingOverlay from "../../components/Loader/LoadingOverlay";
+import { LoadingOverlay } from "../../components/Loader";
+import { Navbar } from "../../components/Navbar";
+import { NotificationLogo } from "../../components/NotificationLogo";
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
   `inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-TertiaryColor focus-visible:ring-offset-2 focus-visible:ring-offset-PrimaryDarkBgColor ${
@@ -65,6 +65,6 @@ const ActivityLayout = () => {
       </main>
     </div>
   );
-}
+};
 
-export default ActivityLayout
+export default ActivityLayout;

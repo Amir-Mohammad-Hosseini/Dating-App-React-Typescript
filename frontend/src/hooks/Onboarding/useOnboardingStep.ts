@@ -26,4 +26,4 @@ const useOnboardingStep = () => {
   };
 };
 
-export default useOnboardingStep
+export default useOnboardingStep;

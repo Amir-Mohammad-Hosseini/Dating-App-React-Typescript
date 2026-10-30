@@ -1,8 +1,6 @@
 import type { RadioInputType } from "./types";
 
-const RadioInput = <
-  T extends { label: string; value: unknown },
->({
+const RadioInput = <T extends { label: string; value: unknown }>({
   options,
   text,
   className = "",
@@ -11,16 +9,11 @@ const RadioInput = <
 }: RadioInputType<T>) => {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 text-SecondaryColor">
-        {text}
-      </legend>
+      <legend className="mb-2 text-SecondaryColor">{text}</legend>
 
       <div className={`flex flex-wrap gap-2 ${className}`}>
         {options.map((option) => (
-          <label
-            key={option.label}
-            className="cursor-pointer"
-          >
+          <label key={option.label} className="cursor-pointer">
             <input
               type="radio"
               name="showMe"
@@ -55,4 +48,4 @@ const RadioInput = <
   );
 };
 
-export default RadioInput
+export default RadioInput;

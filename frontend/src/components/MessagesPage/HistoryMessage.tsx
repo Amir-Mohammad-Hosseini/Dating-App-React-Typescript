@@ -1,5 +1,8 @@
 import useAppStore from "../../lib/zustand/store";
-import { formatChatImageUrl, formatMessageTime } from "../../utils/conversation";
+import {
+  formatChatImageUrl,
+  formatMessageTime,
+} from "../../utils/conversation";
 import type HistoryMessageType from "./types";
 
 const HistoryMessage = ({
@@ -7,7 +10,7 @@ const HistoryMessage = ({
   sender_id,
   time_stamp,
   image_url,
-  onImageLoad
+  onImageLoad,
 }: HistoryMessageType) => {
   const myId = useAppStore((state) => state.user)?.id;
   const fromWho = myId === sender_id ? "me" : "other";

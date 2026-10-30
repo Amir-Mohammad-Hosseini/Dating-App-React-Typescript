@@ -1,8 +1,9 @@
 import getNotifications from "../../../services/api/Notifications/getNotifications"
+import queryKeys from "../queryKeys"
 
 const notificationsQuery = () => {
     return {
-        queryKey : ["notifications"],
+        queryKey : queryKeys.notifications.all,
         queryFn : getNotifications
     }
 }

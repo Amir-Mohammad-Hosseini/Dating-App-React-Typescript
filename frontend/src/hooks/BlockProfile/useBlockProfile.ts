@@ -8,7 +8,7 @@ const useBlockProfile = () => {
   const { mutate: blockProfileMutate, isPending: isBlockProfileMutatePending } =
     useMutation(blockProfileMutation(navigate));
 
-  const handleShowBlockSwal = async (profileId : number | string) => {
+  const handleShowBlockSwal = async (profileId: number | string) => {
     const isBlockConfirm = await confirmAction({
       title: "Are you sure?",
       text: "Do you want to block this user?",

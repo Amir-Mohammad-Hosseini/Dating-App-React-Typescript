@@ -1,11 +1,11 @@
-import getProfileView from "../../../services/api/ProfileView/getProfileView"
+import getProfileView from "../../../services/api/ProfileView/getProfileView";
+import queryKeys from "../queryKeys";
 
-const profileViewQuery = (userId : number | string) => {
-    return {
-        queryKey : ["profileView" , userId]
-        ,
-        queryFn : () => getProfileView(userId) ,
-    }
-}
+const profileViewQuery = (userId: number | string) => {
+  return {
+    queryKey: queryKeys.profileView.all(userId),
+    queryFn: () => getProfileView(userId),
+  };
+};
 
-export default profileViewQuery
+export default profileViewQuery;

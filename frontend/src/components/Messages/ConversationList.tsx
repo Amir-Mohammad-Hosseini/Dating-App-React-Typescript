@@ -20,9 +20,13 @@ const ConversationList = () => {
   useEffect(() => {
     const queryKey = conversationsListQuery().queryKey;
 
-     const typingTimers = new Map<number, ReturnType<typeof setTimeout>>();
+    const typingTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
-    const onPresenceChanged = ({ userId, online, lastSeen }: PresenceDataType) => {
+    const onPresenceChanged = ({
+      userId,
+      online,
+      lastSeen,
+    }: PresenceDataType) => {
       queryClient.setQueryData<ConversationItemType[]>(
         queryKey,
         (prevConversations) =>
@@ -58,7 +62,7 @@ const ConversationList = () => {
     return () => {
       socket.off("presence_changed", onPresenceChanged);
       socket.off("user_typing", onUserTyping);
-        typingTimers.forEach((timer) => clearTimeout(timer));
+      typingTimers.forEach((timer) => clearTimeout(timer));
     };
   }, []);
 

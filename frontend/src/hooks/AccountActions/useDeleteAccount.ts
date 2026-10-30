@@ -12,7 +12,7 @@ const useDeleteAccount = () => {
     isPending: isDeleteAccountMutatePending,
   } = useMutation(deleteAccountMutation(navigate));
 
-    const handleShowDeleteAccountSwal = async () => {
+  const handleShowDeleteAccountSwal = async () => {
     await confirmAction({
       title: "Delete account?",
       text: "You will need to create a new account later.",
@@ -36,7 +36,7 @@ const useDeleteAccount = () => {
     });
   };
 
-  return {isDeleteAccountMutatePending , handleShowDeleteAccountSwal}
-}
+  return { isDeleteAccountMutatePending, handleShowDeleteAccountSwal };
+};
 
-export default useDeleteAccount
+export default useDeleteAccount;

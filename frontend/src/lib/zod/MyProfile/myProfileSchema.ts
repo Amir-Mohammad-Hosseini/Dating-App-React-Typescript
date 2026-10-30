@@ -14,9 +14,9 @@ const myProfileSchema = signupBaseSchema
     }).shape,
   );
 
-export type myProfileSchemaType = z.infer<typeof myProfileSchema>;
+export type MyProfileSchemaType = z.infer<typeof myProfileSchema>;
 
-export type MyProfileFormType = myProfileSchemaType & {
+export type MyProfileFormType = MyProfileSchemaType & {
   username: string;
   email: string;
   tags: string[];

@@ -1,8 +1,9 @@
 import postVerifyEmail from "../../../../services/api/Auth/VerifyEmail/postVerifyEmail";
+import queryKeys from "../../queryKeys";
 
 const verifyEmailQuery = (username?: string, code?: string) => {
   return {
-    queryKey: ["verifyEmail"],
+    queryKey: queryKeys.auth.verifyEmail,
     queryFn: () => postVerifyEmail(username!, code!),
   };
 };

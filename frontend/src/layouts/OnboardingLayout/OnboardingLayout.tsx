@@ -1,14 +1,13 @@
 import { Outlet } from "react-router";
 import { GoChevronLeft } from "react-icons/go";
-import Logo from "../../components/Logo/Logo";
-import SidePanel from "../../components/OnboardingPage/SidePanel";
-import StepBar from "../../components/OnboardingPage/StepBar";
 import useAppStore from "../../lib/zustand/store";
 import { confirmAction } from "../../lib/sweetalert2/confirmAction";
 import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
-import Button from "../../components/Button/Button";
 import { useState } from "react";
-import Spinner from "../../components/Loader/Spinner";
+import { SidePanel, StepBar } from "../../components/OnboardingPage";
+import { Logo } from "../../components/Logo";
+import { Button } from "../../components/Button";
+import { Spinner } from "../../components/Loader";
 
 const OnboardingLayout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -3,7 +3,16 @@ import type InputType from "./types";
 import { Link } from "react-router";
 const Input = forwardRef<HTMLInputElement, InputType>(
   (
-    { text, name, type, isForgotPassword, placeholder, error = "" , defaultvalue = "" , ...props }: InputType,
+    {
+      text,
+      name,
+      type,
+      isForgotPassword,
+      placeholder,
+      error = "",
+      defaultvalue = "",
+      ...props
+    }: InputType,
     ref,
   ) => {
     return (
@@ -14,7 +23,9 @@ const Input = forwardRef<HTMLInputElement, InputType>(
         >
           {text}
           {isForgotPassword && (
-            <Link to="/forgot-password" className="text-TertiaryColor">Forgot password?</Link>
+            <Link to="/forgot-password" className="text-TertiaryColor">
+              Forgot password?
+            </Link>
           )}
         </label>
         <input

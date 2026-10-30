@@ -1,34 +1,18 @@
 import { createBrowserRouter, Navigate } from "react-router";
-import RootLayout from "../layouts/RootLayout/RootLayout";
 import { OnboardingRoute, ProtectedRoute, AuthRoute } from "./../guards";
-import Welcome from "../pages/Auth/Welcome";
-import Login from "../pages/Auth/Login";
-import Register from "../pages/Auth/Register";
-import OnboardingLayout from "../layouts/OnboardingLayout/OnboardingLayout";
-import AboutYou from "../pages/Onboarding/AboutYou";
-import YourStory from "../pages/Onboarding/YourStory";
-import YourLocation from "../pages/Onboarding/YourLocation";
-import YourPhotos from "../pages/Onboarding/YourPhotos";
-import YouAreDone from "../pages/Onboarding/YouAreDone";
-import Discover from "../pages/Discover/Discover";
-import Matches from "../pages/Matches/Matches";
-import MessagesLayout from "../layouts/MessagesLayout/MessagesLayout";
-import EmptyConversation from "../pages/Messages/EmptyConversation";
-import Conversation from "../pages/Messages/Conversation";
-import ProfileView from "../pages/ProfileView/ProfileView";
-import MyProfile from "../pages/MyProfile/MyProfile";
-import Settings from "../pages/Settings/Settings";
-import Notifications from "../pages/Notifications/Notifications";
-import NotFound from "../pages/Errors/NotFound";
-import ErrorPage from "../pages/Errors/ErrorPage";
-import Pro from "../pages/Pro/Pro";
-import BlockedAccounts from "../pages/MyProfile/BlockedAccounts";
-import ActivityLayout from "../layouts/ActivityLayout/ActivityLayout";
-import VisitorsPage from "../pages/Activity/Visitors";
-import LikersPage from "../pages/Activity/Likers";
-import VerifyEmail from "../pages/Auth/VerifyEmail";
-import ForgotPassword from "../pages/Auth/ForgotPassword";
-import ResetPassword from "../pages/Auth/ResetPassword";
+import { ActivityLayout, MessagesLayout, OnboardingLayout, RootLayout } from "../layouts";
+import { ErrorPage, NotFound } from "../pages/Errors";
+import { ForgotPassword, Login, Register, ResetPassword, VerifyEmail, Welcome } from "../pages/Auth";
+import { AboutYou, YouAreDone, YourLocation, YourPhotos, YourStory } from "../pages/Onboarding";
+import { Discover } from "../pages/Discover";
+import { Matches } from "../pages/Matches";
+import { Conversation, EmptyConversation } from "../pages/Messages";
+import { ProfileView } from "../pages/ProfileView";
+import { BlockedAccounts, MyProfile } from "../pages/MyProfile";
+import { Settings } from "../pages/Settings";
+import { Notifications } from "../pages/Notifications";
+import { LikersPage, VisitorsPage } from "../pages/Activity";
+import { Pro } from "../pages/Pro";
 
 const router = createBrowserRouter([
   {

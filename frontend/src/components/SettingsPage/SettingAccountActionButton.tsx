@@ -6,9 +6,9 @@ const SettingAccountActionButton = ({
   children,
   Icon,
   className = "",
-  isSubmitting ,
+  isSubmitting,
   submittingContent,
-  onClickAccountAction
+  onClickAccountAction,
 }: SettingAccountActionButtonType) => {
   return (
     <button
@@ -17,12 +17,13 @@ const SettingAccountActionButton = ({
       className={`${rowClass} ${className}`}
       disabled={isSubmitting}
     >
-      {
-        isSubmitting ? submittingContent : 
-      <span className={iconBoxClass}>
-        <Icon size={16} />
-      </span>
-      }
+      {isSubmitting ? (
+        submittingContent
+      ) : (
+        <span className={iconBoxClass}>
+          <Icon size={16} />
+        </span>
+      )}
       {children}
       <LuChevronRight size={16} className="text-SecondaryColor/60" />
     </button>

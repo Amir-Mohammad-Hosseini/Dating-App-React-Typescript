@@ -1,16 +1,7 @@
 import Spinner from "./Spinner";
+import type { PageLoaderType } from "./types";
 
-type PageLoaderProps = {
-  label?: string;
-};
-
-/**
- * Full-screen loading state. Good fits:
- *  - a Suspense/router fallback while a route chunk loads
- *  - gating the app tree until the persisted zustand store has rehydrated
- *  - any other "nothing to show yet" moment
- */
-const PageLoader = ({ label = "Finding your people…" }: PageLoaderProps) => {
+const PageLoader = ({ label = "Finding your people…" }: PageLoaderType) => {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-PrimaryDarkBgColor">
       <Spinner size="lg" />
