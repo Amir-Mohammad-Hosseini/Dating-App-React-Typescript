@@ -29,15 +29,16 @@ const NotificationsPageHeader = ({
       clearAllNotificationsMutate();
     }
   };
+
   return (
-    <header className="flex items-start justify-between gap-4">
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 className="font-ItalicFont text-3xl">Notifications</h1>
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={handleMarkAllNotifsAsRead}
           disabled={isReadAllNotificationMutatePending}
-          className="flex cursor-pointer items-center gap-1.5 rounded-full border border-SecondaryColor/30 px-4 py-2 text-sm font-PrimarySemiBoldFont text-PrimaryColor transition hover:border-PrimaryColor disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border border-SecondaryColor/30 px-4 py-2 text-sm font-PrimarySemiBoldFont text-PrimaryColor transition hover:border-PrimaryColor disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isReadAllNotificationMutatePending ? (
             <Spinner />
@@ -52,7 +53,7 @@ const NotificationsPageHeader = ({
           type="button"
           onClick={handleClearAllNotifs}
           disabled={isClearAllNotificationMutatePending}
-          className="flex cursor-pointer items-center gap-1.5 rounded-full border border-TertiaryColor/30 px-4 py-2 text-sm font-PrimarySemiBoldFont text-PrimaryColor transition hover:border-PrimaryColor disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border border-TertiaryColor/30 px-4 py-2 text-sm font-PrimarySemiBoldFont text-PrimaryColor transition hover:border-PrimaryColor disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isClearAllNotificationMutatePending ? (
             <Spinner />

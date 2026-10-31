@@ -124,35 +124,6 @@ const YourLocation = () => {
             )}
           </button>
 
-          <div className="my-5 flex items-center gap-3 text-sm text-SecondaryColor">
-            <span className="h-px flex-1 bg-SecondaryColor/20" />
-            or
-            <span className="h-px flex-1 bg-SecondaryColor/20" />
-          </div>
-
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <GoSearch
-                aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-SecondaryColor"
-              />
-              <input
-                type="text"
-                aria-label="Search your city"
-                placeholder="Search your city"
-                autoComplete="off"
-                enterKeyHint="search"
-                className="h-12 w-full rounded-xl border border-SecondaryColor/20 bg-InputBg pr-4 pl-11 text-PrimaryColor outline-none transition placeholder:text-SecondaryColor focus:border-TertiaryColor"
-              />
-            </div>
-            <button
-              type="button"
-              className="h-12 rounded-xl bg-DisabledBtnBg px-6 font-PrimarySemiBoldFont text-SecondaryColor transition enabled:cursor-pointer enabled:bg-TertiaryColor enabled:text-SecondaryDarkBgColor enabled:hover:bg-HoverBtnBg"
-            >
-              Set
-            </button>
-          </div>
-
           {error && (
             <p role="alert" className="mt-3 text-sm text-TertiaryColor">
               {error}

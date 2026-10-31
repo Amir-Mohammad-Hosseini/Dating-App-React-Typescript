@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import React, { useRef } from "react";
 
 type AddInterestInputType = {
   onAddInterest: (interest: string) => void;
@@ -6,19 +6,27 @@ type AddInterestInputType = {
 const AddInterestInput = ({ onAddInterest }: AddInterestInputType) => {
   const interestInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAddInterest = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const handleAddInterest = () => {
     const interestValue = interestInputRef.current!.value.trim();
     if (interestValue.length) {
       onAddInterest(interestValue);
       interestInputRef.current!.value = "";
     }
   };
+  
+  const handleKeyDownInterestInput = (event : React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter") {
+      event.preventDefault();
+      handleAddInterest();
+    }
+  }
+
   return (
     <div className="mb-20">
       <div className="flex justify-between items-center gap-x-3">
         <input
           ref={interestInputRef}
+          onKeyDown={handleKeyDownInterestInput}
           type="text"
           placeholder="Add your own"
           className="input basis-5/6 rounded-full py-5 bg-SecondaryDarkBgColor"
