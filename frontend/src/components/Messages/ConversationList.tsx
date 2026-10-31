@@ -70,7 +70,6 @@ const ConversationList = () => {
     return <LoadingOverlay show />;
   }
 
-  console.log(conversationsList);
 
   return (
     <div className="flex h-full flex-col overflow-x-hidden">

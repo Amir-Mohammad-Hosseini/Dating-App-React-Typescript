@@ -104,7 +104,6 @@ const useConversation = () => {
 
   const handleSendImageAsMessage = (event: ChangeEvent<HTMLInputElement>) => {
     const imageFile = event.target.files![0];
-    console.log(imageFile);
 
     if (!imageFile) {
       return;

@@ -8,7 +8,6 @@ import { Link } from "react-router";
 const MatchModal = () => {
   const match = useAppStore((state) => state.match);
   const closeMatchModal = useAppStore((state) => state.closeMatchModal);
-  console.log(match);
 
   const {
     data: myProfileDatas,

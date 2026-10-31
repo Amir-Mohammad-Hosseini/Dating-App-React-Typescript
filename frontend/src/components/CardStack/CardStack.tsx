@@ -29,7 +29,6 @@ const CardStack = forwardRef<CardStackHandle, CardStackProps>(
     }));
 
     const handleSwipeCard = (status: string, person: SortedUser) => {
-      console.log(status, "STATUS", person);
       if (status === "like") {
         likeProfileMutate(person);
       } else if (status === "nope") {

@@ -1,12 +1,11 @@
-import type { PhotoSlot, PhotoItem } from "../pages/MyProfile/MyProfile";
+import type { PhotoItemType, PhotoSlotType } from "../components/ProfilePage/types";
 
-const createFormDataFromPhotos = (photos: PhotoSlot[]) => {
-    console.log("PHOTOS",photos)
+const createFormDataFromPhotos = (photos: PhotoSlotType[]) => {
   const formData = new FormData();
   const newFiles: File[] = [];
 
   const activePhotos = photos.filter(
-    (photo): photo is PhotoItem => photo != null,
+    (photo): photo is PhotoItemType => photo != null,
   );
 
   const layout = activePhotos.map((photo) => {

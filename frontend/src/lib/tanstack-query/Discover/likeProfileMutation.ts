@@ -7,7 +7,6 @@ const likeProfileMutation = () => {
   return {
     mutationFn: (person: SortedUser) => postLikeProfile(person.id),
     onSuccess: (data: any, person: SortedUser) => {
-      console.log(data, "SUCCESS");
       if (data.isMatch) {
         useAppStore.getState().openMatchModal({
           connectionId: data.connectionId,

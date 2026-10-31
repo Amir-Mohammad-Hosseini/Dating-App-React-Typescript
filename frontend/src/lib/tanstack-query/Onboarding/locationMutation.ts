@@ -5,7 +5,6 @@ const locationMutation = (setCoorditates : Function) => {
   return {
     mutationFn: getCoordinates,
     onSuccess: (data: any) => {
-      console.log("DATA ON SUCCESS", data);
       setCoorditates({
         latitude: data.coords.latitude,
         longitude: data.coords.longitude,
