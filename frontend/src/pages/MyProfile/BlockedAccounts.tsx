@@ -4,10 +4,10 @@ import { Link } from "react-router";
 import blockedAccountsQuery from "../../lib/tanstack-query/MyProfile/AccountActions/blockedAccountsQuery";
 import BlockedAccountItem from "../../components/BlockedAccountsPage/BlockedAccountItem";
 import { PageLoader } from "../../components/Loader";
+import useBlockedAccounts from "./useBlockedAccounts";
 
 const BlockedAccounts = () => {
-  const { data: blockedAccounts, isPending: isBlockedAccountsQueryPending } =
-    useQuery(blockedAccountsQuery());
+  const {blockedAccounts , isBlockedAccountsQueryPending} = useBlockedAccounts()
 
   if (isBlockedAccountsQueryPending) {
     return <PageLoader />

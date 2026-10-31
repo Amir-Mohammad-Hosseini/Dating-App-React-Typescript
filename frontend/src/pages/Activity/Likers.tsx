@@ -1,17 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import likersQuery from "../../lib/tanstack-query/Activity/likersQuery";
 import { PageLoader } from "../../components/Loader";
 import { ActivityList } from "../../components/ActivityPage";
+import useLikers from "./useLikers";
 
 const LikersPage = () => {
-  const {
-    data: likersData,
-    isPending: isLikersQueryPending,
-    isError: isLikersQueryError,
-  } = useQuery(likersQuery());
+  const {likersData , isLikersQueryPending , isLikersQueryError , likersError} = useLikers()
 
   if (isLikersQueryPending) {
-    return <PageLoader />
+    return <PageLoader />;
+  }
+
+  if(isLikersQueryError){
+    throw new Error(likersError?.message)
   }
 
   return (

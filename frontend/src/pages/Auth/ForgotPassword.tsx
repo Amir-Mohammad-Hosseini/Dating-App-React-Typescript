@@ -2,61 +2,27 @@ import { Link } from "react-router";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import forgotPasswordSchema, {
-  type ForgotPasswordFormType,
-} from "../../lib/zod/Auth/extendSchemas/forgotPasswordSchema";
-import { useMutation } from "@tanstack/react-query";
-import forgotPasswordMutation from "../../lib/tanstack-query/Auth/ForgotPassword/forgotPasswordMutation";
-import { useState } from "react";
 import Spinner from "../../components/Loader/Spinner";
+import { SentForgotPassword } from "../../components/ForgotPasswordPage";
+import useForgotPassword from "./useForgotPassword";
 
 const ForgotPassword = () => {
-  const [sentTo, setSentTo] = useState<string | null>(null);
-
   const {
+    sentTo,
+    setSentTo,
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordFormType>({
-    resolver: zodResolver(forgotPasswordSchema),
-  });
-
-  const {
-    mutate: forgotPasswordMutate,
-    isPending: isForgotPasswordMutatePending,
-  } = useMutation(forgotPasswordMutation(setSentTo));
-
-  const onValid = (data: ForgotPasswordFormType) => {
-    forgotPasswordMutate(data.email);
-  };
+    errors,
+    isForgotPasswordMutatePending,
+    onValid,
+  } = useForgotPassword();
 
   if (sentTo) {
     return (
-      <AuthLayout
-        bannerText="Everyone loses a password. Not a match."
-        title="Check your inbox"
-        description={`If an account exists for ${sentTo}, we've sent a link to reset your password.`}
-      >
-        <Link
-          className="btn btn-block py-6 bg-TertiaryColor hover:bg-HoverBtnBg rounded-lg my-2"
-          to="/login"
-        >
-          Back to login
-        </Link>
-        <p className="my-2 text-SecondaryColor text-sm">
-          Nothing after a few minutes? Check your spam folder, or{" "}
-          <button
-            type="button"
-            className="text-TertiaryColor font-bold cursor-pointer"
-            onClick={() => setSentTo(null)}
-          >
-            try again
-          </button>
-          .
-        </p>
-      </AuthLayout>
+      <SentForgotPassword
+        sentTo={sentTo}
+        onClearSentTo={() => setSentTo(null)}
+      />
     );
   }
 

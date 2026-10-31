@@ -1,28 +1,13 @@
-import { useForm } from "react-hook-form";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
-import type { SignupFormType } from "../../lib/zod/Auth/signupSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import signupSchema from "../../lib/zod/Auth/signupSchema";
-import { useMutation } from "@tanstack/react-query";
-import signupMutation from "../../lib/tanstack-query/Auth/Register/signupMutation";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
+import useRegister from "./useRegister";
 
 const Register = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignupFormType>({
-    resolver: zodResolver(signupSchema),
-  });
-  const navigate = useNavigate()
-  const {mutate , isPending } = useMutation(signupMutation(navigate))
+  const { register, handleSubmit, errors, isSignupPending, onValid } =
+    useRegister();
 
-  const onValid = (data: SignupFormType) => {
-    mutate(data)
-  };
   return (
     <AuthLayout
       bannerText="Less scrolling. More meeting."
@@ -77,12 +62,15 @@ const Register = () => {
       <Button
         text="Create account"
         type="submit"
-        isSubmitting={isPending}
+        isSubmitting={isSignupPending}
         submittingText="Submitting..."
       />
       <p className="my-2 text-SecondaryColor">
         Already on Ember?{" "}
-        <Link to="/login" className="text-TertiaryColor font-bold cursor-pointer">
+        <Link
+          to="/login"
+          className="text-TertiaryColor font-bold cursor-pointer"
+        >
           Log in
         </Link>
       </p>

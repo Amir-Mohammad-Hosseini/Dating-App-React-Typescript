@@ -1,41 +1,10 @@
 import { GoCheck } from "react-icons/go";
-import useAppStore from "../../lib/zustand/store";
-import { useMutation } from "@tanstack/react-query";
-import doneMutation from "../../lib/tanstack-query/Onboarding/doneMutation";
-import { useNavigate, useOutletContext } from "react-router";
-import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
-import { useEffect, type SubmitEventHandler } from "react";
-import { deletePhotoFromIndexedDb } from "../../lib/indexedDB/indexedDB";
+import useYouAreDone from "./useYouAreDone";
+import { OnboardingLayoutHeader } from "../../components/Onboarding";
+
 const YouAreDone = () => {
-  const userFirstname = useAppStore((state) => state.user)?.firstname;
-  const onboardingDatas = useAppStore((state) => state.onboardingDatas);
-  const markProfileComplete = useAppStore((state) => state.markProfileComplete);
-  const reset = useAppStore((state) => state.reset);
-  const { goNext } = useOnboardingStep();
-  const navigate = useNavigate();
+  const { userFirstname, handleSubmitOnboardingDatas } = useYouAreDone();
 
-  const { mutateAsync, isPending } = useMutation(doneMutation(navigate));
-
-  const { setIsSubmitting } = useOutletContext<{
-    setIsSubmitting: (status: boolean) => void;
-  }>();
-
-  useEffect(() => {
-    setIsSubmitting(isPending);
-  }, [isPending, setIsSubmitting]);
-
-  const handleSubmitOnboardingDatas: SubmitEventHandler<
-    HTMLFormElement
-  > = async (event) => {
-    event.preventDefault();
-    await mutateAsync(onboardingDatas);
-    goNext();
-    markProfileComplete();
-    navigate("/discover");
-
-    await deletePhotoFromIndexedDb();
-    reset();
-  };
   return (
     <form id="onboarding-form" onSubmit={handleSubmitOnboardingDatas}>
       <div className="mx-auto mt-12 relative flex items-center justify-center">
@@ -45,15 +14,11 @@ const YouAreDone = () => {
           <GoCheck size={26} className="-mb-1" />
         </span>
       </div>
-      <div className="my-8 text-center">
-        <h1 className="mb-1.5 font-ItalicFont text-3xl">
-          You’re in, {userFirstname}.
-        </h1>
-        <p className="text-lg text-SecondaryColor">
-          Your profile is live and matching starts now. You can change anything
-          later from your profile.
-        </p>
-      </div>
+      <OnboardingLayoutHeader
+        title={`You’re in, ${userFirstname}.`}
+        text="Your profile is live and matching starts now. You can change anything
+          later from your profile."
+      />
     </form>
   );
 };

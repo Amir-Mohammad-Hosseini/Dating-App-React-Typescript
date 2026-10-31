@@ -1,81 +1,31 @@
 import { BiTargetLock } from "react-icons/bi";
-import { GoLocation, GoLock, GoSearch } from "react-icons/go";
+import { GoLocation, GoLock } from "react-icons/go";
 import LocationMap from "./../../components/OnboardingPage/LocationMap";
-import useAppStore from "../../lib/zustand/store";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import locationMutation from "../../lib/tanstack-query/Onboarding/locationMutation";
-import { useEffect, useState, type SubmitEventHandler } from "react";
-import locationQuery from "../../lib/tanstack-query/Onboarding/locationQuery";
 import Spinner from "../../components/Loader/Spinner";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
-import useOnboardingStep from "../../hooks/Onboarding/useOnboardingStep";
-import { useOutletContext } from "react-router";
+import useYourLocation from "./useYourLocation";
 
 const YourLocation = () => {
-  const { gps } = useAppStore((state) => state.onboardingDatas);
-  const [coordinates, setCoordinates] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(() =>
-    gps
-      ? {
-          longitude: gps[0],
-          latitude: gps[1],
-        }
-      : null,
-  );
-
-  const { goNext } = useOnboardingStep();
-  const { setIsSubmitting } = useOutletContext<{
-    setIsSubmitting: (status: boolean) => void;
-  }>();
-
-  const { data, isLoading: isQueryLoading } = useQuery(
-    locationQuery(coordinates),
-  );
-
   const {
-    mutate: locationMutate,
-    isPending: isLocationMutatePending,
-    error,
-  } = useMutation(locationMutation(setCoordinates));
-  const setField = useAppStore((state) => state.setField);
-
-  useEffect(() => {
-    setIsSubmitting(isLocationMutatePending);
-  }, [isLocationMutatePending, setIsSubmitting]);
-
-  const handleFindLocation = () => {
-    locationMutate();
-  };
-
-  const handleClearLocation = () => {
-    setCoordinates(null);
-  };
-
-  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {
-    event.preventDefault();
-    if (!coordinates || !data) {
-      return;
-    }
-
-    const gpsTuple: [number, number] = [
-      +coordinates.longitude.toFixed(5),
-      +coordinates.latitude.toFixed(5),
-    ];
-    const location = `${data.city}, ${data.country}`;
-
-    setField("gps", gpsTuple);
-    setField("location", location);
-
-    goNext();
-  };
+    locationData,
+    isQueryLoading,
+    handleFindLocation,
+    handleClearLocation,
+    handleSubmit,
+    isLocationError,
+    locationError,
+    isLocationMutatePending,
+  } = useYourLocation();
 
   if (isQueryLoading) {
     return <LoadingOverlay show />;
   }
 
-  const location = data?.address;
+  if (isLocationError) {
+    throw new Error(locationError?.message || "An error occurred");
+  }
+
+  const location = locationData?.address;
   const label = location ? `${location?.city}, ${location?.country}` : null;
 
   return (
@@ -124,9 +74,9 @@ const YourLocation = () => {
             )}
           </button>
 
-          {error && (
+          {locationError && (
             <p role="alert" className="mt-3 text-sm text-TertiaryColor">
-              {error}
+              {locationError}
             </p>
           )}
         </>

@@ -1,17 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
 import ActivityList from "../../components/ActivityPage/ActivityList";
-import visitorsQuery from "../../lib/tanstack-query/Activity/visitorsQuery";
 import { PageLoader } from "../../components/Loader";
+import useVisitors from "./useVisitors";
 
 const VisitorsPage = () => {
-  const {
-    data: visitorsData,
-    isPending: isVisitorsQueryPending,
-    isError: isVisitirsQueryError,
-  } = useQuery(visitorsQuery());
+  const {visitorsData , isVisitorsQueryPending , isVisitirsQueryError , visitorsError} = useVisitors()
 
   if (isVisitorsQueryPending) {
     return <PageLoader />
+  }
+
+  if(isVisitirsQueryError){
+    throw new Error(visitorsError?.message)
   }
 
   return (

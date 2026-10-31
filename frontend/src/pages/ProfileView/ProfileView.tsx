@@ -1,61 +1,44 @@
-import { useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
-import profileViewQuery from "../../lib/tanstack-query/ProfileView/profileViewQuery";
 import ProfileViewInterests from "../../components/ProfileViewPage/ProfileViewInterests";
 import ProfileViewAbout from "../../components/ProfileViewPage/ProfileViewAbout";
 import ProfileViewBasics from "../../components/ProfileViewPage/ProfileViewBasics";
 import ProfileViewFameRating from "../../components/ProfileViewPage/ProfileViewFameRating";
 import ProfileViewPhotos from "../../components/ProfileViewPage/ProfileViewPhotos";
 import ProfileViewInfo from "../../components/ProfileViewPage/ProfileViewInfo";
-import NotFound from "../Errors/NotFound";
 import ProfileViewActions from "../../components/ProfileViewPage/ProfileViewActions";
-import MatchModal from "../../components/MatchModal/MatchModal";
 import ProfileViewTopbar from "../../components/ProfileViewPage/ProfileViewTopbar";
-import conversationsListQuery from "../../lib/tanstack-query/Conversations/conversationsListQuery";
-import type ConversationItemType from "../../components/Messages/types";
-import usePresenceProfile from "../../hooks/Conversations/usePresenceProfile";
+
+import NotFound from "../Errors/NotFound";
+
+import MatchModal from "../../components/MatchModal/MatchModal";
+
 import { PageLoader } from "../../components/Loader";
 
+import useProfileView from "./useProfileView";
+
 const ProfileView = () => {
-  const { userId: userIdParam } = useParams();
-  const userId = Number(userIdParam);
-  const isValidUserId = Number.isInteger(userId) && userId > 0;
-
   const {
-    data: profileViewDatas,
-    isPending: isProfileViewQueryPending,
-    isError: isProfileViewQueryError,
-  } = useQuery({
-    ...profileViewQuery(userId),
-    enabled: isValidUserId,
-  });
-
-  const {
-    data: conversationsList,
-    isPending: isConversationsListQueryPending,
-  } = useQuery(conversationsListQuery());
-
-  const {presenceProfile , isPresenceProfileQueryPending} = usePresenceProfile(userId)
-
-  const isPending =
-    isProfileViewQueryPending || isConversationsListQueryPending || isPresenceProfileQueryPending
+    isValidUserId,
+    isPending,
+    isProfileViewQueryError,
+    profileViewDatas,
+    profilePictures,
+    presenceProfile,
+    distanceKm,
+    matchedUserDatas,
+  } = useProfileView();
 
   if (!isValidUserId) {
     return <NotFound message="Profile not found" />;
   }
 
   if (isPending) {
-    return <PageLoader />
+    return <PageLoader />;
   }
 
-  if (isProfileViewQueryError) {
+  if (isProfileViewQueryError || !profileViewDatas) {
     return <NotFound message="Profile not found" />;
   }
 
-  const profilePictures = [
-    profileViewDatas.profile_pic,
-    ...profileViewDatas.other_pictures,
-  ];
   const {
     id,
     firstname,
@@ -66,20 +49,7 @@ const ProfileView = () => {
     gender,
     sexual_pref,
     fame_rating,
-    distance,
   } = profileViewDatas;
-
-  const distanceKm =
-    distance !== null &&
-    distance !== undefined &&
-    Number.isFinite(Number(distance))
-      ? Number(distance)
-      : null;
-
-  const matchedUserDatas = conversationsList.find(
-    (conversation: ConversationItemType) => conversation.user_id === id,
-  );
-
 
   return (
     <>
@@ -92,8 +62,12 @@ const ProfileView = () => {
         >
           {/* Topbar */}
           <ProfileViewTopbar id={id} />
+
           {/* Photo */}
-          <ProfileViewPhotos photos={profilePictures} firstname={firstname} />
+          <ProfileViewPhotos
+            photos={profilePictures}
+            firstname={firstname}
+          />
 
           {/* Info */}
           <div className="-mt-7 rounded-t-[28px] bg-PrimaryDarkBgColor px-5 pt-7 pb-2 [grid-area:info] md:mt-0 md:rounded-none md:bg-transparent md:px-0 md:pt-0">
@@ -101,15 +75,23 @@ const ProfileView = () => {
               firstname={firstname}
               username={username}
               age={age}
-              isOnline={presenceProfile.is_online}
+              isOnline={presenceProfile?.is_online ?? false}
               distanceKm={distanceKm}
               connectionId={matchedUserDatas?.connection_id || null}
             />
+
             <ProfileViewAbout about={biography} />
+
             <ProfileViewInterests interests={tags} />
-            <ProfileViewBasics gender={gender} interestedIn={sexual_pref} />
+
+            <ProfileViewBasics
+              gender={gender}
+              interestedIn={sexual_pref}
+            />
+
             <ProfileViewFameRating fameRating={fame_rating} />
           </div>
+
           <ProfileViewActions profileDatas={profileViewDatas} />
         </div>
       </div>

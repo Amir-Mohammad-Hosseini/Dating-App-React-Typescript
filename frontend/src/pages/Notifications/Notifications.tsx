@@ -1,25 +1,19 @@
 import Navbar from "../../components/Navbar/Navbar";
-import { useQuery } from "@tanstack/react-query";
-import notificationsQuery from "../../lib/tanstack-query/Notifications/notificationsQuery";
 import NotificationItem from "../../components/NoticationsPage/NotificationItem";
 import type NotificationItemType from "../../components/NoticationsPage/types";
 
 import NotificationsPageHeader from "../../components/NoticationsPage/NotificationsPageHeader";
 import { PageLoader } from "../../components/Loader";
+import useNotifications from "./useNotifications";
 
 const Notifications = () => {
-  const {
-    data: notificationsData,
-    isPending: isNotificationsQueryPending,
-    isError: isNotificationsQueryError,
-    error: notificationsQueryError,
-  } = useQuery(notificationsQuery());
+  const {notificationsData , isNotificationsQueryPending , isNotificationsQueryError , notificationsQueryError} = useNotifications()
 
   if (isNotificationsQueryPending) {
     return <PageLoader />
   }
   if (isNotificationsQueryError) {
-    throw new Error(notificationsQueryError.message);
+    throw new Error(notificationsQueryError?.message || "An error occurred");
   }
 
   return (

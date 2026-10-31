@@ -53,7 +53,7 @@ export interface TextareaInputType extends Omit<ComponentPropsWithoutRef<"textar
   text: string;
   extraDescription?: string;
   error?: string;
-  defaultValue: string;
+  defaultValue?: string;
 }
 export interface CheckboxInputType {
   text: string;

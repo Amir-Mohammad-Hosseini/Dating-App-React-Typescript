@@ -6,79 +6,16 @@ import { GoCheck } from "react-icons/go";
 import { IoChevronBack } from "react-icons/io5";
 import {
   FaCrown,
-  FaHeart,
-  FaInfinity,
-  FaCompass,
   FaArrowRight,
 } from "react-icons/fa6";
 import Navbar from "../../components/Navbar/Navbar";
 import Logo from "../../components/Logo/Logo";
 import FeatureCell from "../../components/ProPage/FeatureCell";
-
-type Billing = "monthly" | "yearly";
-
-const PLANS: Record<
-  Billing,
-  { price: string; period: string; note: string; badge?: string }
-> = {
-  monthly: {
-    price: "$9.99",
-    period: "/ month",
-    note: "Billed monthly. Cancel any time.",
-  },
-  yearly: {
-    price: "$5.99",
-    period: "/ month",
-    note: "Billed $71.88 once a year. Cancel any time.",
-    badge: "Save 40%",
-  },
-};
-
-const HIGHLIGHTS = [
-  {
-    icon: FaInfinity,
-    title: "Unlimited likes",
-    text: "Like as many people as you want. No daily cap, no waiting for tomorrow.",
-  },
-  {
-    icon: FaHeart,
-    title: "See who liked you",
-    text: "Open the list of people who already like you and match with them in one tap.",
-  },
-  {
-    icon: FaCompass,
-    title: "Go beyond your filters",
-    text: "See people outside your age, distance and fame range when you run out of profiles.",
-  },
-];
-
-const COMPARISON: { feature: string; free: boolean | string; pro: boolean | string }[] = [
-  { feature: "Daily likes", free: "Limited", pro: "Unlimited" },
-  { feature: "See who liked you", free: false, pro: true },
-  { feature: "Profiles outside your filters", free: false, pro: true },
-  { feature: "Browse and match", free: true, pro: true },
-  { feature: "Chat with your matches", free: true, pro: true },
-];
-
-const FAQ = [
-  {
-    q: "Can I cancel whenever I want?",
-    a: "Yes. Cancel from your settings and Pro stays active until the end of the period you already paid for.",
-  },
-  {
-    q: "What happens to my matches if I cancel?",
-    a: "Nothing. Your matches and chats stay exactly as they are. You only lose the Pro features.",
-  },
-  {
-    q: "Will I be charged again automatically?",
-    a: "Your plan renews at the end of each period. We email you before it renews.",
-  },
-];
-
-
+import type { BillingType } from "./types";
+import PLANS, { COMPARISON, FAQ, HIGHLIGHTS } from "../../utils/constants/pro";
 
 const Pro = () => {
-  const [billing, setBilling] = useState<Billing>("yearly");
+  const [billing, setBilling] = useState<BillingType>("yearly");
   const plan = PLANS[billing];
 
   const handleUpgrade = () => {
@@ -140,7 +77,7 @@ const Pro = () => {
                 aria-label="Billing period"
                 className="grid grid-cols-2 gap-1 rounded-full border border-SecondaryColor/30 bg-PrimaryDarkBgColor p-1"
               >
-                {(["monthly", "yearly"] as Billing[]).map((option) => (
+                {(["monthly", "yearly"] as BillingType[]).map((option) => (
                   <button
                     key={option}
                     type="button"

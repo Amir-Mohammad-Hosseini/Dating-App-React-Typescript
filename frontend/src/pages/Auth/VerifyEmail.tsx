@@ -1,19 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
 import {
   IoAlertCircleOutline,
   IoCheckmarkCircleOutline,
 } from "react-icons/io5";
-import { Link, useParams } from "react-router";
+import { Link } from "react-router";
 import LoadingOverlay from "../../components/Loader/LoadingOverlay";
-import verifyEmailQuery from "../../lib/tanstack-query/Auth/VerifyEmail/verifyEmailQuery";
+import useVerifyEmail from "./useVerifyEmail";
 
 const VerifyEmail = () => {
-  const { username, code } = useParams();
-  const {
-    isPending: isVerifyEmailPending,
-    isError: isVerifyEmailError,
-    error: verifyEmailError,
-  } = useQuery(verifyEmailQuery(username, code));
+  const { isVerifyEmailPending, isVerifyEmailError, verifyEmailError } =
+    useVerifyEmail();
 
   if (isVerifyEmailPending) {
     return <LoadingOverlay show />;
@@ -42,7 +37,7 @@ const VerifyEmail = () => {
           </h1>
           <p className="mt-2 text-SecondaryColor">
             {isVerifyEmailError
-              ? verifyEmailError.message
+              ? verifyEmailError?.message
               : "Your account is ready. You can log in now."}
           </p>
         </div>
