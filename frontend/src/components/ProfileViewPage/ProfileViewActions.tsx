@@ -99,28 +99,28 @@ const ProfileViewActions = ({ profileDatas }: any) => {
         </button>
       </div>
       <div className="flex items-center justify-between gap-x-4">
-        <button
+        <div
           style={{
             backgroundColor:
               matchProfileStatus && matchProfileStatus.likeStatus === "nope"
                 ? "var(--color-TertiaryColor)"
                 : "",
           }}
-          className="text-PrimaryColor py-2 w-40 border border-TertiaryColor rounded-lg hover:bg-TertiaryColor transition"
+          className="text-PrimaryColor py-2 w-40 border flex items-center justify-center select-none border-TertiaryColor rounded-lg hover:bg-TertiaryColor transition"
         >
           I'm not interested
-        </button>
-        <button
+        </div>
+        <div
           style={{
             backgroundColor:
               matchProfileStatus && matchProfileStatus.likeStatus === "like"
                 ? "var(--color-TertiaryColor)"
                 : "",
           }}
-          className="text-PrimaryColor py-2 w-40 border border-TertiaryColor rounded-lg hover:bg-TertiaryColor transition"
+          className="text-PrimaryColor py-2 w-40 border flex items-center justify-center select-none border-TertiaryColor rounded-lg hover:bg-TertiaryColor transition"
         >
           I'm interested
-        </button>
+        </div>
       </div>
     </div>
   );
