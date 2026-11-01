@@ -1,10 +1,12 @@
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import type { PanInfo } from "motion/react";
 import type SwipeCardType from "./types";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Link } from "react-router";
 
 const THRESHOLD = 120;
 const VELOCITY = 500;
+const CLICK_TOLERANCE = 5;
 
 export type SwipeCardHandle = {
   triggerSwipe: (direction: 1 | -1) => void;
@@ -17,6 +19,8 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardType>(
     const likeOpacity = useTransform(x, [20, 120], [0, 1]);
     const nopeOpacity = useTransform(x, [-120, -20], [1, 0]);
 
+    const wasDragged = useRef(false);
+
     const runSwipe = (direction: 1 | -1) => {
       animate(x, direction * window.innerWidth, {
         duration: 0.25,
@@ -28,10 +32,20 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardType>(
       triggerSwipe: runSwipe,
     }));
 
+    const handleDrag = (_: unknown, info: PanInfo) => {
+      if (Math.abs(info.offset.x) > CLICK_TOLERANCE) {
+        wasDragged.current = true;
+      }
+    };
+
     const handleDragEnd = (_: unknown, info: PanInfo) => {
       const passed =
         Math.abs(info.offset.x) > THRESHOLD ||
         Math.abs(info.velocity.x) > VELOCITY;
+
+      setTimeout(() => {
+        wasDragged.current = false;
+      }, 0);
 
       if (!passed) {
         animate(x, 0, { type: "spring", stiffness: 300, damping: 25 });
@@ -39,6 +53,12 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardType>(
       }
 
       runSwipe(info.offset.x > 0 ? 1 : -1);
+    };
+
+    const handleLinkClick = (e: React.MouseEvent) => {
+      if (wasDragged.current) {
+        e.preventDefault();
+      }
     };
 
     const {
@@ -50,17 +70,28 @@ const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardType>(
       tags,
       profile_pic,
       username,
+      id
     } = person;
 
     return (
       <motion.div
         drag={isTop ? "x" : false}
         dragMomentum={false}
+        onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         style={{ x, rotate: isTop ? rotate : 0 }}
         animate={{ scale: 1 - index * 0.05, y: index * 14 }}
         className="absolute inset-0 select-none overflow-hidden rounded-3xl border border-SecondaryColor bg-SecondaryDarkBgColor"
       >
+        {isTop && (
+          <Link
+            to={`/users/${id}`}
+            onClick={handleLinkClick}
+            draggable={false}
+            aria-label={`View ${firstname}'s profile`}
+            className="absolute inset-0 z-30"
+          />
+        )}
         <motion.span
           style={{ opacity: likeOpacity }}
           className="absolute top-6 left-6 z-10 -rotate-12 rounded-full border border-TertiaryColor px-4 py-2 text-TertiaryColor"
